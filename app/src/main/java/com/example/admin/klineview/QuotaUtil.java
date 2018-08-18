@@ -8,7 +8,7 @@ import java.util.List;
  * Created by xiesuichao on 2018/8/12.
  */
 
-public class KDataUtil {
+public class QuotaUtil {
 
     private static final int START_SMA5 = 5;
     private static final int START_SMA10 = 10;
