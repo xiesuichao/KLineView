@@ -44,6 +44,7 @@ public class QuotaUtil {
                 //priceMa30
                 dataList.get(i).setPriceMa30(getPriceMa(dataList.subList(i, i + 29)));
             }
+            dataList.get(i).setInitFinish(true);
         }
         long endMa = System.currentTimeMillis();
         PrintUtil.log("MA", endMa - startMa);
@@ -339,10 +340,10 @@ public class QuotaUtil {
 
     //三阶贝塞尔曲线控制点
     public static void setBezierPath(List<Pointer> pointList, Path path) {
+        path.reset();
         if (pointList == null || pointList.isEmpty()) {
             return;
         }
-        path.reset();
         path.moveTo(pointList.get(0).getX(), pointList.get(0).getY());
         Pointer leftControlPointer = new Pointer();
         Pointer rightControlPointer = new Pointer();

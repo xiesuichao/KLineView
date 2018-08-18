@@ -24,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
         Button bollBtn = findViewById(R.id.btn_boll);
         Button macdBtn = findViewById(R.id.btn_macd);
         Button kdjBtn = findViewById(R.id.btn_kdj);
+        Button msgBtn = findViewById(R.id.btn_msg);
 
         mainKlv.initKDataList(getKDataList(5));
 
@@ -80,15 +81,15 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void run() {
                                 if (isRequestBefore){
-                                    mainKlv.addDataList(getKDataList(2));
+                                    mainKlv.addDataList(getKDataList(5));
 
                                 }else {
-                                    mainKlv.addDataList(getKDataList(2));
+                                    mainKlv.addDataList(getKDataList(5));
                                 }
                             }
                         });
                     }
-                }, 1000);
+                }, 2000);
             }
         });
 
@@ -97,7 +98,6 @@ public class MainActivity extends AppCompatActivity {
 
     private List<KData> getKDataList(double num) {
         long start = System.currentTimeMillis();
-        PrintUtil.log("start", start);
 
         Random random = new Random();
         List<KData> dataList = new ArrayList<>();

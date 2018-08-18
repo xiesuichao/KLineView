@@ -36,6 +36,7 @@ public class KData {
     private double leftX;
     private double rightX;
     private double closeY;
+    private boolean initFinish;
 
     public KData() {
     }
@@ -279,6 +280,14 @@ public class KData {
 
     public void setCloseY(double closeY) {
         this.closeY = closeY;
+    }
+
+    public boolean isInitFinish() {
+        return initFinish;
+    }
+
+    public void setInitFinish(boolean initFinish) {
+        this.initFinish = initFinish;
     }
 
     @Override
