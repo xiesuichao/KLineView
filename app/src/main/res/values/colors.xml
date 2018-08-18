@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3193ff</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#3193ff</color>
+
+    <color name="white_bg">#FFFFFF</color>
+    <color name="white_text">#FFFFFF</color>
+    <color name="black_text">#294058</color>
+    <color name="black_text_night">#F8F8F8</color>
+    <color name="black_alpha_50">#80000000</color>
+    <color name="gray_text_line">#65707c</color>
+    <color name="gray_text_line_half_alpha">#8065707c</color>
+    <color name="gray_rmb">#667078</color>
+    <color name="gray_space">#F7F8FA</color>
+    <color name="gray_deal_time">#D8E2EA</color>
+    <color name="gray_line">#dce2ea</color>
+    <color name="gray_bg">#f7f7fb</color>
+    <color name="gray_line_night">#161F33</color>
+    <color name="gray_deep">#C0C6C9</color>
+    <color name="gray_f5">#f5f5f5</color>
+    <color name="gray_ee">#eeeeee</color>
+    <color name="gray_66">#666666</color>
+    <color name="red_detail_text">#ff424a</color>
+    <color name="red_main">#ef462d</color>
+    <color name="red_pressed">#ce2b13</color>
+    <color name="red_prompt">#FF552E</color>
+    <color name="blue_press">#3C8DE4</color>
+    <color name="blue_text">#3193ff</color>
+    <color name="blue_deep">#3193FF</color>
+    <color name="green_buy">#00b23e</color>
+    <color name="green_press">#00A487</color>
+    <color name="none_color">#00000000</color>
+
+    <color name="sliding_menu_orange">#FF5927</color>
+    <color name="recharge_currency_name_bg">#EBEEF2</color>
+    <color name="btn_white_bg_color">#FEFEFE</color>
+    <color name="withdraw_all">#18A7F3</color>
+    <color name="red">#f00</color>
+    <color name="version_info">#65707c</color>
+    <color name="blue_text_with_bg">#3193ff</color>
+    <color name="white">#FFFFFF</color>
+    <color name="register_tips_color">#3193ff</color>
+    <color name="setting_ccec_color">#3193ff</color>
+    <color name="switch_normal_color">#f5f5f5</color>
+    <color name="switch_select_color">#3193ff</color>
+    <color name="half_trans_gray">#8065707c</color>
+
+    <color name="trans_20_gray">#CC9BACBD</color>
+    <color name="blue">#3193ff</color>
+    <color name="home_banner_text">#B5C0D0</color>
+    <color name="candy_item_bg">#F7F7F7</color>
+    <color name="wheel_indicator_color">#9BACBD</color>
+
+    <color name="text_gray">#808F9E</color>
+    <color name="bg_gray">#0D0F1118</color>
+
+</resources>

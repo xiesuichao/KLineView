@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.example.admin.klineview.MainActivity"
+    android:background="@color/white_bg"
+    >
+
+    <com.example.admin.klineview.KLineView
+        android:id="@+id/klv_main"
+        android:layout_width="match_parent"
+        android:layout_height="380dp"
+        android:background="@color/white_bg"
+        />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/black_text"
+        />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_ma"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="MA"
+            />
+
+        <Button
+            android:id="@+id/btn_ema"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="EMA"
+            />
+
+        <Button
+            android:id="@+id/btn_boll"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="BOLL"
+            />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_deputy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="deputy"
+            />
+
+        <Button
+            android:id="@+id/btn_macd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="MACD"
+            />
+
+        <Button
+            android:id="@+id/btn_kdj"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="KDJ"
+            />
+
+    </LinearLayout>
+
+
+
+</LinearLayout>

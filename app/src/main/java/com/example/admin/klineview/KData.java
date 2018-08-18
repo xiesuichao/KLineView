@@ -1,0 +1,305 @@
+package com.example.admin.klineview;
+
+/**
+ * Created by xiesuichao on 2018/6/29.
+ */
+
+public class KData {
+
+    private long time;
+    private double openPrice;
+    private double closePrice;
+    private double maxPrice;
+    private double minPrice;
+    private double volume;
+    //涨跌额
+    private double upDnAmount;
+    //涨跌幅
+    private double upDnRate;
+    private double priceMa5;
+    private double priceMa10;
+    private double priceMa30;
+    private double ema5;
+    private double ema10;
+    private double ema30;
+    private double volumeMa5;
+    private double volumeMa10;
+    private double bollMb;
+    private double bollUp;
+    private double bollDn;
+    private double macd;
+    private double dea;
+    private double dif;
+    private double k;
+    private double d;
+    private double j;
+    private double leftX;
+    private double rightX;
+    private double closeY;
+
+    public KData() {
+    }
+
+    public KData(double openPrice, double closedPrice, double maxPrice, double minPrice, double volume) {
+        this.openPrice = openPrice;
+        this.closePrice = closedPrice;
+        this.maxPrice = maxPrice;
+        this.minPrice = minPrice;
+        this.volume = volume;
+    }
+
+    public KData(long time, double openPrice, double closePrice, double maxPrice, double minPrice, double volume){
+        this.time = time;
+        this.openPrice = openPrice;
+        this.closePrice = closePrice;
+        this.maxPrice = maxPrice;
+        this.minPrice = minPrice;
+        this.volume = volume;
+    }
+
+    public double getOpenPrice() {
+        return openPrice;
+    }
+
+    public void setOpenPrice(double openPrice) {
+        this.openPrice = openPrice;
+    }
+
+    public double getClosePrice() {
+        return closePrice;
+    }
+
+    public void setClosePrice(double closePrice) {
+        this.closePrice = closePrice;
+    }
+
+    public double getMaxPrice() {
+        return maxPrice;
+    }
+
+    public void setMaxPrice(double maxPrice) {
+        this.maxPrice = maxPrice;
+    }
+
+    public double getMinPrice() {
+        return minPrice;
+    }
+
+    public void setMinPrice(double minPrice) {
+        this.minPrice = minPrice;
+    }
+
+    public double getLeftX() {
+        return leftX;
+    }
+
+    public void setLeftX(double leftX) {
+        this.leftX = leftX;
+    }
+
+    public double getRightX() {
+        return rightX;
+    }
+
+    public void setRightX(double rightX) {
+        this.rightX = rightX;
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
+    }
+
+    public double getVolume() {
+        return volume;
+    }
+
+    public void setVolume(double volume) {
+        this.volume = volume;
+    }
+
+    public double getPriceMa5() {
+        return priceMa5;
+    }
+
+    public void setPriceMa5(double priceMa5) {
+        this.priceMa5 = priceMa5;
+    }
+
+    public double getPriceMa10() {
+        return priceMa10;
+    }
+
+    public void setPriceMa10(double priceMa10) {
+        this.priceMa10 = priceMa10;
+    }
+
+    public double getPriceMa30() {
+        return priceMa30;
+    }
+
+    public void setPriceMa30(double priceMa30) {
+        this.priceMa30 = priceMa30;
+    }
+
+    public double getVolumeMa5() {
+        return volumeMa5;
+    }
+
+    public void setVolumeMa5(double volumeMa5) {
+        this.volumeMa5 = volumeMa5;
+    }
+
+    public double getVolumeMa10() {
+        return volumeMa10;
+    }
+
+    public void setVolumeMa10(double volumeMa10) {
+        this.volumeMa10 = volumeMa10;
+    }
+
+    public double getEma5() {
+        return ema5;
+    }
+
+    public void setEma5(double ema5) {
+        this.ema5 = ema5;
+    }
+
+    public double getEma10() {
+        return ema10;
+    }
+
+    public void setEma10(double ema10) {
+        this.ema10 = ema10;
+    }
+
+    public double getEma30() {
+        return ema30;
+    }
+
+    public void setEma30(double ema30) {
+        this.ema30 = ema30;
+    }
+
+    public double getBollMb() {
+        return bollMb;
+    }
+
+    public void setBollMb(double bollMb) {
+        this.bollMb = bollMb;
+    }
+
+    public double getBollUp() {
+        return bollUp;
+    }
+
+    public void setBollUp(double bollUp) {
+        this.bollUp = bollUp;
+    }
+
+    public double getBollDn() {
+        return bollDn;
+    }
+
+    public void setBollDn(double bollDn) {
+        this.bollDn = bollDn;
+    }
+
+    public double getMacd() {
+        return macd;
+    }
+
+    public void setMacd(double macd) {
+        this.macd = macd;
+    }
+
+    public double getDea() {
+        return dea;
+    }
+
+    public void setDea(double dea) {
+        this.dea = dea;
+    }
+
+    public double getDif() {
+        return dif;
+    }
+
+    public void setDif(double dif) {
+        this.dif = dif;
+    }
+
+    public double getK() {
+        return k;
+    }
+
+    public void setK(double k) {
+        this.k = k;
+    }
+
+    public double getD() {
+        return d;
+    }
+
+    public void setD(double d) {
+        this.d = d;
+    }
+
+    public double getJ() {
+        return j;
+    }
+
+    public void setJ(double j) {
+        this.j = j;
+    }
+
+    public double getUpDnAmount() {
+        return closePrice - openPrice;
+    }
+
+    public void setUpDnAmount(double upDnAmount) {
+        this.upDnAmount = upDnAmount;
+    }
+
+    public double getUpDnRate() {
+        return (closePrice - openPrice) / openPrice;
+    }
+
+    public void setUpDnRate(double upDnRate) {
+        this.upDnRate = upDnRate;
+    }
+
+    public double getCloseY() {
+        return closeY;
+    }
+
+    public void setCloseY(double closeY) {
+        this.closeY = closeY;
+    }
+
+    @Override
+    public String toString() {
+        return "KData{" +
+                "time='" + time + '\'' +
+                ", openPrice=" + openPrice +
+                ", closePrice=" + closePrice +
+                ", maxPrice=" + maxPrice +
+                ", minPrice=" + minPrice +
+                ", volume=" + volume +
+                ", priceMa5=" + priceMa5 +
+                ", priceMa10=" + priceMa10 +
+                ", priceMa30=" + priceMa30 +
+                ", ema5=" + ema5 +
+                ", ema10=" + ema10 +
+                ", ema30=" + ema30 +
+                ", volumeMa5=" + volumeMa5 +
+                ", volumeMa10=" + volumeMa10 +
+                ", leftX=" + leftX +
+                ", rightX=" + rightX +
+                '}';
+    }
+}
