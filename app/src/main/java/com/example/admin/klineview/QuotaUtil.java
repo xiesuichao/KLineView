@@ -42,9 +42,14 @@ public class QuotaUtil {
             }
             if (i >= 29 && i + 29 <= dataList.size()){
                 //priceMa30
-                dataList.get(i).setPriceMa30(getPriceMa(dataList.subList(i, i + 29)));
+                if (dataList.get(i).getPriceMa30() == 0){
+                    dataList.get(i).setPriceMa30(getPriceMa(dataList.subList(i, i + 29)));
+                }else {
+                    break;
+                }
             }
             dataList.get(i).setInitFinish(true);
+
         }
         long endMa = System.currentTimeMillis();
         PrintUtil.log("MA", endMa - startMa);
@@ -117,6 +122,9 @@ public class QuotaUtil {
         dataList.get(0).setEma30(lastEma30);
 
         for (int i = 1; i < dataList.size(); i++) {
+            if (dataList.get(i).getEma5() != 0){
+                break;
+            }
             double currentEma5 = 2 * (dataList.get(i).getClosePrice() - lastEma5) / (5 + 1) + lastEma5;
             double currentEma10 = 2 * (dataList.get(i).getClosePrice() - lastEma10) / (10 + 1) + lastEma10;
             double currentEma30 = 2 * (dataList.get(i).getClosePrice() - lastEma30) / (30 + 1) + lastEma30;
@@ -142,14 +150,14 @@ public class QuotaUtil {
      * DN=MB－k×MD
      * K为参数，可根据股票的特性来做相应的调整，一般默认为2
      *
-     * @param quotesList 数据集合
+     * @param dataList 数据集合
      * @param period     周期，一般为26
      * @param k          参数，可根据股票的特性来做相应的调整，一般默认为2
      */
-    public static void initBOLL(List<KData> quotesList, int period, int k) {
+    public static void initBOLL(List<KData> dataList, int period, int k) {
         long startBoll = System.currentTimeMillis();
-        if (quotesList == null || quotesList.isEmpty()
-                || period < 0 || period > quotesList.size() - 1) {
+        if (dataList == null || dataList.isEmpty()
+                || period < 0 || period > dataList.size() - 1) {
             return;
         }
         double mb;//上轨线
@@ -165,14 +173,17 @@ public class QuotaUtil {
         double ma2;
         double md;
 
-        for (int i = 0; i < quotesList.size(); i++) {
-            KData quotes = quotesList.get(i);
+        for (int i = 0; i < dataList.size(); i++) {
+            if (dataList.get(i).getBollMb() != 0){
+                break;
+            }
+            KData quotes = dataList.get(i);
             sum += quotes.getClosePrice();
             sum2 += quotes.getClosePrice();
             if (i > period - 1)
-                sum -= quotesList.get(i - period).getClosePrice();
+                sum -= dataList.get(i - period).getClosePrice();
             if (i > period - 2)
-                sum2 -= quotesList.get(i - period + 1).getClosePrice();
+                sum2 -= dataList.get(i - period + 1).getClosePrice();
 
             //这个范围不计算，在View上的反应就是不显示这个范围的boll线
             if (i < period - 1)
@@ -183,7 +194,7 @@ public class QuotaUtil {
             md = 0;
             for (int j = i + 1 - period; j <= i; j++) {
                 //n-1日
-                md += Math.pow(quotesList.get(j).getClosePrice() - ma, 2);
+                md += Math.pow(dataList.get(j).getClosePrice() - ma, 2);
             }
             md = Math.sqrt(md / period);
             //(n－1）日的MA
@@ -227,6 +238,9 @@ public class QuotaUtil {
         double dif = 0;
         double macd = 0;
         for (int i = 0; i < dataList.size(); i++) {
+            if (dataList.get(i).getMacd() != 0){
+                break;
+            }
             ema_12 = preEma_12 * (fastPeriod - 1) / (fastPeriod + 1) + dataList.get(i).getClosePrice() * 2 / (fastPeriod + 1);
             ema_26 = preEma_26 * (slowPeriod - 1) / (slowPeriod + 1) + dataList.get(i).getClosePrice() * 2 / (slowPeriod + 1);
             dif = ema_12 - ema_26;
@@ -276,6 +290,9 @@ public class QuotaUtil {
         int lowPosition = 0;
         double rSV = 0.0;
         for (int i = 0; i < dataList.size(); i++) {
+            if (dataList.get(i).getK() != 0){
+                break;
+            }
             if (i == 0) {
 //                mK[0] = 33.33;
 //                mD[0] = 11.11;

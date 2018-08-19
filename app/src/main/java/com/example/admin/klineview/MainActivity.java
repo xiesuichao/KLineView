@@ -12,22 +12,72 @@ import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
+    private Handler mHandler;
+    private KLineView mainKlv;
+    private Button deputyBtn;
+    private Button maBtn;
+    private Button emaBtn;
+    private Button bollBtn;
+    private Button macdBtn;
+    private Button kdjBtn;
+    private Button msgBtn;
+    private boolean isBefore = false;
+    private Runnable getDataRunnable;
+    private Runnable sendRunnable;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final KLineView mainKlv = findViewById(R.id.klv_main);
-        Button deputyBtn = findViewById(R.id.btn_deputy);
-        Button maBtn = findViewById(R.id.btn_ma);
-        Button emaBtn = findViewById(R.id.btn_ema);
-        Button bollBtn = findViewById(R.id.btn_boll);
-        Button macdBtn = findViewById(R.id.btn_macd);
-        Button kdjBtn = findViewById(R.id.btn_kdj);
-        Button msgBtn = findViewById(R.id.btn_msg);
+
+        initViewData();
+
+        setListener();
+
+
+
+    }
+
+    private void initViewData(){
+        mainKlv = findViewById(R.id.klv_main);
+        deputyBtn = findViewById(R.id.btn_deputy);
+        maBtn = findViewById(R.id.btn_ma);
+        emaBtn = findViewById(R.id.btn_ema);
+        bollBtn = findViewById(R.id.btn_boll);
+        macdBtn = findViewById(R.id.btn_macd);
+        kdjBtn = findViewById(R.id.btn_kdj);
+        msgBtn = findViewById(R.id.btn_msg);
 
         mainKlv.initKDataList(getKDataList(5));
 
+        mHandler = new Handler();
+        getDataRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (isBefore){
+                    mainKlv.addDataList(getKDataList(5));
+
+                }else {
+                    mainKlv.addDataList(getKDataList(5));
+                }
+            }
+        };
+
+        sendRunnable = new Runnable() {
+            @Override
+            public void run() {
+                mainKlv.addData(getKDataList(0.1).get(0));
+                mHandler.postDelayed(this, 100);
+            }
+        };
+
+        mHandler.postDelayed(sendRunnable, 2000);
+
+
+    }
+
+    private void setListener(){
         deputyBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -73,27 +123,10 @@ public class MainActivity extends AppCompatActivity {
         mainKlv.setOnRequestDataListListener(new KLineView.OnRequestDataListListener() {
             @Override
             public void requestData(final boolean isRequestBefore) {
-                Handler handler = new Handler();
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (isRequestBefore){
-                                    mainKlv.addDataList(getKDataList(5));
-
-                                }else {
-                                    mainKlv.addDataList(getKDataList(5));
-                                }
-                            }
-                        });
-                    }
-                }, 2000);
+                isBefore = isRequestBefore;
+                mHandler.postDelayed(getDataRunnable, 2000);
             }
         });
-
-
     }
 
     private List<KData> getKDataList(double num) {
