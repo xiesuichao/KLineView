@@ -21,7 +21,6 @@ public class MainActivity extends AppCompatActivity {
     private Button macdBtn;
     private Button kdjBtn;
     private Button msgBtn;
-    private boolean isBefore = false;
     private Runnable getDataRunnable;
     private Runnable sendRunnable;
 
@@ -34,6 +33,8 @@ public class MainActivity extends AppCompatActivity {
         initViewData();
 
         setListener();
+
+
 
 
 
@@ -55,12 +56,7 @@ public class MainActivity extends AppCompatActivity {
         getDataRunnable = new Runnable() {
             @Override
             public void run() {
-                if (isBefore){
-                    mainKlv.addDataList(getKDataList(5));
-
-                }else {
-                    mainKlv.addDataList(getKDataList(5));
-                }
+                mainKlv.addDataList(getKDataList(5));
             }
         };
 
@@ -68,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 mainKlv.addData(getKDataList(0.1).get(0));
-                mHandler.postDelayed(this, 100);
+                mHandler.postDelayed(this, 1000);
             }
         };
 
@@ -122,8 +118,7 @@ public class MainActivity extends AppCompatActivity {
 
         mainKlv.setOnRequestDataListListener(new KLineView.OnRequestDataListListener() {
             @Override
-            public void requestData(final boolean isRequestBefore) {
-                isBefore = isRequestBefore;
+            public void requestData() {
                 mHandler.postDelayed(getDataRunnable, 2000);
             }
         });
@@ -161,7 +156,7 @@ public class MainActivity extends AppCompatActivity {
 
         }
         long end = System.currentTimeMillis();
-        PrintUtil.log("mainActivity getKDataList", end - start);
+//        PrintUtil.log("mainActivity getKDataList", end - start);
         return dataList;
     }
 

@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
+ * 股票走势图 K线控件
  * Created by xiesuichao on 2018/6/29.
  */
 
@@ -81,7 +82,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     private float bottomEnd;
     private int maxViewDataNum = 34;
     private int startDataNum = 0;
-    private int maxTotalSize = 2000;
     private int initTotalListSize = 0;
     private float mulFirstDownX;
     private float mulSecondDownX;
@@ -143,10 +143,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     private boolean isLongPress = false;
     //是否需要请求前面的数据
     private boolean isNeedRequestBeforeData = true;
-    //是否需要请求后面的数据
-    private boolean isNeedRequestAfterData = false;
-
-    private boolean isQuotaCalculateFinish = false;
     //是否双指触控
     private boolean isDoubleFinger = false;
     //主图数据类型 0:MA, 1:EMA 2:BOLL
@@ -192,8 +188,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     private QuotaThread quotaThread;
     private Handler mDelayHandler;
     private Runnable mDelayRunnable;
-    private boolean isBeforeData = false;
-    private List<KData> restoreList = new ArrayList<>();
 
 
     public KLineView(Context context) {
@@ -212,7 +206,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     }
 
     public interface OnRequestDataListListener {
-        void requestData(boolean isRequestBefore);
+        void requestData();
     }
 
     public void setOnRequestDataListListener(OnRequestDataListListener requestListener) {
@@ -221,86 +215,40 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
 
     public void addData(KData data) {
         totalDataList.add(data);
-
-        if (totalDataList.size() <= maxTotalSize) {
+        if (startDataNum == totalDataList.size() - maxViewDataNum - 2) {
             startDataNum++;
-        } else {
-            totalDataList.remove(0);
-        }
-
-        if (startDataNum == totalDataList.size() - 1 - maxViewDataNum){
             resetViewData();
             invalidate();
         }
-
-        PrintUtil.log("startDataNum", startDataNum);
-        PrintUtil.log("");
     }
 
     public void addDataList(List<KData> dataList) {
-        long addStart = System.currentTimeMillis();
         if (dataList.size() > 1100) {
             return;
         }
         if (initTotalListSize == 0) {
             initTotalListSize = dataList.size();
         }
-        if (isBeforeData) {
-            isNeedRequestBeforeData = dataList.size() >= initTotalListSize;
-            isNeedRequestAfterData = true;
-            if (startDataNum <= totalDataList.size() / 3) {
-                totalDataList.addAll(0, dataList);
-                if (totalDataList.size() > maxTotalSize) {
-                    int diffSize = totalDataList.size() - maxTotalSize;
-                    totalDataList = totalDataList.subList(0, maxTotalSize);
-                    startDataNum += diffSize;
-                } else {
-                    startDataNum += dataList.size();
-                }
-            }
-
-        } else {
-            isNeedRequestAfterData = dataList.size() >= initTotalListSize;
-            isNeedRequestBeforeData = true;
-            if (startDataNum >= totalDataList.size() * 2 / 3) {
-                totalDataList.addAll(dataList);
-                if (totalDataList.size() > maxTotalSize) {
-                    int diffSize = totalDataList.size() - maxTotalSize;
-                    totalDataList = totalDataList.subList(totalDataList.size() - maxTotalSize, totalDataList.size());
-                    startDataNum -= diffSize;
-                } else {
-                    startDataNum -= dataList.size();
-                }
-            }
-        }
+        isNeedRequestBeforeData = dataList.size() >= initTotalListSize;
+        totalDataList.addAll(0, dataList);
+        startDataNum += dataList.size();
 
         quotaThread.quotaCalculate(totalDataList);
-        long addEnd = System.currentTimeMillis();
-        PrintUtil.log("timeAdd", addEnd - addStart);
         PrintUtil.log("startNum", startDataNum);
-        PrintUtil.log("totalDataList.size", totalDataList.size());
+        PrintUtil.log("size", totalDataList.size());
 
     }
 
     public void initKDataList(List<KData> dataList) {
+        PrintUtil.log("initKDataList");
         if (dataList.size() > 1100) {
             return;
         }
         this.totalDataList.clear();
         this.totalDataList.addAll(dataList);
         startDataNum = totalDataList.size() - 1 - maxViewDataNum;
-        if (maxTotalSize >= totalDataList.size() * 2) {
-            maxTotalSize = totalDataList.size() * 2;
-        } else {
-            maxTotalSize = 2000;
-        }
-        PrintUtil.log("maxTotalSize", maxTotalSize);
-        initKDataQuota();
-        resetViewData();
-    }
-
-    private void initKDataQuota() {
         QuotaUtil.initMa(totalDataList);
+        resetViewData();
     }
 
     public void setDeputyPicShow(boolean showState) {
@@ -515,8 +463,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     @Override
     public boolean handleMessage(Message msg) {
         if (msg.what == QuotaThread.MSG_QUOTA_CALCULATE) {
-            PrintUtil.log("KLineView handleMessage");
-            isQuotaCalculateFinish = true;
             invalidate();
         }
         return false;
@@ -754,24 +700,10 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     }
 
     private void moveData(float distanceX) {
-        if (maxViewDataNum < 20) {
-            if (Math.abs(distanceX) < 2) {
-                startDataNum += (int) distanceX;
-            } else if (Math.abs(distanceX) < 10) {
-                startDataNum += (int) distanceX / 5;
-            } else {
-                startDataNum += (int) distanceX / 10;
-            }
-        } else if (maxViewDataNum < 40) {
-            startDataNum += (int) distanceX / 4;
-        } else if (maxViewDataNum < 60) {
-            startDataNum += (int) distanceX / 4;
-        } else if (maxViewDataNum < 80) {
-            startDataNum += (int) distanceX / 3;
-        } else if (maxViewDataNum < 100) {
-            startDataNum += (int) distanceX / 2;
+        if (maxViewDataNum < 60) {
+            setSpeed(distanceX, 10);
         } else {
-            startDataNum += (int) distanceX / 2;
+            setSpeed(distanceX, 3.5);
         }
 
         if (startDataNum < 0) {
@@ -786,21 +718,21 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
 
     }
 
-    private void requestNewData() {
-        PrintUtil.log("startNum", startDataNum);
+    private void setSpeed(float distanceX, double num) {
+        if (Math.abs(distanceX) > 1 && Math.abs(distanceX) < 2) {
+            startDataNum += (int) (distanceX * 10) % 2;
+        } else if (Math.abs(distanceX) < 10) {
+            startDataNum += (int) distanceX % 2;
+        } else {
+            startDataNum += (int) distanceX / num;
+        }
+    }
 
-        if (startDataNum <= totalDataList.size() / 3 && isNeedRequestBeforeData) {
-            requestListener.requestData(true);
+    private void requestNewData() {
+        if (startDataNum <= totalDataList.size() / 4 && isNeedRequestBeforeData) {
+            requestListener.requestData();
             PrintUtil.log("requestBeforeData");
             isNeedRequestBeforeData = false;
-            isQuotaCalculateFinish = false;
-            isBeforeData = true;
-        } else if (startDataNum >= totalDataList.size() * 2 / 3 && isNeedRequestAfterData) {
-            requestListener.requestData(false);
-            PrintUtil.log("requestAfterData");
-            isNeedRequestAfterData = false;
-            isQuotaCalculateFinish = false;
-            isBeforeData = false;
         }
     }
 
@@ -815,56 +747,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
             lastKData = viewDataList.get(viewDataList.size() - 1);
         }
     }
-
-    /*private void resetAllData() {
-        viewDataList.clear();
-        restoreList.clear();
-        for (int i = 0; i < maxViewDataNum + 80; i++) {
-            if (startDataNum < 40 ){
-                restoreList.add(totalDataList.get(i));
-                if (i >= startDataNum + maxViewDataNum + 40){
-                    break;
-                }
-            }else if (startDataNum >= 40 && startDataNum + maxViewDataNum + 40 <= totalDataList.size()){
-                restoreList.add(totalDataList.get(startDataNum - 40 + i));
-            }else if (startDataNum + maxViewDataNum + 40 > totalDataList.size()){
-                if (startDataNum - 40 + i > totalDataList.size() - 1){
-                    break;
-                }
-                restoreList.add(totalDataList.get(startDataNum - 40 + i));
-            }
-        }
-
-        if (mainImgType == MAIN_IMG_MA){
-            QuotaUtil.initMa(restoreList);
-        }else if (mainImgType == MAIN_IMG_EMA){
-            QuotaUtil.initEma(restoreList);
-        }else if (mainImgType == MAIN_IMG_BOLL){
-            QuotaUtil.initBoll(restoreList);
-        }
-        if (isShowDeputy && deputyImgType == DEPUTY_IMG_MACD){
-            QuotaUtil.initMACD(restoreList);
-        }else if (isShowDeputy && deputyImgType == DEPUTY_IMG_KDJ){
-            QuotaUtil.initKDJ(restoreList);
-        }
-
-        for (int i = 0; i < maxViewDataNum; i++) {
-            if (startDataNum < 40){
-                viewDataList.add(restoreList.get(i));
-            }else if (startDataNum >= 40 && startDataNum + maxViewDataNum + 40 <= totalDataList.size()){
-                viewDataList.add(restoreList.get(i + 40));
-            }else if (startDataNum + maxViewDataNum + 40 > totalDataList.size()){
-                if (i + 40 > restoreList.size() - 1){
-                    break;
-                }
-                viewDataList.add(restoreList.get(i + 40));
-            }
-        }
-        if (viewDataList.size() > 0){
-            lastKData = viewDataList.get(viewDataList.size() - 1);
-        }
-
-    }*/
 
     //刻度线
     private void drawTickMark(Canvas canvas) {
@@ -1386,14 +1268,14 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                 (float) lastKData.getCloseY(),
                 crossHairPaint);
 
-        //灰色指示器
+        //时间指示器
         RectF grayRectF = new RectF(singleClickDownX - dp2px(25),
                 bottomEnd - dp2px(20),
                 singleClickDownX + dp2px(25),
                 bottomEnd);
         canvas.drawRoundRect(grayRectF, 4, 4, grayTimePaint);
 
-        //时间
+        //时间text
         String moveTime = formatDate(lastKData.getTime());
         datePaint.setColor(Color.parseColor("#FFFFFF"));
         canvas.drawText(moveTime,
