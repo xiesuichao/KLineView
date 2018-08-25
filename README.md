@@ -12,7 +12,11 @@
 //@todo         
 实时刷新新增的单条数据没有计算上述5项指标，后续会增加。    
 目前有个bug，因为上述5项指标是放在子线程去计算的，总共计算时长大概300ms，计算过程中如果新增了单条数据，会导致list.size发生变化，导致计算失败，
-后续会改进。          
+后续会改进。        
+
+邮箱：xsc314@163.com       
+qq：181801034    
+如有需要，请联系        
 
 ![image](https://github.com/xiesuichao/KLineView/raw/master/image/KLineUI.png)
 ![image](https://github.com/xiesuichao/KLineView/raw/master/image/a1.png)
