@@ -35,9 +35,6 @@ public class MainActivity extends AppCompatActivity {
         setListener();
 
 
-
-
-
     }
 
     private void initViewData(){

@@ -50,13 +50,7 @@ public class QuotaThread extends HandlerThread implements Handler.Callback{
         if (msg.what == MSG_QUOTA_CALCULATE){
             receiveArrayList = msg.getData().getParcelableArrayList(MSG_KEY_QUOTA_BUNDLE);
             List<KData> dataList = (List<KData>)receiveArrayList.get(0);
-            try {
-                Thread.sleep(2000);
-                initKDataQuota(dataList);
-
-            }catch (Exception e){
-                e.printStackTrace();
-            }
+            initKDataQuota(dataList);
             Message message = Message.obtain(null, MSG_QUOTA_CALCULATE);
             uiHandler.sendMessage(message);
         }

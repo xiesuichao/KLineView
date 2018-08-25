@@ -188,6 +188,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     private QuotaThread quotaThread;
     private Handler mDelayHandler;
     private Runnable mDelayRunnable;
+    private long finishStart;
 
 
     public KLineView(Context context) {
@@ -234,8 +235,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         startDataNum += dataList.size();
 
         quotaThread.quotaCalculate(totalDataList);
-        PrintUtil.log("startNum", startDataNum);
-        PrintUtil.log("size", totalDataList.size());
 
     }
 
@@ -729,7 +728,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     }
 
     private void requestNewData() {
-        if (startDataNum <= totalDataList.size() / 4 && isNeedRequestBeforeData) {
+        if (startDataNum <= totalDataList.size() / 3 && isNeedRequestBeforeData) {
             requestListener.requestData();
             PrintUtil.log("requestBeforeData");
             isNeedRequestBeforeData = false;
