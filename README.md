@@ -22,10 +22,6 @@ qq：181801034
 
 ![image](https://github.com/xiesuichao/KLineView/raw/master/image/KLineUI.png)
 ![image](https://github.com/xiesuichao/KLineView/raw/master/image/a1.png)
-
-
-
-
         
         //初始化控件加载数据
         mKLineView.initKDataList(getKDataList(5));
