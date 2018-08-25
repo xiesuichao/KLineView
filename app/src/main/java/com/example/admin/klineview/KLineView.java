@@ -214,6 +214,10 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         this.requestListener = requestListener;
     }
 
+    /**
+     * 添加最新单条数据
+     * @param data
+     */
     public void addData(KData data) {
         totalDataList.add(data);
         if (startDataNum == totalDataList.size() - maxViewDataNum - 2) {
@@ -223,6 +227,10 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         }
     }
 
+    /**
+     * 分页加载，向前期滑动时新增的数据，目前限制单次添加数据量不超过1100条
+     * @param dataList
+     */
     public void addDataList(List<KData> dataList) {
         if (dataList.size() > 1100) {
             return;
@@ -238,6 +246,10 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
 
     }
 
+    /**
+     * 控件初始化时添加的数据量，目前限制单次添加数据量不超过1100条
+     * @param dataList
+     */
     public void initKDataList(List<KData> dataList) {
         PrintUtil.log("initKDataList");
         if (dataList.size() > 1100) {
@@ -250,6 +262,10 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         resetViewData();
     }
 
+    /**
+     * 是否显示副图
+     * @param showState
+     */
     public void setDeputyPicShow(boolean showState) {
         switch (deputyImgType) {
             case DEPUTY_IMG_MACD:
@@ -264,6 +280,10 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         invalidate();
     }
 
+    /**
+     * 设置主图显示类型，0：MA, 1:EMA, 2:BOLL
+     * @param type
+     */
     public void setMainImgType(int type) {
         switch (type) {
             case MAIN_IMG_MA:
@@ -282,6 +302,10 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         invalidate();
     }
 
+    /**
+     * 设置副图显示类型，0：MACD, 1:KDJ
+     * @param type
+     */
     public void setDeputyImgType(int type) {
         switch (type) {
             case DEPUTY_IMG_MACD:
@@ -296,8 +320,21 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         invalidate();
     }
 
+    /**
+     * 获取副图是否显示
+     * @return
+     */
     public boolean getVicePicShow() {
         return this.isShowDeputy;
+    }
+
+    /**
+     * 退出页面时停止子线程并置空，便于回收，避免内存泄露
+     */
+    public void cancelQuotaThread() {
+        quotaThread.setUIHandler(null);
+        quotaThread.quit();
+        quotaThread = null;
     }
 
     private void init() {
@@ -451,12 +488,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         quotaThread = new QuotaThread("quotaThread", Process.THREAD_PRIORITY_BACKGROUND);
         quotaThread.setUIHandler(uiHandler);
         quotaThread.start();
-    }
-
-    public void cancelQuotaThread() {
-        quotaThread.setUIHandler(null);
-        quotaThread.quit();
-        quotaThread = null;
     }
 
     @Override

@@ -13,7 +13,7 @@ import java.util.Random;
 public class MainActivity extends AppCompatActivity {
 
     private Handler mHandler;
-    private KLineView mainKlv;
+    private KLineView mKLineView;
     private Button deputyBtn;
     private Button maBtn;
     private Button emaBtn;
@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initViewData(){
-        mainKlv = findViewById(R.id.klv_main);
+        mKLineView = findViewById(R.id.klv_main);
         deputyBtn = findViewById(R.id.btn_deputy);
         maBtn = findViewById(R.id.btn_ma);
         emaBtn = findViewById(R.id.btn_ema);
@@ -47,20 +47,21 @@ public class MainActivity extends AppCompatActivity {
         kdjBtn = findViewById(R.id.btn_kdj);
         msgBtn = findViewById(R.id.btn_msg);
 
-        mainKlv.initKDataList(getKDataList(5));
+        //初始化控件加载数据
+        mKLineView.initKDataList(getKDataList(5));
 
         mHandler = new Handler();
         getDataRunnable = new Runnable() {
             @Override
             public void run() {
-                mainKlv.addDataList(getKDataList(5));
+                mKLineView.addDataList(getKDataList(5));
             }
         };
 
         sendRunnable = new Runnable() {
             @Override
             public void run() {
-                mainKlv.addData(getKDataList(0.1).get(0));
+                mKLineView.addData(getKDataList(0.1).get(0));
                 mHandler.postDelayed(this, 1000);
             }
         };
@@ -71,49 +72,63 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setListener(){
+        //初始化控件加载数据
+        mKLineView.initKDataList(getKDataList(5));
+
         deputyBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mainKlv.setDeputyPicShow(!mainKlv.getVicePicShow());
+                //是否显示副图
+                mKLineView.setDeputyPicShow(!mKLineView.getVicePicShow());
             }
         });
 
         maBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mainKlv.setMainImgType(KLineView.MAIN_IMG_MA);
+                //主图展示MA
+                mKLineView.setMainImgType(KLineView.MAIN_IMG_MA);
             }
         });
 
         emaBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mainKlv.setMainImgType(KLineView.MAIN_IMG_EMA);
+                //主图展示EMA
+                mKLineView.setMainImgType(KLineView.MAIN_IMG_EMA);
             }
         });
 
         bollBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mainKlv.setMainImgType(KLineView.MAIN_IMG_BOLL);
+                //主图展示BOLL
+                mKLineView.setMainImgType(KLineView.MAIN_IMG_BOLL);
             }
         });
 
         macdBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mainKlv.setDeputyImgType(KLineView.DEPUTY_IMG_MACD);
+                //副图展示MACD
+                mKLineView.setDeputyImgType(KLineView.DEPUTY_IMG_MACD);
             }
         });
 
         kdjBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mainKlv.setDeputyImgType(KLineView.DEPUTY_IMG_KDJ);
+                //副图展示KDJ
+                mKLineView.setDeputyImgType(KLineView.DEPUTY_IMG_KDJ);
             }
         });
 
-        mainKlv.setOnRequestDataListListener(new KLineView.OnRequestDataListListener() {
+        /**
+         * 当控件显示数据属于总数据量的前三分之一时，会自动调用该接口，用于预加载数据，保证控件操作过程中的流畅性，
+         * 虽然做了预加载，当总数据量较小时，也会出现用户滑到左边界了，但数据还未获取到，依然会有停顿。
+         * 所以数据量越大，越不会出现停顿，也就越流畅
+         */
+        mKLineView.setOnRequestDataListListener(new KLineView.OnRequestDataListListener() {
             @Override
             public void requestData() {
                 mHandler.postDelayed(getDataRunnable, 2000);
