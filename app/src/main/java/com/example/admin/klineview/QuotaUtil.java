@@ -2,6 +2,7 @@ package com.example.admin.klineview;
 
 import android.graphics.Path;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -14,8 +15,8 @@ public class QuotaUtil {
     private static final int QUOTA_DAY5 = 5;
     private static final int QUOTA_DAY10 = 10;
     private static final int QUOTA_DAY30 = 30;
-    private static final int[] MA_PERIOD_ARR = {QUOTA_DAY5, QUOTA_DAY10, QUOTA_DAY30};
     private static final float BEZIER_RATIO = 0.16f;
+    private static List<KData> cacheList = new ArrayList<>();
 
     /**
      * 初始化 MA5，MA10, MA30
@@ -27,58 +28,33 @@ public class QuotaUtil {
         if (dataList == null || dataList.isEmpty()) {
             return;
         }
+        cacheList.clear();
+        cacheList.addAll(dataList);
         for (int i = 0; i < dataList.size(); i++) {
             if (i + QUOTA_DAY5 <= dataList.size()){
                 //priceMa5
-                dataList.get(i + QUOTA_DAY5 - 1).setPriceMa5(getPriceMa(dataList.subList(i, i + QUOTA_DAY5)));
+                dataList.get(i + QUOTA_DAY5 - 1).setPriceMa5(getPriceMa(cacheList.subList(i, i + QUOTA_DAY5)));
                 //volumeMa5
-                dataList.get(i + QUOTA_DAY5 - 1).setVolumeMa5(getVolumeMa(dataList.subList(i, i + QUOTA_DAY5)));
+                dataList.get(i + QUOTA_DAY5 - 1).setVolumeMa5(getVolumeMa(cacheList.subList(i, i + QUOTA_DAY5)));
             }
             if (i + QUOTA_DAY10 <= dataList.size()){
                 //priceMa10
-                dataList.get(i + QUOTA_DAY10 - 1).setPriceMa10(getPriceMa(dataList.subList(i, i + QUOTA_DAY10)));
+                dataList.get(i + QUOTA_DAY10 - 1).setPriceMa10(getPriceMa(cacheList.subList(i, i + QUOTA_DAY10)));
                 //volumeMa10
-                dataList.get(i + QUOTA_DAY10 - 1).setVolumeMa10(getVolumeMa(dataList.subList(i, i + QUOTA_DAY10)));
+                dataList.get(i + QUOTA_DAY10 - 1).setVolumeMa10(getVolumeMa(cacheList.subList(i, i + QUOTA_DAY10)));
             }
             if (i + QUOTA_DAY30 <= dataList.size()){
                 //priceMa30
                 if (dataList.get(i + QUOTA_DAY30 - 1).getPriceMa30() != 0 && !isEndData){
                     break;
                 }else {
-                    dataList.get(i + QUOTA_DAY30 - 1).setPriceMa30(getPriceMa(dataList.subList(i, i + QUOTA_DAY30)));
+                    dataList.get(i + QUOTA_DAY30 - 1).setPriceMa30(getPriceMa(cacheList.subList(i, i + QUOTA_DAY30)));
                 }
             }
             dataList.get(i).setInitFinish(true);
         }
         long endMa = System.currentTimeMillis();
         PrintUtil.log("MA", endMa - startMa);
-    }
-
-    public static void getMa(List<KData> dataList) {
-        if (dataList == null || dataList.isEmpty()) {
-            return;
-        }
-        for (int i = 0; i < dataList.size(); i++) {
-            for (int j : MA_PERIOD_ARR) {
-                if (i + j <= dataList.size()) {
-                    if (j == QUOTA_DAY5) {
-                        //priceMa5
-                        dataList.get(i + j - 1).setPriceMa5(getPriceMa(dataList.subList(i, i + j)));
-                        //volumeMa5
-                        dataList.get(i + j - 1).setVolumeMa5(getVolumeMa(dataList.subList(i, i + j)));
-                    } else if (j == QUOTA_DAY10) {
-                        //priceMa10
-                        dataList.get(i + j - 1).setPriceMa10(getPriceMa(dataList.subList(i, i + j)));
-                        //volumeMa10
-                        dataList.get(i + j - 1).setVolumeMa10(getVolumeMa(dataList.subList(i, i + j)));
-                    } else if (j == QUOTA_DAY30) {
-                        //priceMa30
-                        dataList.get(i + j - 1).setPriceMa30(getPriceMa(dataList.subList(i, i + j)));
-                    }
-                }
-            }
-            dataList.get(i).setInitFinish(true);
-        }
     }
 
     private static double getVolumeMa(List<KData> dataList) {
