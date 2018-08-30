@@ -221,7 +221,9 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         endDataList.clear();
         endDataList.addAll(totalDataList.subList(totalDataList.size() - 30, totalDataList.size()));
         endDataList.add(data);
-        quotaThread.quotaSingleCalculate(endDataList);
+        if (quotaThread != null){
+            quotaThread.quotaSingleCalculate(endDataList);
+        }
     }
 
     /**
@@ -239,7 +241,9 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         isNeedRequestBeforeData = dataList.size() >= initTotalListSize;
         totalDataList.addAll(0, dataList);
         startDataNum += dataList.size();
-        quotaThread.quotaListCalculate(totalDataList);
+        if (quotaThread != null){
+            quotaThread.quotaListCalculate(totalDataList);
+        }
     }
 
     /**
@@ -495,7 +499,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
             invalidate();
         } else if (msg.what == QuotaThread.HANDLER_QUOTA_SINGLE) {
             totalDataList.add(endDataList.get(endDataList.size() - 1));
-            PrintUtil.log("endDataList.end", endDataList.get(endDataList.size() - 1).toString());
             if (startDataNum == totalDataList.size() - maxViewDataNum - 2) {
                 startDataNum++;
                 resetViewData();
