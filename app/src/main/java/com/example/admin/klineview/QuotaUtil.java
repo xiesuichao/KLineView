@@ -22,7 +22,7 @@ public class QuotaUtil {
      *
      * @param dataList
      */
-    public static void initMa(List<KData> dataList){
+    public static void initMa(List<KData> dataList, boolean isEndData){
         long startMa = System.currentTimeMillis();
         if (dataList == null || dataList.isEmpty()) {
             return;
@@ -42,10 +42,10 @@ public class QuotaUtil {
             }
             if (i + QUOTA_DAY30 <= dataList.size()){
                 //priceMa30
-                if (dataList.get(i + QUOTA_DAY30 - 1).getPriceMa30() == 0){
-                    dataList.get(i + QUOTA_DAY30 - 1).setPriceMa30(getPriceMa(dataList.subList(i, i + QUOTA_DAY30)));
-                }else {
+                if (dataList.get(i + QUOTA_DAY30 - 1).getPriceMa30() != 0 && !isEndData){
                     break;
+                }else {
+                    dataList.get(i + QUOTA_DAY30 - 1).setPriceMa30(getPriceMa(dataList.subList(i, i + QUOTA_DAY30)));
                 }
             }
             dataList.get(i).setInitFinish(true);
@@ -108,7 +108,7 @@ public class QuotaUtil {
      *
      * @param dataList
      */
-    public static void initEma(List<KData> dataList) {
+    public static void initEma(List<KData> dataList, boolean isEndData) {
         long startEma = System.currentTimeMillis();
         if (dataList == null || dataList.isEmpty()) {
             return;
@@ -121,7 +121,7 @@ public class QuotaUtil {
         dataList.get(0).setEma30(lastEma30);
 
         for (int i = 1; i < dataList.size(); i++) {
-            if (dataList.get(i).getEma5() != 0){
+            if (dataList.get(i).getEma5() != 0 && !isEndData){
                 break;
             }
             double currentEma5 = 2 * (dataList.get(i).getClosePrice() - lastEma5) / (QUOTA_DAY5 + 1) + lastEma5;
@@ -153,7 +153,7 @@ public class QuotaUtil {
      * @param period     周期，一般为26
      * @param k          参数，可根据股票的特性来做相应的调整，一般默认为2
      */
-    public static void initBOLL(List<KData> dataList, int period, int k) {
+    public static void initBOLL(List<KData> dataList, int period, int k, boolean isEndData) {
         long startBoll = System.currentTimeMillis();
         if (dataList == null || dataList.isEmpty()
                 || period < 0 || period > dataList.size() - 1) {
@@ -173,7 +173,7 @@ public class QuotaUtil {
         double md;
 
         for (int i = 0; i < dataList.size(); i++) {
-            if (dataList.get(i).getBollMb() != 0){
+            if (dataList.get(i).getBollMb() != 0 && !isEndData){
                 break;
             }
             KData quotes = dataList.get(i);
@@ -209,8 +209,8 @@ public class QuotaUtil {
         PrintUtil.log("BOLL", endBoll - startBoll);
     }
 
-    public static void initBoll(List<KData> dataList) {
-        initBOLL(dataList, 26, 2);
+    public static void initBoll(List<KData> dataList, boolean isEndData) {
+        initBOLL(dataList, 26, 2, isEndData);
     }
 
     /**
@@ -221,7 +221,7 @@ public class QuotaUtil {
      * @param slowPeriod   日慢线移动平均，标准为26，可理解为天数
      * @param signalPeriod 日移动平均，标准为9，按照标准即可
      */
-    public static void initMACD(List<KData> dataList, int fastPeriod, int slowPeriod, int signalPeriod) {
+    public static void initMACD(List<KData> dataList, int fastPeriod, int slowPeriod, int signalPeriod, boolean isEndData) {
         long startMacd = System.currentTimeMillis();
         if (dataList == null || dataList.isEmpty()){
             return;
@@ -237,7 +237,7 @@ public class QuotaUtil {
         double dif = 0;
         double macd = 0;
         for (int i = 0; i < dataList.size(); i++) {
-            if (dataList.get(i).getMacd() != 0){
+            if (dataList.get(i).getMacd() != 0 && !isEndData){
                 break;
             }
             ema_12 = preEma_12 * (fastPeriod - 1) / (fastPeriod + 1) + dataList.get(i).getClosePrice() * 2 / (fastPeriod + 1);
@@ -258,8 +258,8 @@ public class QuotaUtil {
         PrintUtil.log("MACD", endMacd - startMacd);
     }
 
-    public static void initMACD(List<KData> dataList) {
-        initMACD(dataList, 12, 26, 9);
+    public static void initMACD(List<KData> dataList, boolean isEndData) {
+        initMACD(dataList, 12, 26, 9, isEndData);
     }
 
     /**
@@ -270,7 +270,7 @@ public class QuotaUtil {
      * @param m1       标准值3
      * @param m2       标准值3
      */
-    public static void initKDJ(List<KData> dataList, int n, int m1, int m2) {
+    public static void initKDJ(List<KData> dataList, int n, int m1, int m2, boolean isEndData) {
         long startKdj = System.currentTimeMillis();
         if (dataList == null || dataList.isEmpty()){
             return;
@@ -289,7 +289,7 @@ public class QuotaUtil {
         int lowPosition = 0;
         double rSV = 0.0;
         for (int i = 0; i < dataList.size(); i++) {
-            if (dataList.get(i).getK() != 0){
+            if (dataList.get(i).getK() != 0 && !isEndData){
                 break;
             }
             if (i == 0) {
@@ -350,8 +350,8 @@ public class QuotaUtil {
         PrintUtil.log("KDJ", endKdj - startKdj);
     }
 
-    public static void initKDJ(List<KData> dataList) {
-        initKDJ(dataList, 9, 3, 3);
+    public static void initKDJ(List<KData> dataList, boolean isEndData) {
+        initKDJ(dataList, 9, 3, 3, isEndData);
     }
 
     /**

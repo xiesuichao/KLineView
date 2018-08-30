@@ -35,15 +35,14 @@ public class QuotaThread extends HandlerThread implements Handler.Callback {
         Message message = Message.obtain(null, HANDLER_QUOTA_SINGLE);
         message.obj = dataList;
         workHandler.sendMessage(message);
-        PrintUtil.log("quotaSingleCalculate");
     }
 
-    private void calculateKDataQuota(List<KData> dataList) {
-        QuotaUtil.initEma(dataList);
-        QuotaUtil.initBoll(dataList);
-        QuotaUtil.initMACD(dataList);
-        QuotaUtil.initKDJ(dataList);
-        QuotaUtil.initMa(dataList);
+    private void calculateKDataQuota(List<KData> dataList, boolean isEndData) {
+        QuotaUtil.initEma(dataList, isEndData);
+        QuotaUtil.initBoll(dataList, isEndData);
+        QuotaUtil.initMACD(dataList, isEndData);
+        QuotaUtil.initKDJ(dataList, isEndData);
+        QuotaUtil.initMa(dataList, isEndData);
     }
 
     @Override
@@ -55,16 +54,16 @@ public class QuotaThread extends HandlerThread implements Handler.Callback {
     @Override
     public boolean handleMessage(Message msg) {
         if (msg.what == HANDLER_QUOTA_LIST) {
-            handleData(msg, HANDLER_QUOTA_LIST);
+            handleData(msg, HANDLER_QUOTA_LIST, false);
         }else if (msg.what == HANDLER_QUOTA_SINGLE){
-            handleData(msg, HANDLER_QUOTA_SINGLE);
+            handleData(msg, HANDLER_QUOTA_SINGLE, true);
         }
         return true;
     }
 
-    private void handleData(Message msg, int whatId){
+    private void handleData(Message msg, int whatId, boolean isEndData){
         List<KData> dataList = (List<KData>) msg.obj;
-        calculateKDataQuota(dataList);
+        calculateKDataQuota(dataList, isEndData);
         Message message = Message.obtain(null, whatId);
         uiHandler.sendMessage(message);
     }

@@ -218,12 +218,10 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
      * @param data
      */
     public void addData(KData data) {
-//        totalDataList.add(data);
         endDataList.clear();
-        endDataList.addAll(totalDataList.subList(totalDataList.size() - 29, totalDataList.size()));
+        endDataList.addAll(totalDataList.subList(totalDataList.size() - 30, totalDataList.size()));
         endDataList.add(data);
         quotaThread.quotaSingleCalculate(endDataList);
-        PrintUtil.log("addData");
     }
 
     /**
@@ -256,7 +254,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         this.totalDataList.clear();
         this.totalDataList.addAll(dataList);
         startDataNum = totalDataList.size() - 1 - maxViewDataNum;
-        QuotaUtil.initMa(totalDataList);
+        QuotaUtil.initMa(totalDataList, false);
         resetViewData();
     }
 
@@ -268,11 +266,11 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     public void setDeputyPicShow(boolean showState) {
         switch (deputyImgType) {
             case DEPUTY_IMG_MACD:
-                QuotaUtil.initMACD(totalDataList);
+                QuotaUtil.initMACD(totalDataList, false);
                 break;
 
             case DEPUTY_IMG_KDJ:
-                QuotaUtil.initKDJ(totalDataList);
+                QuotaUtil.initKDJ(totalDataList, false);
                 break;
         }
         this.isShowDeputy = showState;
@@ -287,15 +285,15 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     public void setMainImgType(int type) {
         switch (type) {
             case MAIN_IMG_MA:
-                QuotaUtil.initMa(totalDataList);
+                QuotaUtil.initMa(totalDataList, false);
                 break;
 
             case MAIN_IMG_EMA:
-                QuotaUtil.initEma(totalDataList);
+                QuotaUtil.initEma(totalDataList, false);
                 break;
 
             case MAIN_IMG_BOLL:
-                QuotaUtil.initBoll(totalDataList);
+                QuotaUtil.initBoll(totalDataList, false);
                 break;
         }
         this.mainImgType = type;
@@ -310,11 +308,11 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     public void setDeputyImgType(int type) {
         switch (type) {
             case DEPUTY_IMG_MACD:
-                QuotaUtil.initMACD(totalDataList);
+                QuotaUtil.initMACD(totalDataList, false);
                 break;
 
             case DEPUTY_IMG_KDJ:
-                QuotaUtil.initKDJ(totalDataList);
+                QuotaUtil.initKDJ(totalDataList, false);
                 break;
         }
         this.deputyImgType = type;
@@ -649,7 +647,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
 
             case MotionEvent.ACTION_UP:
                 isDoubleFinger = false;
-                PrintUtil.log("maxViewDataNum", maxViewDataNum);
                 break;
 
         }

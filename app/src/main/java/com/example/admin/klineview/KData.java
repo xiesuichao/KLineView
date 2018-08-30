@@ -293,12 +293,14 @@ public class KData {
     @Override
     public String toString() {
         return "KData{" +
-                "time='" + time + '\'' +
+                "time=" + time +
                 ", openPrice=" + openPrice +
                 ", closePrice=" + closePrice +
                 ", maxPrice=" + maxPrice +
                 ", minPrice=" + minPrice +
                 ", volume=" + volume +
+                ", upDnAmount=" + upDnAmount +
+                ", upDnRate=" + upDnRate +
                 ", priceMa5=" + priceMa5 +
                 ", priceMa10=" + priceMa10 +
                 ", priceMa30=" + priceMa30 +
@@ -307,8 +309,19 @@ public class KData {
                 ", ema30=" + ema30 +
                 ", volumeMa5=" + volumeMa5 +
                 ", volumeMa10=" + volumeMa10 +
+                ", bollMb=" + bollMb +
+                ", bollUp=" + bollUp +
+                ", bollDn=" + bollDn +
+                ", macd=" + macd +
+                ", dea=" + dea +
+                ", dif=" + dif +
+                ", k=" + k +
+                ", d=" + d +
+                ", j=" + j +
                 ", leftX=" + leftX +
                 ", rightX=" + rightX +
+                ", closeY=" + closeY +
+                ", initFinish=" + initFinish +
                 '}';
     }
 }
