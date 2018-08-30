@@ -20,7 +20,6 @@ public class MainActivity extends AppCompatActivity {
     private Button bollBtn;
     private Button macdBtn;
     private Button kdjBtn;
-    private Button msgBtn;
     private Runnable getDataRunnable;
     private Runnable sendRunnable;
 
@@ -29,15 +28,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-        initViewData();
-
+        initView();
+        initData();
         setListener();
-
 
     }
 
-    private void initViewData(){
+    private void initView(){
         mKLineView = findViewById(R.id.klv_main);
         deputyBtn = findViewById(R.id.btn_deputy);
         maBtn = findViewById(R.id.btn_ma);
@@ -45,8 +42,9 @@ public class MainActivity extends AppCompatActivity {
         bollBtn = findViewById(R.id.btn_boll);
         macdBtn = findViewById(R.id.btn_macd);
         kdjBtn = findViewById(R.id.btn_kdj);
-        msgBtn = findViewById(R.id.btn_msg);
+    }
 
+    private void initData(){
         //初始化控件加载数据
         mKLineView.initKDataList(getKDataList(5));
 
@@ -62,19 +60,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 mKLineView.addData(getKDataList(0.1).get(0));
-                mHandler.postDelayed(this, 1000);
+                mHandler.postDelayed(this, 2000);
             }
         };
-
         mHandler.postDelayed(sendRunnable, 2000);
-
 
     }
 
     private void setListener(){
-        //初始化控件加载数据
-        mKLineView.initKDataList(getKDataList(5));
-
         deputyBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -181,5 +174,15 @@ public class MainActivity extends AppCompatActivity {
         Random random = new Random();
         return random.nextInt(5) * 5  - random.nextDouble();
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mKLineView.cancelQuotaThread();
+    }
+
+
+
+
 
 }

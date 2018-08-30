@@ -5,17 +5,17 @@ import android.graphics.Path;
 import java.util.List;
 
 /**
+ * 五项数据计算公式
  * Created by xiesuichao on 2018/8/12.
  */
 
 public class QuotaUtil {
 
-    private static final int START_SMA5 = 5;
-    private static final int START_SMA10 = 10;
-    private static final int START_SMA30 = 30;
-    private static final int[] MA_PERIOD_ARR = {START_SMA5, START_SMA10, START_SMA30};
+    private static final int QUOTA_DAY5 = 5;
+    private static final int QUOTA_DAY10 = 10;
+    private static final int QUOTA_DAY30 = 30;
+    private static final int[] MA_PERIOD_ARR = {QUOTA_DAY5, QUOTA_DAY10, QUOTA_DAY30};
     private static final float BEZIER_RATIO = 0.16f;
-
 
     /**
      * 初始化 MA5，MA10, MA30
@@ -28,32 +28,30 @@ public class QuotaUtil {
             return;
         }
         for (int i = 0; i < dataList.size(); i++) {
-            if (i >= 4 && i + 4 <= dataList.size()){
+            if (i + QUOTA_DAY5 <= dataList.size()){
                 //priceMa5
-                dataList.get(i).setPriceMa5(getPriceMa(dataList.subList(i, i + 4)));
+                dataList.get(i + QUOTA_DAY5 - 1).setPriceMa5(getPriceMa(dataList.subList(i, i + QUOTA_DAY5)));
                 //volumeMa5
-                dataList.get(i).setVolumeMa5(getVolumeMa(dataList.subList(i, i + 4)));
+                dataList.get(i + QUOTA_DAY5 - 1).setVolumeMa5(getVolumeMa(dataList.subList(i, i + QUOTA_DAY5)));
             }
-            if (i >= 9 && i + 9 <= dataList.size()){
+            if (i + QUOTA_DAY10 <= dataList.size()){
                 //priceMa10
-                dataList.get(i).setPriceMa10(getPriceMa(dataList.subList(i, i + 9)));
+                dataList.get(i + QUOTA_DAY10 - 1).setPriceMa10(getPriceMa(dataList.subList(i, i + QUOTA_DAY10)));
                 //volumeMa10
-                dataList.get(i).setVolumeMa10(getVolumeMa(dataList.subList(i, i + 9)));
+                dataList.get(i + QUOTA_DAY10 - 1).setVolumeMa10(getVolumeMa(dataList.subList(i, i + QUOTA_DAY10)));
             }
-            if (i >= 29 && i + 29 <= dataList.size()){
+            if (i + QUOTA_DAY30 <= dataList.size()){
                 //priceMa30
-                if (dataList.get(i).getPriceMa30() == 0){
-                    dataList.get(i).setPriceMa30(getPriceMa(dataList.subList(i, i + 29)));
+                if (dataList.get(i + QUOTA_DAY30 - 1).getPriceMa30() == 0){
+                    dataList.get(i + QUOTA_DAY30 - 1).setPriceMa30(getPriceMa(dataList.subList(i, i + QUOTA_DAY30)));
                 }else {
                     break;
                 }
             }
             dataList.get(i).setInitFinish(true);
-
         }
         long endMa = System.currentTimeMillis();
         PrintUtil.log("MA", endMa - startMa);
-
     }
 
     public static void getMa(List<KData> dataList) {
@@ -63,22 +61,23 @@ public class QuotaUtil {
         for (int i = 0; i < dataList.size(); i++) {
             for (int j : MA_PERIOD_ARR) {
                 if (i + j <= dataList.size()) {
-                    if (j == START_SMA5) {
+                    if (j == QUOTA_DAY5) {
                         //priceMa5
                         dataList.get(i + j - 1).setPriceMa5(getPriceMa(dataList.subList(i, i + j)));
                         //volumeMa5
                         dataList.get(i + j - 1).setVolumeMa5(getVolumeMa(dataList.subList(i, i + j)));
-                    } else if (j == START_SMA10) {
+                    } else if (j == QUOTA_DAY10) {
                         //priceMa10
                         dataList.get(i + j - 1).setPriceMa10(getPriceMa(dataList.subList(i, i + j)));
                         //volumeMa10
                         dataList.get(i + j - 1).setVolumeMa10(getVolumeMa(dataList.subList(i, i + j)));
-                    } else if (j == START_SMA30) {
+                    } else if (j == QUOTA_DAY30) {
                         //priceMa30
                         dataList.get(i + j - 1).setPriceMa30(getPriceMa(dataList.subList(i, i + j)));
                     }
                 }
             }
+            dataList.get(i).setInitFinish(true);
         }
     }
 
@@ -125,9 +124,9 @@ public class QuotaUtil {
             if (dataList.get(i).getEma5() != 0){
                 break;
             }
-            double currentEma5 = 2 * (dataList.get(i).getClosePrice() - lastEma5) / (5 + 1) + lastEma5;
-            double currentEma10 = 2 * (dataList.get(i).getClosePrice() - lastEma10) / (10 + 1) + lastEma10;
-            double currentEma30 = 2 * (dataList.get(i).getClosePrice() - lastEma30) / (30 + 1) + lastEma30;
+            double currentEma5 = 2 * (dataList.get(i).getClosePrice() - lastEma5) / (QUOTA_DAY5 + 1) + lastEma5;
+            double currentEma10 = 2 * (dataList.get(i).getClosePrice() - lastEma10) / (QUOTA_DAY10 + 1) + lastEma10;
+            double currentEma30 = 2 * (dataList.get(i).getClosePrice() - lastEma30) / (QUOTA_DAY30 + 1) + lastEma30;
 
             dataList.get(i).setEma5(currentEma5);
             dataList.get(i).setEma10(currentEma10);
@@ -355,7 +354,11 @@ public class QuotaUtil {
         initKDJ(dataList, 9, 3, 3);
     }
 
-    //三阶贝塞尔曲线控制点
+    /**
+     * 三阶贝塞尔曲线控制点
+     * @param pointList
+     * @param path
+     */
     public static void setBezierPath(List<Pointer> pointList, Path path) {
         path.reset();
         if (pointList == null || pointList.isEmpty()) {
