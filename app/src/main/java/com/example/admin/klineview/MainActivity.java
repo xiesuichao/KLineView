@@ -60,10 +60,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 mKLineView.addData(getKDataList(0.1).get(0));
-                mHandler.postDelayed(this, 500);
+                mHandler.postDelayed(this, 5000);
             }
         };
-        mHandler.postDelayed(sendRunnable, 2000);
+//        mHandler.postDelayed(sendRunnable, 2000);
 
     }
 

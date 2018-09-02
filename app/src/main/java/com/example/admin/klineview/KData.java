@@ -22,6 +22,7 @@ public class KData {
     private double ema5;
     private double ema10;
     private double ema30;
+    private double ema;
     private double volumeMa5;
     private double volumeMa10;
     private double bollMb;
@@ -56,6 +57,14 @@ public class KData {
         this.maxPrice = maxPrice;
         this.minPrice = minPrice;
         this.volume = volume;
+    }
+
+    public double getEma() {
+        return ema;
+    }
+
+    public void setEma(double ema) {
+        this.ema = ema;
     }
 
     public double getOpenPrice() {
