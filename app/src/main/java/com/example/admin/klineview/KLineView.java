@@ -196,6 +196,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     private double mMinPriceY;
     private double mMaxMacd;
     private double mMinMacd;
+    private double mMaxK;
 
     public KLineView(Context context) {
         this(context, null);
@@ -524,6 +525,13 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     }
 
     @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        PrintUtil.log("width", getResources().getDisplayMetrics().widthPixels);
+        PrintUtil.log("height", getResources().getDisplayMetrics().heightPixels);
+    }
+
+    @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         if (totalDataList.isEmpty() || viewDataList.isEmpty()) {
@@ -847,7 +855,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         double minDea = viewDataList.get(0).getDea();
         double maxDif = viewDataList.get(0).getDif();
         double minDif = viewDataList.get(0).getDif();
-        double maxK = viewDataList.get(0).getK();
+        mMaxK = viewDataList.get(0).getK();
         double maxD = viewDataList.get(0).getD();
         double maxJ = viewDataList.get(0).getJ();
 
@@ -883,8 +891,8 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
             if (viewDataList.get(i).getDif() <= minDif) {
                 minDif = viewDataList.get(i).getDif();
             }
-            if (viewDataList.get(i).getK() >= maxK) {
-                maxK = viewDataList.get(i).getK();
+            if (viewDataList.get(i).getK() >= mMaxK) {
+                mMaxK = viewDataList.get(i).getK();
             }
             if (viewDataList.get(i).getD() >= maxD) {
                 maxD = viewDataList.get(i).getD();
@@ -940,7 +948,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
             avgHeightDif = (horizontalYList.get(horizontalYList.size() - 1) - deputyTopY - dp2px(24)) / Math.abs(maxDif);
         }
         //K
-        avgHeightK = (horizontalYList.get(horizontalYList.size() - 1) - deputyTopY - dp2px(12)) / maxK;
+        avgHeightK = (horizontalYList.get(horizontalYList.size() - 1) - deputyTopY - dp2px(12)) / mMaxK;
         //D
         avgHeightD = (horizontalYList.get(horizontalYList.size() - 1) - deputyTopY - dp2px(12)) / maxD;
         //J
@@ -1293,7 +1301,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         canvas.drawLine((float) (lastKData.getLeftX() + avgPriceRectWidth / 2),
                 horizontalYList.get(0),
                 (float) (lastKData.getLeftX() + avgPriceRectWidth / 2),
-                bottomEnd,
+                horizontalYList.get(horizontalYList.size() - 1),
                 crossHairPaint);
 
         //水平
@@ -1748,36 +1756,42 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                         datePaint);
             }
 
-            String topMacd = "";
-            String botMacd = "";
-            String centerMacd = "";
-            if (mMaxMacd > 0 && mMinMacd < 0) {
-                topMacd = ArithUtil.setPrecision(mMaxMacd, 2);
-                botMacd = ArithUtil.setPrecision(mMinMacd, 2);
-                centerMacd = ArithUtil.setPrecision((mMaxMacd - mMinMacd) / 2, 2);
-            } else if (mMaxMacd <= 0) {
-                topMacd = "0";
-                botMacd = ArithUtil.setPrecision(mMinMacd, 2);
-                centerMacd = ArithUtil.setPrecision((mMinMacd - mMaxMacd) / 2, 2);
-            } else if (mMinMacd >= 0) {
-                topMacd = ArithUtil.setPrecision(mMaxMacd, 2);
-                botMacd = "0";
-                centerMacd = ArithUtil.setPrecision((mMaxMacd - mMinMacd) / 2, 2);
+            String topDeputy = "";
+            String botDeputy = "";
+            String centerDeputy = "";
+            if (deputyImgType == DEPUTY_IMG_MACD) {
+                if (mMaxMacd > 0 && mMinMacd < 0) {
+                    topDeputy = ArithUtil.setPrecision(mMaxMacd, 2);
+                    botDeputy = ArithUtil.setPrecision(mMinMacd, 2);
+                    centerDeputy = ArithUtil.setPrecision((mMaxMacd - mMinMacd) / 2, 2);
+                } else if (mMaxMacd <= 0) {
+                    topDeputy = "0";
+                    botDeputy = ArithUtil.setPrecision(mMinMacd, 2);
+                    centerDeputy = ArithUtil.setPrecision((mMinMacd - mMaxMacd) / 2, 2);
+                } else if (mMinMacd >= 0) {
+                    topDeputy = ArithUtil.setPrecision(mMaxMacd, 2);
+                    botDeputy = "0";
+                    centerDeputy = ArithUtil.setPrecision((mMaxMacd - mMinMacd) / 2, 2);
+                }
+            } else if (deputyImgType == DEPUTY_IMG_KDJ) {
+                topDeputy = mMaxK + "";
+                centerDeputy = mMaxK / 2 + "";
+                botDeputy = "0";
             }
 
-            canvas.drawText(topMacd,
+            canvas.drawText(topDeputy,
                     verticalXList.get(verticalXList.size() - 1) + dp2px(4),
                     horizontalYList.get(horizontalYList.size() - 2) + rect.height(),
                     datePaint
             );
 
-            canvas.drawText(centerMacd,
+            canvas.drawText(centerDeputy,
                     verticalXList.get(verticalXList.size() - 1) + dp2px(4),
                     horizontalYList.get(horizontalYList.size() - 1) - verticalSpace / 2,
                     datePaint
             );
 
-            canvas.drawText(botMacd,
+            canvas.drawText(botDeputy,
                     verticalXList.get(verticalXList.size() - 1) + dp2px(4),
                     horizontalYList.get(horizontalYList.size() - 1),
                     datePaint

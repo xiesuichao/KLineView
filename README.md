@@ -17,10 +17,11 @@
 
 邮箱：xsc314@163.com       
 qq：181801034    
-如有需要，请联系        
+如有需要其他修改，请联系        
 
 ![image](https://github.com/xiesuichao/KLineView/raw/master/image/KLineUI.png)
 ![image](https://github.com/xiesuichao/KLineView/raw/master/image/a1.png)
+![image](https://github.com/xiesuichao/KLineView/raw/master/image/a2.png)
         
         //初始化控件加载数据
         mKLineView.initKDataList(getKDataList(5));
