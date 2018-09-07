@@ -28,7 +28,123 @@ import java.util.List;
 
 public class KLineView extends View implements View.OnTouchListener, Handler.Callback {
 
+    //是否显示副图
+    private boolean isShowDeputy = false;
+    //是否显示详情
+    private boolean isShowDetail = false;
+    //是否长按
+    private boolean isLongPress = false;
+    //是否需要请求前面的数据
+    private boolean isNeedRequestBeforeData = true;
+    //是否双指触控
+    private boolean isDoubleFinger = false;
+    //主图数据类型 0:MA, 1:EMA 2:BOLL
+    private int mainImgType = 0;
+    public static final int MAIN_IMG_MA = 0;
+    public static final int MAIN_IMG_EMA = 1;
+    public static final int MAIN_IMG_BOLL = 2;
+    //副图数据类型 0:MACD, 1:KDJ
+    private int deputyImgType = 0;
+    public static final int DEPUTY_IMG_MACD = 0;
+    public static final int DEPUTY_IMG_KDJ = 1;
+
+    private int maxViewDataNum = 34;
+    private int startDataNum = 0;
+    private int initTotalListSize = 0;
+    private int detailRectWidth;
+    private int detailRectHeight;
+    private float leftStart;
+    private float topStart;
+    private float rightEnd;
+    private float bottomEnd;
+    private float mulFirstDownX;
+    private float mulSecondDownX;
+    private float mulFirstDownY;
+    private float mulSecondDownY;
+    private float lastDiffMoveX;
+    private float lastDiffMoveY;
+    private float singleClickDownX;
+    private float dispatchDownX;
+    private float dispatchDownY;
+    private float detailTextVerticalSpace;
+    private float volumeImgBot;
+    private float verticalSpace;
+    private float flingVelocityX;
+    private final String mMa5 = "Ma5:";
+    private final String mMa10 = "Ma10:";
+    private final String mMa30 = "Ma30:";
+    private final String mVol = "VOL:";
+    private final String mMacdTitle = "MACD(12,26,9)";
+    private final String mMacd = "MACD:";
+    private final String mDif = "DIF:";
+    private final String mDea = "DEA:";
+    private final String mKdjTitle = "KDJ(9,3,3)";
+    private final String mK = "K:";
+    private final String mD = "D:";
+    private final String mJ = "J:";
+
+    private String[] dateArr;
+    private String[] detailLeftTitleArr;
+    private List<KData> totalDataList = new ArrayList<>();
+    private List<KData> viewDataList = new ArrayList<>();
+    private List<String> detailRightDataList = new ArrayList<>();
+    //水平线纵坐标
+    private List<Float> horizontalYList = new ArrayList<>();
+    //垂直线横坐标
+    private List<Float> verticalXList = new ArrayList<>();
+    private List<Pointer> priceMa5PointList = new ArrayList<>();
+    private List<Pointer> priceMa10PointList = new ArrayList<>();
+    private List<Pointer> priceMa30PointList = new ArrayList<>();
+    private List<Pointer> volumeEma5PointList = new ArrayList<>();
+    private List<Pointer> volumeEma10PointList = new ArrayList<>();
+    private List<Pointer> ema5PointList = new ArrayList<>();
+    private List<Pointer> ema10PointList = new ArrayList<>();
+    private List<Pointer> ema30PointList = new ArrayList<>();
+    private List<Pointer> bollMbPointList = new ArrayList<>();
+    private List<Pointer> bollUpPointList = new ArrayList<>();
+    private List<Pointer> bollDnPointList = new ArrayList<>();
+    private List<Pointer> deaPointList = new ArrayList<>();
+    private List<Pointer> difPointList = new ArrayList<>();
+    private List<Pointer> kPointList = new ArrayList<>();
+    private List<Pointer> dPointList = new ArrayList<>();
+    private List<Pointer> jPointList = new ArrayList<>();
+    private List<KData> endDataList = new ArrayList<>();
+
+    private double maxPrice = 0;
+    private double topPrice = 0;
+    private double maxPriceX = 0;
+    private double minPrice = 0;
+    private double botPrice = 0;
+    private double minPriceX = 0;
+    private double maxVolume;
+    private float priceImgBot = 0;
+
+    private double avgHeightPerPrice;
+    private double avgPriceRectWidth;
+    private double avgHeightPerVolume;
+    private float deputyTopY;
+    private float deputyCenterY;
+    private double avgHeightMacd;
+    private double avgHeightDea;
+    private double avgHeightDif;
+    private double avgHeightK;
+    private double avgHeightD;
+    private double avgHeightJ;
+    private double mMaxPriceY;
+    private double mMinPriceY;
+    private double mMaxMacd;
+    private double mMinMacd;
+    private double mMaxK;
+
+    private KData lastKData;
+    private LongPressRunnable longPressRunnable;
+    private OnRequestDataListListener requestListener;
+    private Handler uiHandler;
+    private QuotaThread quotaThread;
+    private Handler mDelayHandler;
+    private Runnable mDelayRunnable;
     private GestureDetector gestureDetector;
+
     private Paint tickMarkPaint;
     private Paint datePaint;
     private Paint pricePaint;
@@ -76,121 +192,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     private Path dLinePath;
     private Path jLinePath;
 
-    private float leftStart;
-    private float topStart;
-    private float rightEnd;
-    private float bottomEnd;
-    private int maxViewDataNum = 34;
-    private int startDataNum = 0;
-    private int initTotalListSize = 0;
-    private float mulFirstDownX;
-    private float mulSecondDownX;
-    private float mulFirstDownY;
-    private float mulSecondDownY;
-    private float lastDiffMoveX;
-    private float lastDiffMoveY;
-    private float singleClickDownX;
-    private float dispatchDownX;
-    private float dispatchDownY;
-    private float detailTextVerticalSpace;
-    private final String mMa5 = "Ma5:";
-    private final String mMa10 = "Ma10:";
-    private final String mMa30 = "Ma30:";
-    private final String mVol = "VOL:";
-    private final String mMacdTitle = "MACD(12,26,9)";
-    private final String mMacd = "MACD:";
-    private final String mDif = "DIF:";
-    private final String mDea = "DEA:";
-    private final String mKdjTitle = "KDJ(9,3,3)";
-    private final String mK = "K:";
-    private final String mD = "D:";
-    private final String mJ = "J:";
-
-    private int detailRectWidth;
-    private int detailRectHeight;
-
-    private String[] dateArr;
-    private String[] detailLeftTitleArr;
-    private List<KData> totalDataList = new ArrayList<>();
-    private List<KData> viewDataList = new ArrayList<>();
-    private List<String> detailRightDataList = new ArrayList<>();
-    //水平线纵坐标
-    private List<Float> horizontalYList = new ArrayList<>();
-    //垂直线横坐标
-    private List<Float> verticalXList = new ArrayList<>();
-    private List<Pointer> priceMa5PointList = new ArrayList<>();
-    private List<Pointer> priceMa10PointList = new ArrayList<>();
-    private List<Pointer> priceMa30PointList = new ArrayList<>();
-    private List<Pointer> volumeEma5PointList = new ArrayList<>();
-    private List<Pointer> volumeEma10PointList = new ArrayList<>();
-    private List<Pointer> ema5PointList = new ArrayList<>();
-    private List<Pointer> ema10PointList = new ArrayList<>();
-    private List<Pointer> ema30PointList = new ArrayList<>();
-    private List<Pointer> bollMbPointList = new ArrayList<>();
-    private List<Pointer> bollUpPointList = new ArrayList<>();
-    private List<Pointer> bollDnPointList = new ArrayList<>();
-    private List<Pointer> deaPointList = new ArrayList<>();
-    private List<Pointer> difPointList = new ArrayList<>();
-    private List<Pointer> kPointList = new ArrayList<>();
-    private List<Pointer> dPointList = new ArrayList<>();
-    private List<Pointer> jPointList = new ArrayList<>();
-
-    //是否显示副图
-    private boolean isShowDeputy = false;
-    //是否显示详情
-    private boolean isShowDetail = false;
-    //是否长按
-    private boolean isLongPress = false;
-    //是否需要请求前面的数据
-    private boolean isNeedRequestBeforeData = true;
-    //是否双指触控
-    private boolean isDoubleFinger = false;
-    //主图数据类型 0:MA, 1:EMA 2:BOLL
-    private int mainImgType = 0;
-    public static final int MAIN_IMG_MA = 0;
-    public static final int MAIN_IMG_EMA = 1;
-    public static final int MAIN_IMG_BOLL = 2;
-    //副图数据类型 0:MACD, 1:KDJ
-    private int deputyImgType = 0;
-    public static final int DEPUTY_IMG_MACD = 0;
-    public static final int DEPUTY_IMG_KDJ = 1;
-
-    private LongPressRunnable longPressRunnable = new LongPressRunnable();
-    private double maxPrice = 0;
-    private double topPrice = 0;
-    private double maxPriceX = 0;
-    private double minPrice = 0;
-    private double botPrice = 0;
-    private double minPriceX = 0;
-    private double maxVolume;
-    private float priceImgBot = 0;
-
-    private double avgHeightPerPrice;
-    private double avgPriceRectWidth;
-    private double avgHeightPerVolume;
-    private float deputyTopY;
-    private float deputyCenterY;
-    private double avgHeightMacd;
-    private double avgHeightDea;
-    private double avgHeightDif;
-    private double avgHeightK;
-    private double avgHeightD;
-    private double avgHeightJ;
-    private KData lastKData;
-    private float volumeImgBot;
-    private float verticalSpace;
-    private float flingVelocityX;
-    private OnRequestDataListListener requestListener;
-    private Handler uiHandler;
-    private QuotaThread quotaThread;
-    private Handler mDelayHandler;
-    private Runnable mDelayRunnable;
-    private List<KData> endDataList = new ArrayList<>();
-    private double mMaxPriceY;
-    private double mMinPriceY;
-    private double mMaxMacd;
-    private double mMinMacd;
-    private double mMaxK;
 
     public KLineView(Context context) {
         this(context, null);
@@ -348,6 +349,14 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         super.setLongClickable(true);
         super.setFocusable(true);
         gestureDetector = new GestureDetector(getContext(), new CustomGestureListener());
+        longPressRunnable = new LongPressRunnable();
+        detailRectWidth = dp2px(103);
+        detailRectHeight = dp2px(120);
+        detailTextVerticalSpace = (detailRectHeight - dp2px(4)) / 8;
+        dateArr = new String[3];
+        detailLeftTitleArr = new String[]{"时间", "开", "高", "低", "收", "涨跌额", "涨跌幅", "成交量"};
+        initQuotaThread();
+        initStopDelay();
 
         priceMa5Paint = new Paint();
         priceMa5Paint.setAntiAlias(true);
@@ -472,19 +481,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         kLinePath = new Path();
         dLinePath = new Path();
         jLinePath = new Path();
-
-        detailRectWidth = dp2px(103);
-        detailRectHeight = dp2px(120);
-        detailTextVerticalSpace = (detailRectHeight - dp2px(4)) / 8;
-
-        dateArr = new String[3];
-
-        detailLeftTitleArr = new String[]{"时间", "开", "高", "低", "收", "涨跌额", "涨跌幅", "成交量"};
-
-        initQuotaThread();
-
-        initStopDelay();
-
     }
 
     private void initQuotaThread() {
@@ -814,7 +810,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                 rightEnd,
                 horizontalYList.get(4) + verticalSpace / 2,
                 tickMarkPaint);
-
         //数量中线
         if (isShowDeputy) {
             canvas.drawLine(leftStart + dp2px(6),
