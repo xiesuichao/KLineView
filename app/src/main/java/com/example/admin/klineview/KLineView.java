@@ -164,19 +164,14 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     private double minPriceX = 0;
     private double maxVolume;
     private float priceImgBot = 0;
-    private float priceImgTop = 0;
 
-    private float volumeTopStart;
     private double avgHeightPerPrice;
     private double avgPriceRectWidth;
     private double avgHeightPerVolume;
     private float deputyTopY;
     private float deputyCenterY;
     private double avgHeightMacd;
-    //    private double avgHeightDnMacd;
-//    private double avgHeightUpDea;
     private double avgHeightDea;
-    private double avgHeightUpDif;
     private double avgHeightDif;
     private double avgHeightK;
     private double avgHeightD;
@@ -190,7 +185,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     private QuotaThread quotaThread;
     private Handler mDelayHandler;
     private Runnable mDelayRunnable;
-    private long finishStart;
     private List<KData> endDataList = new ArrayList<>();
     private double mMaxPriceY;
     private double mMinPriceY;
@@ -483,7 +477,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         detailRectHeight = dp2px(120);
         detailTextVerticalSpace = (detailRectHeight - dp2px(4)) / 8;
 
-        dateArr = new String[]{"06-29 10:00", "06-29 10:01", "06-29 10:02", "06-29 10:03", "06-29 10:04"};
+        dateArr = new String[3];
 
         detailLeftTitleArr = new String[]{"时间", "开", "高", "低", "收", "涨跌额", "涨跌幅", "成交量"};
 
@@ -522,13 +516,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         topStart = getPaddingTop() + 1;
         rightEnd = getMeasuredWidth() - getPaddingRight() - 1;
         bottomEnd = getMeasuredHeight() - getPaddingBottom() - 1;
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        super.onLayout(changed, left, top, right, bottom);
-        PrintUtil.log("width", getResources().getDisplayMetrics().widthPixels);
-        PrintUtil.log("height", getResources().getDisplayMetrics().heightPixels);
     }
 
     @Override
@@ -597,7 +584,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         }
         return isLongPress || super.dispatchTouchEvent(event);
     }
-
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -801,6 +787,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     private void drawTickMark(Canvas canvas) {
         //垂直刻度线
         float horizontalSpace = (rightEnd - leftStart - (dp2px(46))) / 4;
+        verticalXList.clear();
         for (int i = 0; i < 5; i++) {
             canvas.drawLine(leftStart + horizontalSpace * (i) + dp2px(6),
                     topStart + dp2px(18),
@@ -811,6 +798,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         }
         //水平刻度线
         verticalSpace = (bottomEnd - topStart - dp2px(38)) / 5;
+        horizontalYList.clear();
         for (int i = 0; i < 6; i++) {
             canvas.drawLine(leftStart + dp2px(6),
                     topStart + verticalSpace * i + dp2px(18),
@@ -821,9 +809,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         }
         //副图顶线
         deputyTopY = horizontalYList.get(4) + dp2px(12);
-        //副图中线
-//        deputyCenterY = deputyTopY + (verticalSpace - dp2px(15)) / 2;
-//        deputyCenterY = horizontalYList.get(4) + verticalSpace / 2;
         canvas.drawLine(leftStart + dp2px(6),
                 horizontalYList.get(4) + verticalSpace / 2,
                 rightEnd,
@@ -838,8 +823,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                     horizontalYList.get(3) + verticalSpace / 2,
                     tickMarkPaint);
         }
-
-
     }
 
     //主副图蜡烛图
@@ -1141,7 +1124,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                 Pointer difPoint = new Pointer();
                 if (viewDataList.get(i).getDif() > 0) {
                     difPoint.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
-                    difPoint.setY((float) (deputyCenterY - viewDataList.get(i).getDif() * avgHeightUpDif));
+                    difPoint.setY((float) (deputyCenterY - viewDataList.get(i).getDif() * avgHeightDif));
                 } else {
                     difPoint.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
                     difPoint.setY((float) (deputyCenterY + Math.abs(viewDataList.get(i).getDif() * avgHeightDif)));
@@ -1622,7 +1605,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                 verticalXList.get(0),
                 priceImgBot + volRect.height() + dp2px(2),
                 volPaint);
-        volumeTopStart = priceImgBot + volRect.height();
+//        volumeTopStart = priceImgBot + volRect.height();
 
         String ma5Str = mMa5 + ArithUtil.setPrecision(lastKData.getVolumeMa5(), 2);
         Rect volMa5Rect = new Rect();
@@ -1699,23 +1682,34 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     //日期
     private void drawDate(Canvas canvas) {
         datePaint.setColor(Color.parseColor("#9BACBD"));
-        for (int i = 0; i < 5; i++) {
+
+        for (int i = 0; i < 3; i++) {
+            for (KData data : viewDataList) {
+                if (data.getLeftX() <= verticalXList.get(i + 1) && data.getRightX() >= verticalXList.get(i)) {
+                    dateArr[i] = formatDate(data.getTime());
+                    break;
+                }
+            }
+        }
+
+        for (int i = 0; i < verticalXList.size(); i++) {
             if (i == 0) {
-                canvas.drawText(dateArr[i],
+                canvas.drawText(formatDate(viewDataList.get(0).getTime()),
                         leftStart + dp2px(6),
                         bottomEnd - dp2px(7),
                         datePaint);
 
-            } else if (i == dateArr.length - 1) {
-                canvas.drawText(dateArr[i],
-                        rightEnd - dp2px(41) - datePaint.measureText(dateArr[i]),
+            } else if (i == verticalXList.size() - 1) {
+                String dateStr = formatDate(viewDataList.get(viewDataList.size() - 1).getTime());
+                canvas.drawText(dateStr,
+                        rightEnd - dp2px(41) - datePaint.measureText(dateStr),
                         bottomEnd - dp2px(7),
                         datePaint);
 
             } else {
-                canvas.drawText(dateArr[i],
-                        leftStart + dp2px(6)
-                                + (rightEnd - leftStart - dp2px(47)) / 4 * i - datePaint.measureText(dateArr[i]) / 2,
+                canvas.drawText(dateArr[i - 1],
+                        leftStart + dp2px(6) + (rightEnd - leftStart - dp2px(47)) / 4 * i
+                                - datePaint.measureText(dateArr[i - 1]) / 2,
                         bottomEnd - dp2px(7),
                         datePaint);
             }
