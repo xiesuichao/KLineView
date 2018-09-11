@@ -192,44 +192,6 @@ public class QuotaUtil {
     /**
      * MACD
      *
-     */
-    public static final Double getEXPMA(final List<KData> dataList, final int number) {
-        // 开始计算EMA值，
-        Double k = 2.0 / (number + 1.0);// 计算出序数
-        Double ema = dataList.get(0).getClosePrice();// 第一天ema等于当天收盘价
-        for (int i = 1; i < dataList.size(); i++) {
-            // 第二天以后，当天收盘 收盘价乘以系数再加上昨天EMA乘以系数-1
-            ema = dataList.get(i).getClosePrice() * k + ema * (1 - k);
-        }
-        return ema;
-    }
-
-    public static void getMACD(final List<KData> dataList, final int shortPeriod, final int longPeriod, int midPeriod) {
-//        HashMap<String, Double> macdData = new HashMap<String, Double>();
-//        List<Double> diffList = new ArrayList<Double>();
-        Double shortEMA = 0.0;
-        Double longEMA = 0.0;
-        Double dif = 0.0;
-        Double dea = 0.0;
-
-        for (int i = dataList.size() - 1; i >= 0; i--) {
-//            List<Double> sublist = dataList.subList(0, dataList.size() - i);
-            shortEMA = getEXPMA(dataList, shortPeriod);
-            longEMA = getEXPMA(dataList, longPeriod);
-            dif = shortEMA - longEMA;
-            dataList.get(i).setDif(dif);
-//            diffList.add(dif);
-        }
-//        dea = getEXPMA(diffList, midPeriod);
-//        macdData.put("DIF", dif);
-//        macdData.put("DEA", dea);
-//        macdData.put("MACD", (dif - dea) * 2);
-//        dataList.get()
-    }
-
-    /**
-     * MACD
-     *
      * @param dataList
      * @param fastPeriod   日快线移动平均，标准为12，按照标准即可
      * @param slowPeriod   日慢线移动平均，标准为26，可理解为天数
