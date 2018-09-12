@@ -1,6 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <declare-styleable name="KLineView">
+        <!--刻度线颜色-->
+        <attr name="klTickMarkLineCol" format="color"/>
+        <!--横坐标字体颜色-->
+        <attr name="klAbscissaTextCol" format="color"/>
+        <!--横坐标字体大小-->
+        <attr name="klAbscissaTextSize" format="integer"/>
+        <!--纵坐标字体颜色-->
+        <attr name="klOrdinateTextCol" format="color"/>
+        <!--纵坐标字体大小-->
+        <attr name="klOrdinateTextSize" format="color"/>
+        <!--顶部MA字体大小-->
+        <attr name="klTopMaTextSize" format="color"/>
+        <!--涨价方块颜色-->
+        <attr name="klPriceIncreaseCol" format="color"/>
+        <!--跌价方块颜色-->
+        <attr name="klPriceFallCol" format="color"/>
+        <!--价格MA5,MA10,MA30颜色-->
+        <attr name="klPriceMa5LineCol" format="color"/>
+        <attr name="klPriceMa10LineCol" format="color"/>
+        <attr name="klPriceMa30LineCol" format="color"/>
+        <!--最高价标签颜色-->
+        <attr name="klPriceMaxLabelCol" format="color"/>
+        <!--最高价标签字体颜色-->
+        <attr name="klPriceMaxLabelTextCol" format="color"/>
+        <!--最高价标签字体大小-->
+        <attr name="klPriceMaxLabelTextSize" format="color"/>
+        <!--最低价标签颜色-->
+        <attr name="klPriceMinLabelCol" format="color"/>
+        <!--最低价标签字体颜色-->
+        <attr name="klPriceMinLabelTextCol" format="color"/>
+        <!--最低价标签字体大小-->
+        <attr name="klPriceMinLabelTextSize" format="integer"/>
+        <!--数量字体,MA5,MA10颜色-->
+        <attr name="klVolumeTextCol" format="color"/>
+        <!--数量字体大小-->
+        <attr name="klVolumeTextSize" format="integer"/>
+        <attr name="klVolumeMa5LineCol" format="color"/>
+        <attr name="klVolumeMa10LineCol" format="color"/>
+        <!--MACD字体颜色(同KDJ字体颜色)-->
+        <attr name="klMacdTextCol" format="color"/>
+        <!--MACD正值方块颜色-->
+        <attr name="klMacdPositiveCol" format="color"/>
+        <!--MACD负值方块颜色-->
+        <attr name="klMacdNegativeCol" format="color"/>
+        <!--DIF，DEA颜色-->
+        <attr name="klDifLineCol" format="color"/>
+        <attr name="klDeaLineCol" format="color"/>
+        <!--K,D,J颜色-->
+        <attr name="klKLineCol" format="color"/>
+        <attr name="klDLineCol" format="color"/>
+        <attr name="klJLineCol" format="color"/>
+        <!--十字线-->
+        <attr name="klCrossHairCol" format="color"/>
+        <!--十字线右侧标签-->
+        <attr name="klCrossHairRightLabelCol" format="color"/>
+        <!--十字线右侧标签字体颜色-->
+        <attr name="klCrossHairRightLabelTextCol" format="color"/>
+        <!--十字线右侧标签字体大小-->
+        <attr name="klCrossHairRightLabelTextSize" format="color"/>
+        <!--十字线底部标签-->
+        <attr name="klCrossHairBottomLabelCol" format="color"/>
+        <!--十字线底部标签字体颜色-->
+        <attr name="klCrossHairBottomLabelTextCol" format="color"/>
+        <!--十字线底部标签字体大小-->
+        <attr name="klCrossHairBottomLabelTextSize" format="color"/>
+        <!--数据详情边框颜色-->
+        <attr name="klDetailFrameCol" format="color"/>
+        <!--数据详情字体颜色-->
+        <attr name="klDetailTextCol" format="color"/>
+        <!--数据详情字体大小-->
+        <attr name="klDetailTextSize" format="integer"/>
+        <!--数据详情背景颜色-->
+        <attr name="klDetailBgCol" format="color"/>
 
-
+    </declare-styleable>
 
 </resources>

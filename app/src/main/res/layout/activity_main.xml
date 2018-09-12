@@ -5,20 +5,18 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context="com.example.admin.klineview.MainActivity"
-    android:background="@color/white_bg"
-    >
+    android:background="#ffffff">
 
     <com.example.admin.klineview.KLineView
         android:id="@+id/klv_main"
         android:layout_width="match_parent"
         android:layout_height="380dp"
-        android:background="@color/white_bg"
         />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/black_text"
+        android:background="#294058"
         />
 
     <LinearLayout
