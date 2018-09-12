@@ -10,9 +10,9 @@
         <!--纵坐标字体颜色-->
         <attr name="klOrdinateTextCol" format="color"/>
         <!--纵坐标字体大小-->
-        <attr name="klOrdinateTextSize" format="color"/>
+        <attr name="klOrdinateTextSize" format="integer"/>
         <!--顶部MA字体大小-->
-        <attr name="klTopMaTextSize" format="color"/>
+        <attr name="klTopMaTextSize" format="integer"/>
         <!--涨价方块颜色-->
         <attr name="klPriceIncreaseCol" format="color"/>
         <!--跌价方块颜色-->
@@ -26,7 +26,7 @@
         <!--最高价标签字体颜色-->
         <attr name="klPriceMaxLabelTextCol" format="color"/>
         <!--最高价标签字体大小-->
-        <attr name="klPriceMaxLabelTextSize" format="color"/>
+        <attr name="klPriceMaxLabelTextSize" format="integer"/>
         <!--最低价标签颜色-->
         <attr name="klPriceMinLabelCol" format="color"/>
         <!--最低价标签字体颜色-->
@@ -59,13 +59,13 @@
         <!--十字线右侧标签字体颜色-->
         <attr name="klCrossHairRightLabelTextCol" format="color"/>
         <!--十字线右侧标签字体大小-->
-        <attr name="klCrossHairRightLabelTextSize" format="color"/>
+        <attr name="klCrossHairRightLabelTextSize" format="integer"/>
         <!--十字线底部标签-->
         <attr name="klCrossHairBottomLabelCol" format="color"/>
         <!--十字线底部标签字体颜色-->
         <attr name="klCrossHairBottomLabelTextCol" format="color"/>
         <!--十字线底部标签字体大小-->
-        <attr name="klCrossHairBottomLabelTextSize" format="color"/>
+        <attr name="klCrossHairBottomLabelTextSize" format="integer"/>
         <!--数据详情边框颜色-->
         <attr name="klDetailFrameCol" format="color"/>
         <!--数据详情字体颜色-->
