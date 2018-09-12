@@ -76,8 +76,8 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
             crossHairRightLabelTextSize, crossHairBottomLabelTextSize, ordinateTextSize, detailTextSize,
             topMaTextSize, detailRectHeight;
 
-    private float leftStart, topStart, rightEnd, bottomEnd, mulFirstDownX, mulSecondDownX, mulFirstDownY, mulSecondDownY,
-            lastDiffMoveX, lastDiffMoveY, singleClickDownX, dispatchDownX, dispatchDownY, detailTextVerticalSpace,
+    private float leftStart, topStart, rightEnd, bottomEnd, mulFirstDownX, mulFirstDownY, lastDiffMoveX,
+            lastDiffMoveY, singleClickDownX, dispatchDownX, dispatchDownY, detailTextVerticalSpace,
             volumeImgBot, verticalSpace, flingVelocityX, priceImgBot, deputyTopY, deputyCenterY;
 
     private double maxPrice, topPrice, maxPriceX, minPrice, botPrice, minPriceX, maxVolume, avgHeightPerPrice,
@@ -85,16 +85,8 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
             avgHeightK, avgHeightD, avgHeightJ, mMaxPriceY,
             mMinPriceY, mMaxMacd, mMinMacd, mMaxK;
 
-    //贝塞尔曲线
-    private Path priceMa5BezierPath, priceMa10BezierPath, priceMa30BezierPath, ema5BezierPath,
-            ema10BezierPath, ema30BezierPath, volumeEma5BezierPath, volumeEma10BezierPath, bollMbBezierPath,
-            bollUpBezierPath, bollDnBezierPath, deaBezierPath, difBezierPath, kLinePath,
-            dLinePath, jLinePath;
-
-    //十字线标签
-    private Path blueTrianglePath;
-    private Path maxPriceTrianglePath;
-    private Path minPriceTrianglePath;
+    private Paint strokePaint, fillPaint;
+    private Path curvePath;
 
     private Rect topMa5Rect = new Rect();
     private Rect topMa10Rect = new Rect();
@@ -106,26 +98,23 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     private List<KData> totalDataList = new ArrayList<>();
     private List<KData> viewDataList = new ArrayList<>();
     private List<String> detailRightDataList = new ArrayList<>();
+
     //水平线纵坐标
     private List<Float> horizontalYList = new ArrayList<>();
     //垂直线横坐标
     private List<Float> verticalXList = new ArrayList<>();
-    private List<Pointer> priceMa5PointList = new ArrayList<>();
-    private List<Pointer> priceMa10PointList = new ArrayList<>();
-    private List<Pointer> priceMa30PointList = new ArrayList<>();
-    private List<Pointer> volumeEma5PointList = new ArrayList<>();
-    private List<Pointer> volumeEma10PointList = new ArrayList<>();
-    private List<Pointer> ema5PointList = new ArrayList<>();
-    private List<Pointer> ema10PointList = new ArrayList<>();
-    private List<Pointer> ema30PointList = new ArrayList<>();
-    private List<Pointer> bollMbPointList = new ArrayList<>();
-    private List<Pointer> bollUpPointList = new ArrayList<>();
-    private List<Pointer> bollDnPointList = new ArrayList<>();
-    private List<Pointer> deaPointList = new ArrayList<>();
-    private List<Pointer> difPointList = new ArrayList<>();
-    private List<Pointer> kPointList = new ArrayList<>();
-    private List<Pointer> dPointList = new ArrayList<>();
-    private List<Pointer> jPointList = new ArrayList<>();
+
+    private List<Pointer> mainMa5PointList = new ArrayList<>();
+    private List<Pointer> mainMa10PointList = new ArrayList<>();
+    private List<Pointer> mainMa30PointList = new ArrayList<>();
+
+    private List<Pointer> deputyMa5PointList = new ArrayList<>();
+    private List<Pointer> deputyMa10PointList = new ArrayList<>();
+    private List<Pointer> deputyMa30PointList = new ArrayList<>();
+
+    private List<Pointer> volumeMa5PointList = new ArrayList<>();
+    private List<Pointer> volumeMa10PointList = new ArrayList<>();
+
     private List<KData> endDataList = new ArrayList<>();
 
     private KData lastKData;
@@ -135,7 +124,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     private Handler mDelayHandler;
     private Runnable mDelayRunnable;
     private GestureDetector gestureDetector;
-    private Paint strokePaint, fillPaint;
 
 
     public KLineView(Context context) {
@@ -516,26 +504,8 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         fillPaint.setAntiAlias(true);
         fillPaint.setStyle(Paint.Style.FILL);
 
-        blueTrianglePath = new Path();
-        maxPriceTrianglePath = new Path();
-        minPriceTrianglePath = new Path();
+        curvePath = new Path();
 
-        priceMa5BezierPath = new Path();
-        priceMa10BezierPath = new Path();
-        priceMa30BezierPath = new Path();
-        ema5BezierPath = new Path();
-        ema10BezierPath = new Path();
-        ema30BezierPath = new Path();
-        volumeEma5BezierPath = new Path();
-        volumeEma10BezierPath = new Path();
-        bollMbBezierPath = new Path();
-        bollUpBezierPath = new Path();
-        bollDnBezierPath = new Path();
-        deaBezierPath = new Path();
-        difBezierPath = new Path();
-        kLinePath = new Path();
-        dLinePath = new Path();
-        jLinePath = new Path();
     }
 
     private void initQuotaThread() {
@@ -662,8 +632,8 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
             case MotionEvent.ACTION_POINTER_DOWN:
                 isDoubleFinger = true;
                 removeCallbacks(longPressRunnable);
-                mulSecondDownX = event.getX(1);
-                mulSecondDownY = event.getY(1);
+                float mulSecondDownX = event.getX(1);
+                float mulSecondDownY = event.getY(1);
                 lastDiffMoveX = Math.abs(mulSecondDownX - mulFirstDownX);
                 lastDiffMoveY = Math.abs(mulSecondDownY - mulFirstDownY);
                 break;
@@ -1050,22 +1020,16 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
 
     //贝塞尔曲线
     private void drawBezierCurve(Canvas canvas) {
-        priceMa5PointList.clear();
-        priceMa10PointList.clear();
-        priceMa30PointList.clear();
-        ema5PointList.clear();
-        ema10PointList.clear();
-        ema30PointList.clear();
-        volumeEma5PointList.clear();
-        volumeEma10PointList.clear();
-        bollMbPointList.clear();
-        bollUpPointList.clear();
-        bollDnPointList.clear();
-        deaPointList.clear();
-        difPointList.clear();
-        kPointList.clear();
-        dPointList.clear();
-        jPointList.clear();
+        mainMa5PointList.clear();
+        mainMa10PointList.clear();
+        mainMa30PointList.clear();
+
+        volumeMa5PointList.clear();
+        volumeMa10PointList.clear();
+
+        deputyMa5PointList.clear();
+        deputyMa10PointList.clear();
+        deputyMa30PointList.clear();
 
         for (int i = 0; i < viewDataList.size(); i++) {
             if (!viewDataList.get(i).isInitFinish()) {
@@ -1077,15 +1041,16 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                 volumeMa5Point.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
                 volumeMa5Point.setY((float) (volumeImgBot
                         - viewDataList.get(i).getVolumeMa5() * avgHeightPerVolume));
-                volumeEma5PointList.add(volumeMa5Point);
+                volumeMa5PointList.add(volumeMa5Point);
             }
             Pointer volumeMa10Point = new Pointer();
             if (viewDataList.get(i).getVolumeMa10() > 0) {
                 volumeMa10Point.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
                 volumeMa10Point.setY((float) (volumeImgBot
                         - viewDataList.get(i).getVolumeMa10() * avgHeightPerVolume));
-                volumeEma10PointList.add(volumeMa10Point);
+                volumeMa10PointList.add(volumeMa10Point);
             }
+
             switch (mainImgType) {
                 //priceMA
                 case MAIN_IMG_MA:
@@ -1094,21 +1059,21 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                         priceMa5Point.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
                         priceMa5Point.setY((float) (mMaxPriceY
                                 + (maxPrice - viewDataList.get(i).getPriceMa5()) * avgHeightPerPrice));
-                        priceMa5PointList.add(priceMa5Point);
+                        mainMa5PointList.add(priceMa5Point);
                     }
                     Pointer priceMa10Point = new Pointer();
                     if (viewDataList.get(i).getPriceMa10() > 0) {
                         priceMa10Point.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
                         priceMa10Point.setY((float) (mMaxPriceY
                                 + (maxPrice - viewDataList.get(i).getPriceMa10()) * avgHeightPerPrice));
-                        priceMa10PointList.add(priceMa10Point);
+                        mainMa10PointList.add(priceMa10Point);
                     }
                     Pointer priceMa30Point = new Pointer();
                     if (viewDataList.get(i).getPriceMa30() > 0) {
                         priceMa30Point.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
                         priceMa30Point.setY((float) (mMaxPriceY
                                 + (maxPrice - viewDataList.get(i).getPriceMa30()) * avgHeightPerPrice));
-                        priceMa30PointList.add(priceMa30Point);
+                        mainMa30PointList.add(priceMa30Point);
                     }
                     break;
 
@@ -1119,21 +1084,21 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                         ema5Point.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
                         ema5Point.setY((float) (mMaxPriceY
                                 + (maxPrice - viewDataList.get(i).getEma5()) * avgHeightPerPrice));
-                        ema5PointList.add(ema5Point);
+                        mainMa5PointList.add(ema5Point);
                     }
                     Pointer ema10Point = new Pointer();
                     if (viewDataList.get(i).getEma10() > 0) {
                         ema10Point.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
                         ema10Point.setY((float) (mMaxPriceY
                                 + (maxPrice - viewDataList.get(i).getEma10()) * avgHeightPerPrice));
-                        ema10PointList.add(ema10Point);
+                        mainMa10PointList.add(ema10Point);
                     }
                     Pointer ema30Point = new Pointer();
                     if (viewDataList.get(i).getEma30() > 0) {
                         ema30Point.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
                         ema30Point.setY((float) (mMaxPriceY
                                 + (maxPrice - viewDataList.get(i).getEma30()) * avgHeightPerPrice));
-                        ema30PointList.add(ema30Point);
+                        mainMa30PointList.add(ema30Point);
                     }
                     break;
 
@@ -1144,21 +1109,21 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                         bollMbPoint.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
                         bollMbPoint.setY((float) (mMaxPriceY
                                 + (maxPrice - viewDataList.get(i).getBollMb()) * avgHeightPerPrice));
-                        bollMbPointList.add(bollMbPoint);
+                        mainMa5PointList.add(bollMbPoint);
                     }
                     Pointer bollUpPoint = new Pointer();
                     if (viewDataList.get(i).getBollUp() > 0) {
                         bollUpPoint.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
                         bollUpPoint.setY((float) (mMaxPriceY
                                 + (maxPrice - viewDataList.get(i).getBollUp()) * avgHeightPerPrice));
-                        bollUpPointList.add(bollUpPoint);
+                        mainMa10PointList.add(bollUpPoint);
                     }
                     Pointer bollDnPoint = new Pointer();
                     if (viewDataList.get(i).getBollDn() > 0) {
                         bollDnPoint.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
                         bollDnPoint.setY((float) (mMaxPriceY
                                 + (maxPrice - viewDataList.get(i).getBollDn()) * avgHeightPerPrice));
-                        bollDnPointList.add(bollDnPoint);
+                        mainMa30PointList.add(bollDnPoint);
                     }
                     break;
             }
@@ -1172,7 +1137,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                     deaPoint.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
                     deaPoint.setY((float) (deputyCenterY + Math.abs(viewDataList.get(i).getDea() * avgHeightDea)));
                 }
-                deaPointList.add(deaPoint);
+                deputyMa5PointList.add(deaPoint);
 
                 Pointer difPoint = new Pointer();
                 if (viewDataList.get(i).getDif() > 0) {
@@ -1182,136 +1147,78 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                     difPoint.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
                     difPoint.setY((float) (deputyCenterY + Math.abs(viewDataList.get(i).getDif() * avgHeightDif)));
                 }
-                difPointList.add(difPoint);
+                deputyMa10PointList.add(difPoint);
 
             } else if (isShowDeputy && deputyImgType == DEPUTY_IMG_KDJ) {
                 Pointer kPoint = new Pointer();
                 if (viewDataList.get(i).getK() > 0) {
                     kPoint.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
                     kPoint.setY((float) (horizontalYList.get(5) - viewDataList.get(i).getK() * avgHeightK));
-                    kPointList.add(kPoint);
+                    deputyMa5PointList.add(kPoint);
                 }
 
                 Pointer dPoint = new Pointer();
                 if (viewDataList.get(i).getD() > 0) {
                     dPoint.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
                     dPoint.setY((float) (horizontalYList.get(5) - viewDataList.get(i).getD() * avgHeightD));
-                    dPointList.add(dPoint);
+                    deputyMa10PointList.add(dPoint);
                 }
 
                 Pointer jPoint = new Pointer();
                 if (viewDataList.get(i).getJ() > 0) {
                     jPoint.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
                     jPoint.setY((float) (horizontalYList.get(5) - viewDataList.get(i).getJ() * avgHeightJ));
-                    jPointList.add(jPoint);
+                    deputyMa30PointList.add(jPoint);
                 }
             }
-
         }
 
-        drawVolumeMaBezierCurve(canvas);
-
-        switch (mainImgType) {
-            case MAIN_IMG_MA:
-                drawPriceMaBezierCurve(canvas);
-                break;
-
-            case MAIN_IMG_EMA:
-                drawEmaBezierCurve(canvas);
-                break;
-
-            case MAIN_IMG_BOLL:
-                drawBollBezierCurve(canvas);
-                break;
-        }
-
-        if (isShowDeputy && deputyImgType == DEPUTY_IMG_MACD) {
-            drawDeaDifBezier(canvas);
-        } else if (isShowDeputy && deputyImgType == DEPUTY_IMG_KDJ) {
-            drawKdjLine(canvas);
+        drawVolumeBezierCurve(canvas);
+        drawMainBezierCurve(canvas);
+        if (isShowDeputy){
+            drawDeputyCurve(canvas);
         }
     }
 
-    //price MA曲线
-    private void drawPriceMaBezierCurve(Canvas canvas) {
-        QuotaUtil.setBezierPath(priceMa5PointList, priceMa5BezierPath);
+    //主图 MA曲线
+    private void drawMainBezierCurve(Canvas canvas) {
+        QuotaUtil.setBezierPath(mainMa5PointList, curvePath);
         resetStrokePaint(priceMa5Col, 0);
-        canvas.drawPath(priceMa5BezierPath, strokePaint);
+        canvas.drawPath(curvePath, strokePaint);
 
-        QuotaUtil.setBezierPath(priceMa10PointList, priceMa10BezierPath);
+        QuotaUtil.setBezierPath(mainMa10PointList, curvePath);
         resetStrokePaint(priceMa10Col, 0);
-        canvas.drawPath(priceMa10BezierPath, strokePaint);
+        canvas.drawPath(curvePath, strokePaint);
 
-        QuotaUtil.setBezierPath(priceMa30PointList, priceMa30BezierPath);
+        QuotaUtil.setBezierPath(mainMa30PointList, curvePath);
         resetStrokePaint(priceMa30Col, 0);
-        canvas.drawPath(priceMa30BezierPath, strokePaint);
+        canvas.drawPath(curvePath, strokePaint);
     }
 
     //volume MA曲线
-    private void drawVolumeMaBezierCurve(Canvas canvas) {
-        QuotaUtil.setBezierPath(volumeEma5PointList, volumeEma5BezierPath);
+    private void drawVolumeBezierCurve(Canvas canvas) {
+        QuotaUtil.setBezierPath(volumeMa5PointList, curvePath);
         resetStrokePaint(priceMa5Col, 0);
-        canvas.drawPath(volumeEma5BezierPath, strokePaint);
+        canvas.drawPath(curvePath, strokePaint);
 
-        QuotaUtil.setBezierPath(volumeEma10PointList, volumeEma10BezierPath);
+        QuotaUtil.setBezierPath(volumeMa10PointList, curvePath);
         resetStrokePaint(priceMa10Col, 0);
-        canvas.drawPath(volumeEma10BezierPath, strokePaint);
+        canvas.drawPath(curvePath, strokePaint);
     }
 
-    //EMA曲线
-    private void drawEmaBezierCurve(Canvas canvas) {
-        QuotaUtil.setBezierPath(ema5PointList, ema5BezierPath);
+    //副图 曲线
+    private void drawDeputyCurve(Canvas canvas) {
+        QuotaUtil.setLinePath(deputyMa5PointList, curvePath);
         resetStrokePaint(priceMa5Col, 0);
-        canvas.drawPath(ema5BezierPath, strokePaint);
+        canvas.drawPath(curvePath, strokePaint);
 
-        QuotaUtil.setBezierPath(ema10PointList, ema10BezierPath);
+        QuotaUtil.setLinePath(deputyMa10PointList, curvePath);
         resetStrokePaint(priceMa10Col, 0);
-        canvas.drawPath(ema10BezierPath, strokePaint);
+        canvas.drawPath(curvePath, strokePaint);
 
-        QuotaUtil.setBezierPath(ema30PointList, ema30BezierPath);
+        QuotaUtil.setLinePath(deputyMa30PointList, curvePath);
         resetStrokePaint(priceMa30Col, 0);
-        canvas.drawPath(ema30BezierPath, strokePaint);
-    }
-
-    //BOLL曲线
-    private void drawBollBezierCurve(Canvas canvas) {
-        QuotaUtil.setBezierPath(bollMbPointList, bollMbBezierPath);
-        resetStrokePaint(priceMa5Col, 0);
-        canvas.drawPath(bollMbBezierPath, strokePaint);
-
-        QuotaUtil.setBezierPath(bollUpPointList, bollUpBezierPath);
-        resetStrokePaint(priceMa10Col, 0);
-        canvas.drawPath(bollUpBezierPath, strokePaint);
-
-        QuotaUtil.setBezierPath(bollDnPointList, bollDnBezierPath);
-        resetStrokePaint(priceMa30Col, 0);
-        canvas.drawPath(bollDnBezierPath, strokePaint);
-    }
-
-    //DEA DIF曲线
-    private void drawDeaDifBezier(Canvas canvas) {
-        QuotaUtil.setBezierPath(deaPointList, deaBezierPath);
-        resetStrokePaint(priceMa10Col, 0);
-        canvas.drawPath(deaBezierPath, strokePaint);
-
-        QuotaUtil.setBezierPath(difPointList, difBezierPath);
-        resetStrokePaint(priceMa30Col, 0);
-        canvas.drawPath(difBezierPath, strokePaint);
-    }
-
-    //KDJ
-    private void drawKdjLine(Canvas canvas) {
-        QuotaUtil.setLinePath(kPointList, kLinePath);
-        resetStrokePaint(priceMa5Col, 0);
-        canvas.drawPath(kLinePath, strokePaint);
-
-        QuotaUtil.setLinePath(dPointList, dLinePath);
-        resetStrokePaint(priceMa10Col, 0);
-        canvas.drawPath(dLinePath, strokePaint);
-
-        QuotaUtil.setLinePath(jPointList, jLinePath);
-        resetStrokePaint(priceMa30Col, 0);
-        canvas.drawPath(jLinePath, strokePaint);
+        canvas.drawPath(curvePath, strokePaint);
     }
 
     //获取单击位置的数据
@@ -1389,12 +1296,12 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         fillPaint.setColor(crossHairRightLabelCol);
         canvas.drawRoundRect(blueRectF, 4, 4, fillPaint);
 
-        blueTrianglePath.reset();
-        blueTrianglePath.moveTo(verticalXList.get(verticalXList.size() - 1), (float) lastKData.getCloseY());
-        blueTrianglePath.lineTo(rightEnd - dp2px(37), (float) lastKData.getCloseY() - dp2px(3));
-        blueTrianglePath.lineTo(rightEnd - dp2px(37), (float) lastKData.getCloseY() + dp2px(3));
-        blueTrianglePath.close();
-        canvas.drawPath(blueTrianglePath, fillPaint);
+        curvePath.reset();
+        curvePath.moveTo(verticalXList.get(verticalXList.size() - 1), (float) lastKData.getCloseY());
+        curvePath.lineTo(rightEnd - dp2px(37), (float) lastKData.getCloseY() - dp2px(3));
+        curvePath.lineTo(rightEnd - dp2px(37), (float) lastKData.getCloseY() + dp2px(3));
+        curvePath.close();
+        canvas.drawPath(curvePath, fillPaint);
 
         double avgPricePerHeight;
         if (!isShowDeputy) {
@@ -1432,11 +1339,11 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                     (float) (maxPriceX + maxPriceRect.width() + dp2px(8)),
                     (float) mMaxPriceY + dp2px(7));
 
-            maxPriceTrianglePath.reset();
-            maxPriceTrianglePath.moveTo((float) maxPriceX, (float) mMaxPriceY);
-            maxPriceTrianglePath.lineTo((float) (maxPriceX + dp2px(4)), (float) mMaxPriceY - dp2px(3));
-            maxPriceTrianglePath.lineTo((float) (maxPriceX + dp2px(4)), (float) mMaxPriceY + dp2px(3));
-            maxPriceTrianglePath.close();
+            curvePath.reset();
+            curvePath.moveTo((float) maxPriceX, (float) mMaxPriceY);
+            curvePath.lineTo((float) (maxPriceX + dp2px(4)), (float) mMaxPriceY - dp2px(3));
+            curvePath.lineTo((float) (maxPriceX + dp2px(4)), (float) mMaxPriceY + dp2px(3));
+            curvePath.close();
 
             maxPriceTextX = (float) (maxPriceX + dp2px(5));
 
@@ -1446,18 +1353,18 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                     (float) (maxPriceX - maxPriceRect.width() - dp2px(8)),
                     (float) mMaxPriceY + dp2px(7));
 
-            maxPriceTrianglePath.reset();
-            maxPriceTrianglePath.moveTo((float) maxPriceX, (float) mMaxPriceY);
-            maxPriceTrianglePath.lineTo((float) (maxPriceX - dp2px(4)), (float) mMaxPriceY - dp2px(3));
-            maxPriceTrianglePath.lineTo((float) (maxPriceX - dp2px(4)), (float) mMaxPriceY + dp2px(3));
-            maxPriceTrianglePath.close();
+            curvePath.reset();
+            curvePath.moveTo((float) maxPriceX, (float) mMaxPriceY);
+            curvePath.lineTo((float) (maxPriceX - dp2px(4)), (float) mMaxPriceY - dp2px(3));
+            curvePath.lineTo((float) (maxPriceX - dp2px(4)), (float) mMaxPriceY + dp2px(3));
+            curvePath.close();
 
             maxPriceTextX = (float) (maxPriceX - dp2px(5)) - maxPriceRect.width();
         }
 
         fillPaint.setColor(priceMaxLabelCol);
         canvas.drawRoundRect(maxRectF, 4, 4, fillPaint);
-        canvas.drawPath(maxPriceTrianglePath, fillPaint);
+        canvas.drawPath(curvePath, fillPaint);
 
         resetStrokePaint(priceMaxLabelTextCol, priceMaxLabelTextSize);
         canvas.drawText(maxPriceStr,
@@ -1479,11 +1386,11 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                     (float) (minPriceX + minPriceRect.width() + dp2px(8)),
                     (float) mMinPriceY + dp2px(7));
 
-            minPriceTrianglePath.reset();
-            minPriceTrianglePath.moveTo((float) minPriceX, (float) mMinPriceY);
-            minPriceTrianglePath.lineTo((float) (minPriceX + dp2px(4)), (float) mMinPriceY - dp2px(3));
-            minPriceTrianglePath.lineTo((float) (minPriceX + dp2px(4)), (float) mMinPriceY + dp2px(3));
-            minPriceTrianglePath.close();
+            curvePath.reset();
+            curvePath.moveTo((float) minPriceX, (float) mMinPriceY);
+            curvePath.lineTo((float) (minPriceX + dp2px(4)), (float) mMinPriceY - dp2px(3));
+            curvePath.lineTo((float) (minPriceX + dp2px(4)), (float) mMinPriceY + dp2px(3));
+            curvePath.close();
 
             minPriceTextX = (float) (minPriceX + dp2px(5));
 
@@ -1493,19 +1400,18 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                     (float) (minPriceX - minPriceRect.width() - dp2px(8)),
                     (float) mMinPriceY + dp2px(7));
 
-            minPriceTrianglePath.reset();
-            minPriceTrianglePath.moveTo((float) minPriceX, (float) mMinPriceY);
-            minPriceTrianglePath.lineTo((float) (minPriceX - dp2px(4)), (float) mMinPriceY - dp2px(3));
-            minPriceTrianglePath.lineTo((float) (minPriceX - dp2px(4)), (float) mMinPriceY + dp2px(3));
-            minPriceTrianglePath.close();
+            curvePath.reset();
+            curvePath.moveTo((float) minPriceX, (float) mMinPriceY);
+            curvePath.lineTo((float) (minPriceX - dp2px(4)), (float) mMinPriceY - dp2px(3));
+            curvePath.lineTo((float) (minPriceX - dp2px(4)), (float) mMinPriceY + dp2px(3));
+            curvePath.close();
 
             minPriceTextX = (float) (minPriceX - dp2px(5)) - minPriceRect.width();
         }
 
-//        resetStrokePaint(priceMinLabelCol, 0);
         fillPaint.setColor(priceMinLabelCol);
         canvas.drawRoundRect(minRectF, 4, 4, fillPaint);
-        canvas.drawPath(minPriceTrianglePath, fillPaint);
+        canvas.drawPath(curvePath, fillPaint);
 
         resetStrokePaint(priceMinLabelTextCol, priceMinLabelTextSize);
         canvas.drawText(minPriceStr,
