@@ -66,25 +66,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     private int startDataNum = 0;
     private int initTotalListSize = 0;
 
-    private int priceIncreaseCol, priceFallCol, priceMa5Col, priceMa10Col, priceMa30Col,
-            priceMaxLabelCol, priceMinLabelCol, volumeTextCol, volumeMa5Col, volumeMa10Col, macdTextCol,
-            macdPositiveCol, macdNegativeCol, difLineCol, deaLineCol, kLineCol, dLineCol,
-            jLineCol, abscissaTextCol, ordinateTextCol, crossHairCol, crossHairRightLabelCol,
-            crossHairBottomLabelCol, crossHairRightLabelTextCol, detailFrameCol, detailTextCol, tickMarkCol,
-            detailBgCol, detailRectWidth, abscissaTextSize, volumeTextSize, crossHairBottomLabelTextCol,
-            priceMaxLabelTextCol, priceMinLabelTextCol, priceMaxLabelTextSize, priceMinLabelTextSize,
-            crossHairRightLabelTextSize, crossHairBottomLabelTextSize, ordinateTextSize, detailTextSize,
-            topMaTextSize, detailRectHeight;
-
-    private float leftStart, topStart, rightEnd, bottomEnd, mulFirstDownX, mulFirstDownY, lastDiffMoveX,
-            lastDiffMoveY, singleClickDownX, dispatchDownX, dispatchDownY, detailTextVerticalSpace,
-            volumeImgBot, verticalSpace, flingVelocityX, priceImgBot, deputyTopY, deputyCenterY;
-
-    private double maxPrice, topPrice, maxPriceX, minPrice, botPrice, minPriceX, maxVolume, avgHeightPerPrice,
-            avgPriceRectWidth, avgHeightPerVolume, avgHeightMacd, avgHeightDea, avgHeightDif,
-            avgHeightK, avgHeightD, avgHeightJ, mMaxPriceY,
-            mMinPriceY, mMaxMacd, mMinMacd, mMaxK;
-
     private Paint strokePaint, fillPaint;
     private Path curvePath;
 
@@ -97,6 +78,8 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     private String[] detailLeftTitleArr;
     private List<KData> totalDataList = new ArrayList<>();
     private List<KData> viewDataList = new ArrayList<>();
+    private List<KData> endDataList = new ArrayList<>();
+
     private List<String> detailRightDataList = new ArrayList<>();
 
     //水平线纵坐标
@@ -115,8 +98,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     private List<Pointer> volumeMa5PointList = new ArrayList<>();
     private List<Pointer> volumeMa10PointList = new ArrayList<>();
 
-    private List<KData> endDataList = new ArrayList<>();
-
     private KData lastKData;
     private LongPressRunnable longPressRunnable;
     private OnRequestDataListListener requestListener;
@@ -124,6 +105,25 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     private Handler mDelayHandler;
     private Runnable mDelayRunnable;
     private GestureDetector gestureDetector;
+
+    private int priceIncreaseCol, priceFallCol, priceMa5Col, priceMa10Col, priceMa30Col,
+            priceMaxLabelCol, priceMinLabelCol, volumeTextCol, volumeMa5Col, volumeMa10Col, macdTextCol,
+            macdPositiveCol, macdNegativeCol, difLineCol, deaLineCol, kLineCol, dLineCol,
+            jLineCol, abscissaTextCol, ordinateTextCol, crossHairCol, crossHairRightLabelCol,
+            crossHairBottomLabelCol, crossHairRightLabelTextCol, detailFrameCol, detailTextCol, tickMarkCol,
+            detailBgCol, detailRectWidth, abscissaTextSize, volumeTextSize, crossHairBottomLabelTextCol,
+            priceMaxLabelTextCol, priceMinLabelTextCol, priceMaxLabelTextSize, priceMinLabelTextSize,
+            crossHairRightLabelTextSize, crossHairBottomLabelTextSize, ordinateTextSize, detailTextSize,
+            topMaTextSize, detailRectHeight;
+
+    private float leftStart, topStart, rightEnd, bottomEnd, mulFirstDownX, mulFirstDownY, lastDiffMoveX,
+            lastDiffMoveY, singleClickDownX, dispatchDownX, dispatchDownY, detailTextVerticalSpace,
+            volumeImgBot, verticalSpace, flingVelocityX, priceImgBot, deputyTopY, deputyCenterY;
+
+    private double maxPrice, topPrice, maxPriceX, minPrice, botPrice, minPriceX, maxVolume, avgHeightPerPrice,
+            avgPriceRectWidth, avgHeightPerVolume, avgHeightMacd, avgHeightDea, avgHeightDif,
+            avgHeightK, avgHeightD, avgHeightJ, mMaxPriceY,
+            mMinPriceY, mMaxMacd, mMinMacd, mMaxK;
 
 
     public KLineView(Context context) {
@@ -546,7 +546,10 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
             return;
         }
         drawTickMark(canvas);
+        long start = System.currentTimeMillis();
         drawMainDeputyRect(canvas);
+        long end = System.currentTimeMillis();
+        PrintUtil.log("drawMainDeputy", end - start);
         drawBezierCurve(canvas);
 
         getClickKData();
@@ -878,32 +881,38 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
             if (viewDataList.get(i).getVolume() >= maxVolume) {
                 maxVolume = viewDataList.get(i).getVolume();
             }
-            if (viewDataList.get(i).getMacd() >= mMaxMacd) {
-                mMaxMacd = viewDataList.get(i).getMacd();
+
+            if (isShowDeputy && deputyImgType == DEPUTY_IMG_MACD) {
+                if (viewDataList.get(i).getMacd() >= mMaxMacd) {
+                    mMaxMacd = viewDataList.get(i).getMacd();
+                }
+                if (viewDataList.get(i).getMacd() <= mMinMacd) {
+                    mMinMacd = viewDataList.get(i).getMacd();
+                }
+                if (viewDataList.get(i).getDea() >= maxDea) {
+                    maxDea = viewDataList.get(i).getDea();
+                }
+                if (viewDataList.get(i).getDea() <= minDea) {
+                    minDea = viewDataList.get(i).getDea();
+                }
+                if (viewDataList.get(i).getDif() >= maxDif) {
+                    maxDif = viewDataList.get(i).getDif();
+                }
+                if (viewDataList.get(i).getDif() <= minDif) {
+                    minDif = viewDataList.get(i).getDif();
+                }
             }
-            if (viewDataList.get(i).getMacd() <= mMinMacd) {
-                mMinMacd = viewDataList.get(i).getMacd();
-            }
-            if (viewDataList.get(i).getDea() >= maxDea) {
-                maxDea = viewDataList.get(i).getDea();
-            }
-            if (viewDataList.get(i).getDea() <= minDea) {
-                minDea = viewDataList.get(i).getDea();
-            }
-            if (viewDataList.get(i).getDif() >= maxDif) {
-                maxDif = viewDataList.get(i).getDif();
-            }
-            if (viewDataList.get(i).getDif() <= minDif) {
-                minDif = viewDataList.get(i).getDif();
-            }
-            if (viewDataList.get(i).getK() >= mMaxK) {
-                mMaxK = viewDataList.get(i).getK();
-            }
-            if (viewDataList.get(i).getD() >= maxD) {
-                maxD = viewDataList.get(i).getD();
-            }
-            if (viewDataList.get(i).getJ() >= maxJ) {
-                maxJ = viewDataList.get(i).getJ();
+
+            if (isShowDeputy && deputyImgType == DEPUTY_IMG_KDJ) {
+                if (viewDataList.get(i).getK() >= mMaxK) {
+                    mMaxK = viewDataList.get(i).getK();
+                }
+                if (viewDataList.get(i).getD() >= maxD) {
+                    maxD = viewDataList.get(i).getD();
+                }
+                if (viewDataList.get(i).getJ() >= maxJ) {
+                    maxJ = viewDataList.get(i).getJ();
+                }
             }
         }
 
@@ -925,39 +934,44 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         //volumeData
         avgHeightPerVolume = (horizontalYList.get(horizontalYList.size() - 1) - deputyTopY) / maxVolume;
 
-        //MACD
-        if (mMaxMacd > 0 && mMinMacd < 0) {
-            avgHeightMacd = (horizontalYList.get(horizontalYList.size() - 1) - deputyTopY) / Math.abs(mMaxMacd - mMinMacd);
-            deputyCenterY = (float) (deputyTopY + mMaxMacd * avgHeightMacd);
-        } else if (mMaxMacd <= 0) {
-            avgHeightMacd = (horizontalYList.get(horizontalYList.size() - 1) - deputyTopY) / Math.abs(mMinMacd);
-            deputyCenterY = deputyTopY;
-        } else if (mMinMacd >= 0) {
-            avgHeightMacd = (horizontalYList.get(horizontalYList.size() - 1) - deputyTopY) / Math.abs(mMaxMacd);
-            deputyCenterY = horizontalYList.get(horizontalYList.size() - 1);
+        if (isShowDeputy && deputyImgType == DEPUTY_IMG_MACD) {
+            //MACD
+            if (mMaxMacd > 0 && mMinMacd < 0) {
+                avgHeightMacd = (horizontalYList.get(horizontalYList.size() - 1) - deputyTopY) / Math.abs(mMaxMacd - mMinMacd);
+                deputyCenterY = (float) (deputyTopY + mMaxMacd * avgHeightMacd);
+            } else if (mMaxMacd <= 0) {
+                avgHeightMacd = (horizontalYList.get(horizontalYList.size() - 1) - deputyTopY) / Math.abs(mMinMacd);
+                deputyCenterY = deputyTopY;
+            } else if (mMinMacd >= 0) {
+                avgHeightMacd = (horizontalYList.get(horizontalYList.size() - 1) - deputyTopY) / Math.abs(mMaxMacd);
+                deputyCenterY = horizontalYList.get(horizontalYList.size() - 1);
+            }
+            //DEA
+            if (maxDea > 0 && minDea < 0) {
+                avgHeightDea = (horizontalYList.get(horizontalYList.size() - 1) - deputyTopY - dp2px(24)) / (maxDea - minDea);
+            } else if (maxDea <= 0) {
+                avgHeightDea = (horizontalYList.get(horizontalYList.size() - 1) - deputyTopY - dp2px(24)) / Math.abs(minDea);
+            } else if (minDea >= 0) {
+                avgHeightDea = (horizontalYList.get(horizontalYList.size() - 1) - deputyTopY - dp2px(24)) / Math.abs(maxDea);
+            }
+            //DIF
+            if (maxDif > 0 && minDif < 0) {
+                avgHeightDif = (horizontalYList.get(horizontalYList.size() - 1) - deputyTopY - dp2px(24)) / (maxDif - minDif);
+            } else if (maxDif <= 0) {
+                avgHeightDif = (horizontalYList.get(horizontalYList.size() - 1) - deputyTopY - dp2px(24)) / Math.abs(minDif);
+            } else if (minDif >= 0) {
+                avgHeightDif = (horizontalYList.get(horizontalYList.size() - 1) - deputyTopY - dp2px(24)) / Math.abs(maxDif);
+            }
         }
-        //DEA
-        if (maxDea > 0 && minDea < 0) {
-            avgHeightDea = (horizontalYList.get(horizontalYList.size() - 1) - deputyTopY - dp2px(24)) / (maxDea - minDea);
-        } else if (maxDea <= 0) {
-            avgHeightDea = (horizontalYList.get(horizontalYList.size() - 1) - deputyTopY - dp2px(24)) / Math.abs(minDea);
-        } else if (minDea >= 0) {
-            avgHeightDea = (horizontalYList.get(horizontalYList.size() - 1) - deputyTopY - dp2px(24)) / Math.abs(maxDea);
+
+        if (isShowDeputy && deputyImgType == DEPUTY_IMG_KDJ) {
+            //K
+            avgHeightK = (horizontalYList.get(horizontalYList.size() - 1) - deputyTopY - dp2px(12)) / mMaxK;
+            //D
+            avgHeightD = (horizontalYList.get(horizontalYList.size() - 1) - deputyTopY - dp2px(12)) / maxD;
+            //J
+            avgHeightJ = (horizontalYList.get(horizontalYList.size() - 1) - deputyTopY - dp2px(12)) / maxJ;
         }
-        //DIF
-        if (maxDif > 0 && minDif < 0) {
-            avgHeightDif = (horizontalYList.get(horizontalYList.size() - 1) - deputyTopY - dp2px(24)) / (maxDif - minDif);
-        } else if (maxDif <= 0) {
-            avgHeightDif = (horizontalYList.get(horizontalYList.size() - 1) - deputyTopY - dp2px(24)) / Math.abs(minDif);
-        } else if (minDif >= 0) {
-            avgHeightDif = (horizontalYList.get(horizontalYList.size() - 1) - deputyTopY - dp2px(24)) / Math.abs(maxDif);
-        }
-        //K
-        avgHeightK = (horizontalYList.get(horizontalYList.size() - 1) - deputyTopY - dp2px(12)) / mMaxK;
-        //D
-        avgHeightD = (horizontalYList.get(horizontalYList.size() - 1) - deputyTopY - dp2px(12)) / maxD;
-        //J
-        avgHeightJ = (horizontalYList.get(horizontalYList.size() - 1) - deputyTopY - dp2px(12)) / maxJ;
 
         for (int i = 0; i < viewDataList.size(); i++) {
             //drawPriceRectAndLine
@@ -1175,7 +1189,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
 
         drawVolumeBezierCurve(canvas);
         drawMainBezierCurve(canvas);
-        if (isShowDeputy){
+        if (isShowDeputy) {
             drawDeputyCurve(canvas);
         }
     }
