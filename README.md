@@ -27,7 +27,13 @@ qq：181801034
 ![image](https://github.com/xiesuichao/KLineView/raw/master/image/a2.png)
         
         //初始化控件加载数据
-        mKLineView.initKDataList(getKDataList(5));
+        mKLineView.initKDataList(getKDataList(5));              
+                
+        //分页加载时添加多条数据
+        mKLineView.addDataList(getKDataList(5));        
+                
+        //实时刷新时添加单条数据
+        mKLineView.addData(getKDataList(0.1).get(0));
 
         deputyBtn.setOnClickListener(new View.OnClickListener() {
             @Override
