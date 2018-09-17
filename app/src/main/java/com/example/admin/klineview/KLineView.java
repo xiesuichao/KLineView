@@ -150,8 +150,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
 
     /**
      * 添加最新单条数据
-     *
-     * @param data
      */
     public void addData(KData data) {
         endDataList.clear();
@@ -164,8 +162,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
 
     /**
      * 分页加载，向前期滑动时新增的数据，目前限制单次添加数据量不超过1100条
-     *
-     * @param dataList
      */
     public void addDataList(List<KData> dataList) {
         if (dataList.size() > 1100) {
@@ -184,8 +180,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
 
     /**
      * 控件初始化时添加的数据量，目前限制单次添加数据量不超过1100条
-     *
-     * @param dataList
      */
     public void initKDataList(List<KData> dataList) {
         if (dataList.size() > 1100) {
@@ -200,8 +194,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
 
     /**
      * 是否显示副图
-     *
-     * @param showState
      */
     public void setDeputyPicShow(boolean showState) {
         switch (deputyImgType) {
@@ -219,8 +211,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
 
     /**
      * 设置主图显示类型，0：MA, 1:EMA, 2:BOLL
-     *
-     * @param type
      */
     public void setMainImgType(int type) {
         switch (type) {
@@ -242,8 +232,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
 
     /**
      * 设置副图显示类型，0：MACD, 1:KDJ
-     *
-     * @param type
      */
     public void setDeputyImgType(int type) {
         switch (type) {
@@ -261,8 +249,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
 
     /**
      * 获取副图是否显示
-     *
-     * @return
      */
     public boolean getVicePicShow() {
         return this.isShowDeputy;
@@ -546,10 +532,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
             return;
         }
         drawTickMark(canvas);
-        long start = System.currentTimeMillis();
         drawMainDeputyRect(canvas);
-        long end = System.currentTimeMillis();
-        PrintUtil.log("drawMainDeputy", end - start);
         drawBezierCurve(canvas);
 
         getClickKData();

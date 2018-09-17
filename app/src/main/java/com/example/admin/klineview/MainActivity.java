@@ -69,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
         getDataRunnable = new Runnable() {
             @Override
             public void run() {
+                //分页加载时添加多条数据
                 mKLineView.addDataList(getKDataList(5));
             }
         };
@@ -76,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
         sendRunnable = new Runnable() {
             @Override
             public void run() {
+                //实时刷新时添加单条数据
                 mKLineView.addData(getKDataList(0.1).get(0));
                 mHandler.postDelayed(this, 5000);
             }
