@@ -609,6 +609,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                 break;
         }
 
+        //双指触控
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 mulFirstDownX = event.getX(0);
@@ -631,27 +632,34 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                     float mulFirstMoveY = event.getY(0);
                     float mulSecondMoveX = event.getX(1);
                     float mulSecondMoveY = event.getY(1);
+                    float diffMoveX = Math.abs(mulSecondMoveX - mulFirstMoveX);
+                    float diffMoveY = Math.abs(mulSecondMoveY - mulFirstMoveY);
 
-                    if (Math.abs(mulSecondMoveX - mulFirstMoveX) - lastDiffMoveX > 1.5
-                            || Math.abs(mulSecondMoveY - mulFirstMoveY) - lastDiffMoveY > 1.5) {
+                    if ((diffMoveX >= diffMoveY && Math.abs(mulSecondMoveX - mulFirstMoveX) - lastDiffMoveX > 1.5)
+                            || (diffMoveY >= diffMoveX && Math.abs(mulSecondMoveY - mulFirstMoveY) - lastDiffMoveY > 1.5)) {
                         maxViewDataNum -= 3;
                         if (maxViewDataNum < 18) {
                             maxViewDataNum = 18;
                         }
 
-                    } else if (Math.abs(mulSecondMoveX - mulFirstMoveX) - lastDiffMoveX < -1.5
-                            || Math.abs(mulSecondMoveY - mulFirstMoveY) - lastDiffMoveY < -1.5) {
+                    } else if ((diffMoveX >= diffMoveY && Math.abs(mulSecondMoveX - mulFirstMoveX) - lastDiffMoveX < -1.5)
+                            || (diffMoveY >= diffMoveX && Math.abs(mulSecondMoveY - mulFirstMoveY) - lastDiffMoveY < -1.5)) {
                         maxViewDataNum += 3;
-                        if (totalDataList.size() - startDataNum >= 140 && maxViewDataNum > 140) {
-                            maxViewDataNum = 140;
-                        } else if (totalDataList.size() - startDataNum < 140 && maxViewDataNum > 140) {
+                        if (totalDataList.size() - startDataNum < 140 && maxViewDataNum >= 140) {
                             maxViewDataNum = totalDataList.size() - startDataNum;
+                        }else if (totalDataList.size() - startDataNum >= 140 && maxViewDataNum > 140) {
+                            maxViewDataNum = 140;
                         }
+
                     }
                     lastDiffMoveX = Math.abs(mulSecondMoveX - mulFirstMoveX);
                     lastDiffMoveY = Math.abs(mulSecondMoveY - mulFirstMoveY);
 
                     resetViewData();
+                    if (viewDataList.size() < maxViewDataNum){
+                        startDataNum = totalDataList.size() - maxViewDataNum;
+                        resetViewData();
+                    }
                     invalidate();
                 }
                 break;
@@ -740,7 +748,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                 requestNewData();
 
                 if (Math.abs(flingVelocityX) > 200) {
-                    mDelayHandler.postDelayed(this, 30);
+                    mDelayHandler.postDelayed(this, 15);
                 }
             }
         };

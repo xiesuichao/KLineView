@@ -3,7 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     tools:context="com.example.admin.klineview.MainActivity"
     android:background="#ffffff">
@@ -12,7 +11,6 @@
         android:id="@+id/klv_main"
         android:layout_width="match_parent"
         android:layout_height="380dp"
-        app:klCrossHairRightLabelTextSize="8"
         />
 
     <TextView
