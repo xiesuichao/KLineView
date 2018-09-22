@@ -200,8 +200,4 @@ public class MainActivity extends AppCompatActivity {
         mKLineView.cancelQuotaThread();
     }
 
-
-
-
-
 }

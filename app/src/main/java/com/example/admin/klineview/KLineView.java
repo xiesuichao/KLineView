@@ -102,7 +102,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     private List<Pointer> volumeMa10PointList = new ArrayList<>();
 
     private KData lastKData;
-//    private LongPressRunnable longPressRunnable;
     private OnRequestDataListListener requestListener;
     private QuotaThread quotaThread;
     private Handler mDelayHandler;
@@ -166,7 +165,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     }
 
     /**
-     * 分页加载，向前期滑动时新增的数据，目前限制单次添加数据量不超过1100条
+     * 分页加载，向左滑动时新增的数据，目前限制单次添加数据量不超过1100条
      */
     public void addDataList(List<KData> dataList) {
         if (dataList.size() > 1100) {
@@ -322,7 +321,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         super.setLongClickable(true);
         super.setFocusable(true);
         gestureDetector = new GestureDetector(getContext(), new CustomGestureListener());
-//        longPressRunnable = new LongPressRunnable();
         detailRectWidth = dp2px(103);
         detailRectHeight = dp2px(120);
         detailTextVerticalSpace = (detailRectHeight - dp2px(4)) / 8;
@@ -397,26 +395,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         drawDetailData(canvas);
     }
 
-    private class LongPressRunnable implements Runnable {
-        private float longPressX;
-        private float longPressY;
-
-        void setPressLocation(float x, float y) {
-            this.longPressX = x;
-            this.longPressY = y;
-        }
-
-        @Override
-        public void run() {
-            isLongPress = true;
-            isShowDetail = true;
-            singleClickDownX = longPressX;
-            invalidate();
-            PrintUtil.log("isShowDetail = true;");
-
-        }
-    }
-
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
@@ -427,11 +405,12 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
             dispatchDownTime = event.getDownTime();
 
         } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
+            //长按控制
             float dispatchMoveX = event.getX();
             float dispatchMoveY = event.getY();
             float diffDispatchMoveX = Math.abs(dispatchMoveX - dispatchDownX);
             float diffDispatchMoveY = Math.abs(dispatchMoveY - dispatchDownY);
-            if (diffDispatchMoveX > 5 || diffDispatchMoveY > 5){
+            if (diffDispatchMoveX > 5 || diffDispatchMoveY > 5) {
                 canShowLongPress = false;
             }
             if (canShowLongPress && !isDoubleFinger && !isLongPress
@@ -444,19 +423,12 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
             }
 
             if (diffDispatchMoveX > 1) {
-//                removeCallbacks(longPressRunnable);
                 if (isLongPress) {
                     singleClickDownX = event.getX();
                     invalidate();
                 }
             }
-//            dispatchDownX = event.getX();
-//            dispatchDownY = event.getY();
-
-        } else if (event.getAction() == MotionEvent.ACTION_UP) {
-//            removeCallbacks(longPressRunnable);
         }
-
         return isLongPress || super.dispatchTouchEvent(event);
     }
 
@@ -489,7 +461,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
             case MotionEvent.ACTION_POINTER_DOWN:
                 isDoubleFinger = true;
                 canShowLongPress = false;
-//                removeCallbacks(longPressRunnable);
                 float mulSecondDownX = event.getX(1);
                 float mulSecondDownY = event.getY(1);
                 lastDiffMoveX = Math.abs(mulSecondDownX - mulFirstDownX);

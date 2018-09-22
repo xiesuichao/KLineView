@@ -94,8 +94,6 @@ qq：181801034
     /**
     * 如果外层需要嵌套上下滑动的view，包括ScrollView，ListView，RecyclerView等，
     * 复写onInterceptTouchEvent进行点击事件拦截处理
-    * @param ev
-    * @return
     */
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
@@ -116,6 +114,7 @@ qq：181801034
             if ((isVerticalMove || diffMoveY > diffMoveX + 5 ) && !isHorizontalMove) {
                 isVerticalMove = true;
                 return true;
+
             //如果水平间距大于竖直滑动间距 + 5，不拦截
             } else if ((isHorizontalMove || diffMoveX > diffMoveY + 5 ) && !isVerticalMove) {
                 isHorizontalMove = true;
