@@ -15,6 +15,7 @@ import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewParent;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
@@ -35,6 +36,8 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     private boolean isShowDetail = false;
     //是否长按
     private boolean isLongPress = false;
+    //能否显示长按
+    private boolean canShowLongPress = true;
     //是否需要请求前面的数据
     private boolean isNeedRequestBeforeData = true;
     //是否双指触控
@@ -99,7 +102,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     private List<Pointer> volumeMa10PointList = new ArrayList<>();
 
     private KData lastKData;
-    private LongPressRunnable longPressRunnable;
+//    private LongPressRunnable longPressRunnable;
     private OnRequestDataListListener requestListener;
     private QuotaThread quotaThread;
     private Handler mDelayHandler;
@@ -124,6 +127,8 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
             avgPriceRectWidth, avgHeightPerVolume, avgHeightMacd, avgHeightDea, avgHeightDif,
             avgHeightK, avgHeightD, avgHeightJ, mMaxPriceY,
             mMinPriceY, mMaxMacd, mMinMacd, mMaxK;
+    private float touchDownY;
+    private long dispatchDownTime;
 
 
     public KLineView(Context context) {
@@ -266,204 +271,49 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     private void initAttrs(Context context, AttributeSet attrs) {
         if (attrs != null) {
             TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.KLineView);
-            tickMarkCol = typedArray.getColor(R.styleable.KLineView_klTickMarkLineCol, -1);
-            abscissaTextCol = typedArray.getColor(R.styleable.KLineView_klAbscissaTextCol, -1);
-            abscissaTextSize = typedArray.getInt(R.styleable.KLineView_klAbscissaTextSize, -1);
-            ordinateTextCol = typedArray.getColor(R.styleable.KLineView_klOrdinateTextCol, -1);
-            ordinateTextSize = typedArray.getInt(R.styleable.KLineView_klOrdinateTextSize, -1);
-            topMaTextSize = typedArray.getInt(R.styleable.KLineView_klTopMaTextSize, -1);
-            priceIncreaseCol = typedArray.getColor(R.styleable.KLineView_klPriceIncreaseCol, -1);
-            priceFallCol = typedArray.getColor(R.styleable.KLineView_klPriceFallCol, -1);
-            priceMa5Col = typedArray.getColor(R.styleable.KLineView_klPriceMa5LineCol, -1);
-            priceMa10Col = typedArray.getColor(R.styleable.KLineView_klPriceMa10LineCol, -1);
-            priceMa30Col = typedArray.getColor(R.styleable.KLineView_klPriceMa30LineCol, -1);
-            priceMaxLabelCol = typedArray.getColor(R.styleable.KLineView_klPriceMaxLabelCol, -1);
-            priceMaxLabelTextCol = typedArray.getColor(R.styleable.KLineView_klPriceMaxLabelTextCol, -1);
-            priceMaxLabelTextSize = typedArray.getInt(R.styleable.KLineView_klPriceMaxLabelTextSize, -1);
-            priceMinLabelCol = typedArray.getColor(R.styleable.KLineView_klPriceMinLabelCol, -1);
-            priceMinLabelTextCol = typedArray.getColor(R.styleable.KLineView_klPriceMinLabelTextCol, -1);
-            priceMinLabelTextSize = typedArray.getInt(R.styleable.KLineView_klPriceMinLabelTextSize, -1);
-            volumeTextCol = typedArray.getColor(R.styleable.KLineView_klVolumeTextCol, -1);
-            volumeTextSize = typedArray.getInt(R.styleable.KLineView_klVolumeTextSize, -1);
-            volumeMa5Col = typedArray.getColor(R.styleable.KLineView_klVolumeMa5LineCol, -1);
-            volumeMa10Col = typedArray.getColor(R.styleable.KLineView_klVolumeMa10LineCol, -1);
-            macdTextCol = typedArray.getColor(R.styleable.KLineView_klMacdTextCol, -1);
-            macdPositiveCol = typedArray.getColor(R.styleable.KLineView_klMacdPositiveCol, -1);
-            macdNegativeCol = typedArray.getColor(R.styleable.KLineView_klMacdNegativeCol, -1);
-            difLineCol = typedArray.getColor(R.styleable.KLineView_klDifLineCol, -1);
-            deaLineCol = typedArray.getColor(R.styleable.KLineView_klDeaLineCol, -1);
-            kLineCol = typedArray.getColor(R.styleable.KLineView_klKLineCol, -1);
-            dLineCol = typedArray.getColor(R.styleable.KLineView_klDLineCol, -1);
-            jLineCol = typedArray.getColor(R.styleable.KLineView_klJLineCol, -1);
-            crossHairCol = typedArray.getColor(R.styleable.KLineView_klCrossHairCol, -1);
-            crossHairRightLabelCol = typedArray.getColor(R.styleable.KLineView_klCrossHairRightLabelCol, -1);
-            crossHairRightLabelTextCol = typedArray.getColor(R.styleable.KLineView_klCrossHairRightLabelTextCol, -1);
-            crossHairRightLabelTextSize = typedArray.getInt(R.styleable.KLineView_klCrossHairRightLabelTextSize, -1);
-            crossHairBottomLabelCol = typedArray.getColor(R.styleable.KLineView_klCrossHairBottomLabelCol, -1);
-            crossHairBottomLabelTextCol = typedArray.getColor(R.styleable.KLineView_klCrossHairBottomLabelTextCol, -1);
-            crossHairBottomLabelTextSize = typedArray.getInt(R.styleable.KLineView_klCrossHairBottomLabelTextSize, -1);
-            detailFrameCol = typedArray.getColor(R.styleable.KLineView_klDetailFrameCol, -1);
-            detailTextCol = typedArray.getColor(R.styleable.KLineView_klDetailTextCol, -1);
-            detailTextSize = typedArray.getInt(R.styleable.KLineView_klDetailTextSize, -1);
-            detailBgCol = typedArray.getColor(R.styleable.KLineView_klDetailBgCol, -1);
+            tickMarkCol = typedArray.getColor(R.styleable.KLineView_klTickMarkLineCol, 0xffF7F7FB);
+            abscissaTextCol = typedArray.getColor(R.styleable.KLineView_klAbscissaTextCol, 0xff9BACBD);
+            abscissaTextSize = typedArray.getInt(R.styleable.KLineView_klAbscissaTextSize, 8);
+            ordinateTextCol = typedArray.getColor(R.styleable.KLineView_klOrdinateTextCol, abscissaTextCol);
+            ordinateTextSize = typedArray.getInt(R.styleable.KLineView_klOrdinateTextSize, abscissaTextSize);
+            topMaTextSize = typedArray.getInt(R.styleable.KLineView_klTopMaTextSize, 10);
+            priceIncreaseCol = typedArray.getColor(R.styleable.KLineView_klPriceIncreaseCol, 0xffFF5442);
+            priceFallCol = typedArray.getColor(R.styleable.KLineView_klPriceFallCol, 0xff2BB8AB);
+            priceMa5Col = typedArray.getColor(R.styleable.KLineView_klPriceMa5LineCol, 0xffFFA800);
+            priceMa10Col = typedArray.getColor(R.styleable.KLineView_klPriceMa10LineCol, 0xff2668FF);
+            priceMa30Col = typedArray.getColor(R.styleable.KLineView_klPriceMa30LineCol, 0xffFF45A1);
+            priceMaxLabelCol = typedArray.getColor(R.styleable.KLineView_klPriceMaxLabelCol, 0xffC0C6C9);
+            priceMaxLabelTextCol = typedArray.getColor(R.styleable.KLineView_klPriceMaxLabelTextCol, 0xffffffff);
+            priceMaxLabelTextSize = typedArray.getInt(R.styleable.KLineView_klPriceMaxLabelTextSize, 10);
+            priceMinLabelCol = typedArray.getColor(R.styleable.KLineView_klPriceMinLabelCol, priceMaxLabelCol);
+            priceMinLabelTextCol = typedArray.getColor(R.styleable.KLineView_klPriceMinLabelTextCol, priceMaxLabelTextCol);
+            priceMinLabelTextSize = typedArray.getInt(R.styleable.KLineView_klPriceMinLabelTextSize, 10);
+            volumeTextCol = typedArray.getColor(R.styleable.KLineView_klVolumeTextCol, 0xff9BACBD);
+            volumeTextSize = typedArray.getInt(R.styleable.KLineView_klVolumeTextSize, 10);
+            volumeMa5Col = typedArray.getColor(R.styleable.KLineView_klVolumeMa5LineCol, priceMa5Col);
+            volumeMa10Col = typedArray.getColor(R.styleable.KLineView_klVolumeMa10LineCol, priceMa10Col);
+            macdTextCol = typedArray.getColor(R.styleable.KLineView_klMacdTextCol, volumeTextCol);
+            macdPositiveCol = typedArray.getColor(R.styleable.KLineView_klMacdPositiveCol, priceIncreaseCol);
+            macdNegativeCol = typedArray.getColor(R.styleable.KLineView_klMacdNegativeCol, priceFallCol);
+            difLineCol = typedArray.getColor(R.styleable.KLineView_klDifLineCol, priceMa10Col);
+            deaLineCol = typedArray.getColor(R.styleable.KLineView_klDeaLineCol, priceMa30Col);
+            kLineCol = typedArray.getColor(R.styleable.KLineView_klKLineCol, priceMa5Col);
+            dLineCol = typedArray.getColor(R.styleable.KLineView_klDLineCol, priceMa10Col);
+            jLineCol = typedArray.getColor(R.styleable.KLineView_klJLineCol, priceMa30Col);
+            crossHairCol = typedArray.getColor(R.styleable.KLineView_klCrossHairCol, 0xff828EA2);
+            crossHairRightLabelCol = typedArray.getColor(R.styleable.KLineView_klCrossHairRightLabelCol, 0xff3193FF);
+            crossHairRightLabelTextCol = typedArray.getColor(R.styleable.KLineView_klCrossHairRightLabelTextCol, 0xffffffff);
+            crossHairRightLabelTextSize = typedArray.getInt(R.styleable.KLineView_klCrossHairRightLabelTextSize, 10);
+            crossHairBottomLabelCol = typedArray.getColor(R.styleable.KLineView_klCrossHairBottomLabelCol, priceMaxLabelCol);
+            crossHairBottomLabelTextCol = typedArray.getColor(R.styleable.KLineView_klCrossHairBottomLabelTextCol, 0xffffffff);
+            crossHairBottomLabelTextSize = typedArray.getInt(R.styleable.KLineView_klCrossHairBottomLabelTextSize, 8);
+            detailFrameCol = typedArray.getColor(R.styleable.KLineView_klDetailFrameCol, 0xffB5C0D0);
+            detailTextCol = typedArray.getColor(R.styleable.KLineView_klDetailTextCol, 0xff808F9E);
+            detailTextSize = typedArray.getInt(R.styleable.KLineView_klDetailTextSize, 10);
+            detailBgCol = typedArray.getColor(R.styleable.KLineView_klDetailBgCol, 0xe6ffffff);
             typedArray.recycle();
         }
 
-        if (tickMarkCol == -1) {
-            tickMarkCol = 0xffF7F7FB;
-        }
-
-        if (abscissaTextCol == -1) {
-            abscissaTextCol = 0xff9BACBD;
-        }
-
-        if (abscissaTextSize == -1) {
-            abscissaTextSize = 8;
-        }
-
-        if (ordinateTextCol == -1) {
-            ordinateTextCol = abscissaTextCol;
-        }
-
-        if (ordinateTextSize == -1) {
-            ordinateTextSize = abscissaTextSize;
-        }
-
-        if (topMaTextSize == -1) {
-            topMaTextSize = 10;
-        }
-
-        if (priceIncreaseCol == -1) {
-            priceIncreaseCol = 0xffFF5442;
-        }
-
-        if (priceFallCol == -1) {
-            priceFallCol = 0xff2BB8AB;
-        }
-
-        if (priceMa5Col == -1) {
-            priceMa5Col = 0xffFFA800;
-        }
-
-        if (priceMa10Col == -1) {
-            priceMa10Col = 0xff2668FF;
-        }
-
-        if (priceMa30Col == -1) {
-            priceMa30Col = 0xffFF45A1;
-        }
-
-        if (priceMaxLabelCol == -1) {
-            priceMaxLabelCol = 0xffC0C6C9;
-        }
-
-        if (priceMaxLabelTextCol == -1) {
-            priceMaxLabelTextCol = 0xffffffff;
-        }
-
-        if (priceMaxLabelTextSize == -1) {
-            priceMaxLabelTextSize = 10;
-        }
-
-        if (priceMinLabelCol == -1) {
-            priceMinLabelCol = priceMaxLabelCol;
-        }
-
-        if (priceMinLabelTextCol == -1) {
-            priceMinLabelTextCol = priceMaxLabelTextCol;
-        }
-
-        if (priceMinLabelTextSize == -1) {
-            priceMinLabelTextSize = 10;
-        }
-
-        if (volumeTextCol == -1) {
-            volumeTextCol = 0xff9BACBD;
-        }
-
-        if (volumeMa5Col == -1) {
-            volumeMa5Col = priceMa5Col;
-        }
-
-        if (volumeMa10Col == -1) {
-            volumeMa10Col = priceMa10Col;
-        }
-
-        if (macdTextCol == -1) {
-            macdTextCol = volumeTextCol;
-        }
-
-        if (macdPositiveCol == -1) {
-            macdPositiveCol = priceIncreaseCol;
-        }
-
-        if (macdNegativeCol == -1) {
-            macdNegativeCol = priceFallCol;
-        }
-
-        if (difLineCol == -1) {
-            difLineCol = priceMa10Col;
-        }
-
-        if (deaLineCol == -1) {
-            deaLineCol = priceMa30Col;
-        }
-
-        if (kLineCol == -1) {
-            kLineCol = priceMa5Col;
-        }
-
-        if (dLineCol == -1) {
-            dLineCol = priceMa10Col;
-        }
-
-        if (jLineCol == -1) {
-            jLineCol = priceMa30Col;
-        }
-
-        if (crossHairCol == -1) {
-            crossHairCol = 0xff828EA2;
-        }
-
-        if (crossHairBottomLabelCol == -1) {
-            crossHairBottomLabelCol = priceMaxLabelCol;
-        }
-
-        if (crossHairBottomLabelTextCol == -1) {
-            crossHairBottomLabelTextCol = 0xffffffff;
-        }
-
-        if (crossHairBottomLabelTextSize == -1) {
-            crossHairBottomLabelTextSize = 8;
-        }
-
-        if (crossHairRightLabelCol == -1) {
-            crossHairRightLabelCol = 0xff3193FF;
-        }
-
-        if (crossHairRightLabelTextCol == -1) {
-            crossHairRightLabelTextCol = 0xffffffff;
-        }
-
-        if (crossHairRightLabelTextSize == -1) {
-            crossHairRightLabelTextSize = 10;
-        }
-
-        if (detailFrameCol == -1) {
-            detailFrameCol = 0xffB5C0D0;
-        }
-
-        if (detailTextCol == -1) {
-            detailTextCol = 0xff808F9E;
-        }
-
-        if (detailTextSize == -1) {
-            detailTextSize = 10;
-        }
-
-        if (detailBgCol == -1) {
-            detailBgCol = 0xe6ffffff;
-        }
     }
 
     private void initData() {
@@ -472,7 +322,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         super.setLongClickable(true);
         super.setFocusable(true);
         gestureDetector = new GestureDetector(getContext(), new CustomGestureListener());
-        longPressRunnable = new LongPressRunnable();
+//        longPressRunnable = new LongPressRunnable();
         detailRectWidth = dp2px(103);
         detailRectHeight = dp2px(120);
         detailTextVerticalSpace = (detailRectHeight - dp2px(4)) / 8;
@@ -549,9 +399,11 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
 
     private class LongPressRunnable implements Runnable {
         private float longPressX;
+        private float longPressY;
 
-        void setPressLocation(float x) {
+        void setPressLocation(float x, float y) {
             this.longPressX = x;
+            this.longPressY = y;
         }
 
         @Override
@@ -560,35 +412,51 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
             isShowDetail = true;
             singleClickDownX = longPressX;
             invalidate();
+            PrintUtil.log("isShowDetail = true;");
+
         }
     }
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                dispatchDownX = event.getX();
-                dispatchDownY = event.getY();
-                longPressRunnable.setPressLocation(event.getX());
-                postDelayed(longPressRunnable, 500);
-                isLongPress = false;
-                break;
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            dispatchDownX = event.getX();
+            dispatchDownY = event.getY();
+            isLongPress = false;
+            canShowLongPress = true;
+            dispatchDownTime = event.getDownTime();
 
-            case MotionEvent.ACTION_MOVE:
-                if (Math.abs(event.getX() - dispatchDownX) > 5
-                        || Math.abs(event.getY() - dispatchDownY) > 5) {
-                    removeCallbacks(longPressRunnable);
-                    if (isLongPress) {
-                        singleClickDownX = event.getX();
-                        invalidate();
-                    }
+        } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
+            float dispatchMoveX = event.getX();
+            float dispatchMoveY = event.getY();
+            float diffDispatchMoveX = Math.abs(dispatchMoveX - dispatchDownX);
+            float diffDispatchMoveY = Math.abs(dispatchMoveY - dispatchDownY);
+            if (diffDispatchMoveX > 5 || diffDispatchMoveY > 5){
+                canShowLongPress = false;
+            }
+            if (canShowLongPress && !isDoubleFinger && !isLongPress
+                    && event.getEventTime() - dispatchDownTime > 400
+                    && diffDispatchMoveX < 1 && diffDispatchMoveY < 1) {
+                isLongPress = true;
+                isShowDetail = true;
+                singleClickDownX = event.getX();
+                invalidate();
+            }
+
+            if (diffDispatchMoveX > 1) {
+//                removeCallbacks(longPressRunnable);
+                if (isLongPress) {
+                    singleClickDownX = event.getX();
+                    invalidate();
                 }
-                break;
+            }
+//            dispatchDownX = event.getX();
+//            dispatchDownY = event.getY();
 
-            case MotionEvent.ACTION_UP:
-                removeCallbacks(longPressRunnable);
-                break;
+        } else if (event.getAction() == MotionEvent.ACTION_UP) {
+//            removeCallbacks(longPressRunnable);
         }
+
         return isLongPress || super.dispatchTouchEvent(event);
     }
 
@@ -597,12 +465,14 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 singleClickDownX = event.getX();
+                touchDownY = event.getY();
                 flingVelocityX = 0;
                 break;
 
             case MotionEvent.ACTION_UP:
-                float upX = event.getX();
-                if (Math.abs(upX - singleClickDownX) < 5) {
+                float diffTouchMoveX = event.getX() - singleClickDownX;
+                float diffTouchMoveY = event.getY() - touchDownY;
+                if (diffTouchMoveY <= diffTouchMoveX && diffTouchMoveX < 5) {
                     isShowDetail = true;
                     invalidate();
                 }
@@ -618,7 +488,8 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
 
             case MotionEvent.ACTION_POINTER_DOWN:
                 isDoubleFinger = true;
-                removeCallbacks(longPressRunnable);
+                canShowLongPress = false;
+//                removeCallbacks(longPressRunnable);
                 float mulSecondDownX = event.getX(1);
                 float mulSecondDownY = event.getY(1);
                 lastDiffMoveX = Math.abs(mulSecondDownX - mulFirstDownX);
@@ -647,7 +518,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                         maxViewDataNum += 3;
                         if (totalDataList.size() - startDataNum < 140 && maxViewDataNum >= 140) {
                             maxViewDataNum = totalDataList.size() - startDataNum;
-                        }else if (totalDataList.size() - startDataNum >= 140 && maxViewDataNum > 140) {
+                        } else if (totalDataList.size() - startDataNum >= 140 && maxViewDataNum > 140) {
                             maxViewDataNum = 140;
                         }
 
@@ -656,7 +527,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                     lastDiffMoveY = Math.abs(mulSecondMoveY - mulFirstMoveY);
 
                     resetViewData();
-                    if (viewDataList.size() < maxViewDataNum){
+                    if (viewDataList.size() < maxViewDataNum) {
                         startDataNum = totalDataList.size() - maxViewDataNum;
                         resetViewData();
                     }

@@ -7,75 +7,178 @@
     tools:context="com.example.admin.klineview.MainActivity"
     android:background="#ffffff">
 
-    <com.example.admin.klineview.KLineView
-        android:id="@+id/klv_main"
-        android:layout_width="match_parent"
-        android:layout_height="380dp"
-        />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#294058"
-        />
-
-    <LinearLayout
+    <!--<LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="vertical">
 
-        <Button
-            android:id="@+id/btn_ma"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="MA"
+        <com.example.admin.klineview.KLineView
+            android:id="@+id/klv_main"
+            android:layout_width="match_parent"
+            android:layout_height="380dp"
             />
 
-        <Button
-            android:id="@+id/btn_ema"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="EMA"
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#294058"
             />
 
-        <Button
-            android:id="@+id/btn_boll"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="BOLL"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_ma"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="MA"
+                />
+
+            <Button
+                android:id="@+id/btn_ema"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="EMA"
+                />
+
+            <Button
+                android:id="@+id/btn_boll"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="BOLL"
+                />
+
+            <Button
+                android:id="@+id/btn_deputy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="显示副图"
+                />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+
+            <Button
+                android:id="@+id/btn_macd"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="MACD"
+                />
+
+            <Button
+                android:id="@+id/btn_kdj"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="KDJ"
+                />
+
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:background="#eeeeee"
             />
 
-        <Button
-            android:id="@+id/btn_deputy"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="显示副图"
-            />
+    </LinearLayout>-->
 
-    </LinearLayout>
-
-    <LinearLayout
+    <com.example.admin.klineview.CustomNestedScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        >
 
-
-
-        <Button
-            android:id="@+id/btn_macd"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="MACD"
-            />
+            android:orientation="vertical">
 
-        <Button
-            android:id="@+id/btn_kdj"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="KDJ"
-            />
+            <com.example.admin.klineview.KLineView
+                android:id="@+id/klv_main"
+                android:layout_width="match_parent"
+                android:layout_height="380dp"
+                />
 
-    </LinearLayout>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#294058"
+                />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btn_ma"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="MA"
+                    />
+
+                <Button
+                    android:id="@+id/btn_ema"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="EMA"
+                    />
+
+                <Button
+                    android:id="@+id/btn_boll"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="BOLL"
+                    />
+
+                <Button
+                    android:id="@+id/btn_deputy"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="显示副图"
+                    />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+
+                <Button
+                    android:id="@+id/btn_macd"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="MACD"
+                    />
+
+                <Button
+                    android:id="@+id/btn_kdj"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="KDJ"
+                    />
+
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:background="#eeeeee"
+                />
+
+        </LinearLayout>
+
+    </com.example.admin.klineview.CustomNestedScrollView>
+
+
 
 
 </LinearLayout>
