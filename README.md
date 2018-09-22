@@ -95,7 +95,8 @@ qq：181801034
             }
         });
         
-            /**
+        
+     /**
      * 如果外层需要嵌套上下滑动的view，包括ScrollView，ListView，RecyclerView等，
      * 复写onInterceptTouchEvent进行点击事件拦截处理
      * @param ev
