@@ -28,6 +28,7 @@ qq：181801034
 ![image](https://github.com/xiesuichao/KLineView/raw/master/image/a3.png)
 
 1.K线控件:
+      
     //初始化控件加载数据
     mKLineView.initKDataList(getKDataList(5));
                 
@@ -134,6 +135,7 @@ qq：181801034
     }
 
 2.深度图控件:
+
     //添加购买数据
     depthView.setBuyDataList(getBuyDepthList());
     //添加出售数据
