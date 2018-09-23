@@ -153,6 +153,7 @@ public class MainActivity extends AppCompatActivity {
 
         /**
          * 重置所有数据（不包括KLineView当前显示的最大数据量和起始position）
+         * 可用于数据分时加载。数据的分时计算暂时没时间做，请自行计算。
          */
         resetBtn.setOnClickListener(new View.OnClickListener() {
             @Override
