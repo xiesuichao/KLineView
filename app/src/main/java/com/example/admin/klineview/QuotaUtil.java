@@ -20,8 +20,6 @@ public class QuotaUtil {
 
     /**
      * 初始化 MA5，MA10, MA30
-     *
-     * @param dataList
      */
     public static void initMa(List<KData> dataList, boolean isEndData){
         long startMa = System.currentTimeMillis();
@@ -81,8 +79,6 @@ public class QuotaUtil {
 
     /**
      * 初始化 EMA5, EMA10, EMA30
-     *
-     * @param dataList
      */
     public static void initEma(List<KData> dataList, boolean isEndData) {
         long startEma = System.currentTimeMillis();

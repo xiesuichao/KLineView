@@ -197,6 +197,38 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     }
 
     /**
+     * 重置所有数据（不包括KLineView当前显示的最大数据量和起始position）
+     */
+    public void resetDataList(List<KData> dataList){
+        if (dataList.size() > 1100){
+            return;
+        }
+        this.totalDataList.clear();
+        this.totalDataList.addAll(dataList);
+        QuotaUtil.initMa(totalDataList, false);
+        switch (mainImgType){
+            case MAIN_IMG_EMA:
+                QuotaUtil.initEma(totalDataList, false);
+                break;
+
+            case MAIN_IMG_BOLL:
+                QuotaUtil.initBoll(totalDataList, false);
+                break;
+        }
+        switch (deputyImgType){
+            case DEPUTY_IMG_MACD:
+                QuotaUtil.initMACD(totalDataList, false);
+                break;
+
+            case DEPUTY_IMG_KDJ:
+                QuotaUtil.initKDJ(totalDataList, false);
+                break;
+        }
+        resetViewData();
+        invalidate();
+    }
+
+    /**
      * 是否显示副图
      */
     public void setDeputyPicShow(boolean showState) {

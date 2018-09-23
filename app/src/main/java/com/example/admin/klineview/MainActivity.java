@@ -25,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
     private Button kdjBtn;
     private Runnable getDataRunnable;
     private Runnable sendRunnable;
+    private Button resetBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
         bollBtn = findViewById(R.id.btn_boll);
         macdBtn = findViewById(R.id.btn_macd);
         kdjBtn = findViewById(R.id.btn_kdj);
+        resetBtn = findViewById(R.id.btn_reset);
     }
 
     private void initData(){
@@ -139,11 +141,23 @@ public class MainActivity extends AppCompatActivity {
          * 当控件显示数据属于总数据量的前三分之一时，会自动调用该接口，用于预加载数据，保证控件操作过程中的流畅性，
          * 虽然做了预加载，当总数据量较小时，也会出现用户滑到左边界了，但数据还未获取到，依然会有停顿。
          * 所以数据量越大，越不会出现停顿，也就越流畅
+         * （首次调用addDataList添加数据后，控件会记录该次list.size，后续每次分页加载的size都会与首次的size
+         * 比较，如果比首次的size小，判定为数据已拿完，不再自动请求数据）
          */
         mKLineView.setOnRequestDataListListener(new KLineView.OnRequestDataListListener() {
             @Override
             public void requestData() {
                 mHandler.postDelayed(getDataRunnable, 2000);
+            }
+        });
+
+        /**
+         * 重置所有数据（不包括KLineView当前显示的最大数据量和起始position）
+         */
+        resetBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mKLineView.resetDataList(getKDataList(5));
             }
         });
     }
