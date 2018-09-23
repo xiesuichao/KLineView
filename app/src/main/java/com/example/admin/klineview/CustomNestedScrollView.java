@@ -73,6 +73,7 @@ public class CustomNestedScrollView extends NestedScrollView {
         if (ev.getAction() == MotionEvent.ACTION_UP){
             isVerticalMove = false;
             isHorizontalMove = false;
+            PrintUtil.log("parent onTouchEvent up");
         }
         return super.onTouchEvent(ev);
     }

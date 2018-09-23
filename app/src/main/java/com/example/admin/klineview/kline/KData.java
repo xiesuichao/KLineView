@@ -1,6 +1,7 @@
-package com.example.admin.klineview;
+package com.example.admin.klineview.kline;
 
 /**
+ * K线数据
  * Created by xiesuichao on 2018/6/29.
  */
 

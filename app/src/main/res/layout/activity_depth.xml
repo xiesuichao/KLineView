@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.example.admin.klineview.CustomNestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="#ffffff">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <com.example.admin.klineview.depth.DepthView
+            android:id="@+id/dv_depth"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            app:dvBuyLineStrokeWidth="1"
+            app:dvSellLineStrokeWidth="1"
+            app:dvDetailLineWidth="0"
+            />
+
+        <Button
+            android:id="@+id/btn_depth_reset"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="reset"
+            />
+
+    </LinearLayout>
+
+</com.example.admin.klineview.CustomNestedScrollView>

@@ -15,7 +15,7 @@
 已对性能做优化，单次添加数据量1000条，总数据量几万条，滑动都很流畅，不会影响用户体验。
 
 //TODO         
-1、数据分时暂时没时间做，可自行计算后调用resetDataList刷新即可。
+1、数据分时加载
 2、内存进一步优化
 
 邮箱：xsc314@163.com       
@@ -25,7 +25,9 @@ qq：181801034
 ![image](https://github.com/xiesuichao/KLineView/raw/master/image/KLineUI.png)
 ![image](https://github.com/xiesuichao/KLineView/raw/master/image/a1.png)
 ![image](https://github.com/xiesuichao/KLineView/raw/master/image/a2.png)
-        
+![image](https://github.com/xiesuichao/KLineView/raw/master/image/a3.png)
+
+1.K线控件:
     //初始化控件加载数据
     mKLineView.initKDataList(getKDataList(5));
                 
@@ -35,48 +37,40 @@ qq：181801034
     //实时刷新时添加单条数据
     mKLineView.addData(getKDataList(0.1).get(0));
 
-    deputyBtn.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            //是否显示副图
-            mKLineView.setDeputyPicShow(!mKLineView.getVicePicShow());
-        }
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.btn_deputy:
+                //是否显示副图
+                mKLineView.setDeputyPicShow(!mKLineView.getVicePicShow());
+                break;
 
-    maBtn.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            //主图展示MA
-            mKLineView.setMainImgType(KLineView.MAIN_IMG_MA);
-        }
+            case R.id.btn_ma:
+                //主图展示MA
+                mKLineView.setMainImgType(KLineView.MAIN_IMG_MA);
+                break;
 
-    emaBtn.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            //主图展示EMA
-            mKLineView.setMainImgType(KLineView.MAIN_IMG_EMA);
-        }
+            case R.id.btn_ema:
+                //主图展示EMA
+                mKLineView.setMainImgType(KLineView.MAIN_IMG_EMA);
+                break;
 
-    bollBtn.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            //主图展示BOLL
-            mKLineView.setMainImgType(KLineView.MAIN_IMG_BOLL);
-        }
-    });
+            case R.id.btn_boll:
+                //主图展示BOLL
+                mKLineView.setMainImgType(KLineView.MAIN_IMG_BOLL);
+                break;
 
-    macdBtn.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            //副图展示MACD
-            mKLineView.setDeputyImgType(KLineView.DEPUTY_IMG_MACD);
-        }
+            case R.id.btn_macd:
+                //副图展示MACD
+                mKLineView.setDeputyImgType(KLineView.DEPUTY_IMG_MACD);
+                break;
 
-    kdjBtn.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            //副图展示KDJ
-            mKLineView.setDeputyImgType(KLineView.DEPUTY_IMG_KDJ);
+            case R.id.btn_kdj:
+                //副图展示KDJ
+                mKLineView.setDeputyImgType(KLineView.DEPUTY_IMG_KDJ);
+                break;
         }
+    }
 
     /**
      * 当控件显示数据属于总数据量的前三分之一时，会自动调用该接口，用于预加载数据，保证控件操作过程中的流畅性，
@@ -88,22 +82,11 @@ qq：181801034
     mKLineView.setOnRequestDataListListener(new KLineView.OnRequestDataListListener() {
         @Override
         public void requestData() {
-            mHandler.postDelayed(getDataRunnable, 2000);
+            //请求数据
         }
     });
 
-    /**
-     * 重置所有数据（不包括KLineView当前显示的最大数据量和起始position）
-     * 可用于数据分时加载。数据的分时计算暂时没时间做，请自行计算。
-     */
-    resetBtn.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            mKLineView.resetDataList(getKDataList(5));
-        }
-    });
-        
-        
+
     /**
     * 如果外层需要嵌套上下滑动的view，包括ScrollView，ListView，RecyclerView等，
     * 复写onInterceptTouchEvent进行点击事件拦截处理
@@ -149,4 +132,13 @@ qq：181801034
         }
         return super.onTouchEvent(ev);
     }
+
+2.深度图控件:
+    //添加购买数据
+    depthView.setBuyDataList(getBuyDepthList());
+    //添加出售数据
+    depthView.setSellDataList(getSellDepthList());
+    //重置深度数据
+    depthView.resetAllData(getBuyDepthList(), getSellDepthList());
+
 

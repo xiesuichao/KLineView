@@ -1,4 +1,4 @@
-package com.example.admin.klineview;
+package com.example.admin.klineview.kline;
 
 /**
  * Created by xiesuichao on 2018/7/3.

@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+    <!--K线控件-->
     <declare-styleable name="KLineView">
         <!--刻度线颜色-->
         <attr name="klTickMarkLineCol" format="color"/>
@@ -74,6 +76,36 @@
         <attr name="klDetailTextSize" format="integer"/>
         <!--数据详情背景颜色-->
         <attr name="klDetailBgCol" format="color"/>
+
+    </declare-styleable>
+
+    <declare-styleable name="DepthView">
+        <!--买方线条颜色、线条宽度、背景颜色-->
+        <attr name="dvBuyLineCol" format="color"/>
+        <attr name="dvBuyLineStrokeWidth" format="integer"/>
+        <attr name="dvBuyBgCol" format="color"/>
+        <!--卖方线条颜色、背景颜色-->
+        <attr name="dvSellLineCol" format="color"/>
+        <attr name="dvSellLineStrokeWidth" format="integer"/>
+        <attr name="dvSellBgCol" format="color"/>
+        <!--纵坐标颜色、字体大小-->
+        <attr name="dvOrdinateCol" format="color"/>
+        <attr name="dvOrdinateTextSize" format="integer"/>
+        <!--纵坐标个数-->
+        <attr name="dvOrdinateNum" format="integer"/>
+        <!--横坐标颜色、字体大小-->
+        <attr name="dvAbscissaCol" format="color"/>
+        <attr name="dvAbscissaTextSize" format="integer"/>
+        <!--详情背景颜色、字体颜色、字体大小、游标线颜色-->
+        <attr name="dvDetailBgCol" format="color"/>
+        <attr name="dvDetailTextCol" format="color"/>
+        <attr name="dvDetailTextSize" format="integer"/>
+        <attr name="dvDetailLineCol" format="color"/>
+        <!--游标线宽度、交界圆点半径、价格文字说明、数量文字说明-->
+        <attr name="dvDetailLineWidth" format="float" />
+        <attr name="dvDetailPointRadius" format="integer"/>
+        <attr name="dvDetailPriceTitle" format="string"/>
+        <attr name="dvDetailVolumeTitle" format="string"/>
 
     </declare-styleable>
 

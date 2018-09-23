@@ -1,5 +1,6 @@
 package com.example.admin.klineview;
 
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
@@ -9,11 +10,16 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
+import com.example.admin.klineview.depth.Depth;
+import com.example.admin.klineview.depth.DepthView;
+import com.example.admin.klineview.kline.KData;
+import com.example.admin.klineview.kline.KLineView;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener{
 
     private Handler mHandler;
     private KLineView mKLineView;
@@ -25,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
     private Button kdjBtn;
     private Runnable getDataRunnable;
     private Runnable sendRunnable;
-    private Button resetBtn;
+    private Button depthJumpBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
         initData();
         setListener();
 
+        //切换横屏适配测试
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE){
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                     dp2px(280));
@@ -47,11 +54,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private int dp2px(float dpValue) {
-        final float scale = getResources().getDisplayMetrics().density;
-        return (int) (dpValue * scale + 0.5f);
-    }
-
     private void initView(){
         mKLineView = findViewById(R.id.klv_main);
         deputyBtn = findViewById(R.id.btn_deputy);
@@ -60,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
         bollBtn = findViewById(R.id.btn_boll);
         macdBtn = findViewById(R.id.btn_macd);
         kdjBtn = findViewById(R.id.btn_kdj);
-        resetBtn = findViewById(R.id.btn_reset);
+        depthJumpBtn = findViewById(R.id.btn_depth_activity);
     }
 
     private void initData(){
@@ -89,53 +91,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setListener(){
-        deputyBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //是否显示副图
-                mKLineView.setDeputyPicShow(!mKLineView.getVicePicShow());
-            }
-        });
-
-        maBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //主图展示MA
-                mKLineView.setMainImgType(KLineView.MAIN_IMG_MA);
-            }
-        });
-
-        emaBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //主图展示EMA
-                mKLineView.setMainImgType(KLineView.MAIN_IMG_EMA);
-            }
-        });
-
-        bollBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //主图展示BOLL
-                mKLineView.setMainImgType(KLineView.MAIN_IMG_BOLL);
-            }
-        });
-
-        macdBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //副图展示MACD
-                mKLineView.setDeputyImgType(KLineView.DEPUTY_IMG_MACD);
-            }
-        });
-
-        kdjBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //副图展示KDJ
-                mKLineView.setDeputyImgType(KLineView.DEPUTY_IMG_KDJ);
-            }
-        });
+        deputyBtn.setOnClickListener(this);
+        maBtn.setOnClickListener(this);
+        emaBtn.setOnClickListener(this);
+        bollBtn.setOnClickListener(this);
+        macdBtn.setOnClickListener(this);
+        kdjBtn.setOnClickListener(this);
+        depthJumpBtn.setOnClickListener(this);
 
         /**
          * 当控件显示数据属于总数据量的前三分之一时，会自动调用该接口，用于预加载数据，保证控件操作过程中的流畅性，
@@ -150,19 +112,48 @@ public class MainActivity extends AppCompatActivity {
                 mHandler.postDelayed(getDataRunnable, 2000);
             }
         });
-
-        /**
-         * 重置所有数据（不包括KLineView当前显示的最大数据量和起始position）
-         * 可用于数据分时加载。数据的分时计算暂时没时间做，请自行计算。
-         */
-        resetBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mKLineView.resetDataList(getKDataList(5));
-            }
-        });
     }
 
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.btn_deputy:
+                //是否显示副图
+                mKLineView.setDeputyPicShow(!mKLineView.getVicePicShow());
+                break;
+
+            case R.id.btn_ma:
+                //主图展示MA
+                mKLineView.setMainImgType(KLineView.MAIN_IMG_MA);
+                break;
+
+            case R.id.btn_ema:
+                //主图展示EMA
+                mKLineView.setMainImgType(KLineView.MAIN_IMG_EMA);
+                break;
+
+            case R.id.btn_boll:
+                //主图展示BOLL
+                mKLineView.setMainImgType(KLineView.MAIN_IMG_BOLL);
+                break;
+
+            case R.id.btn_macd:
+                //副图展示MACD
+                mKLineView.setDeputyImgType(KLineView.DEPUTY_IMG_MACD);
+                break;
+
+            case R.id.btn_kdj:
+                //副图展示KDJ
+                mKLineView.setDeputyImgType(KLineView.DEPUTY_IMG_KDJ);
+                break;
+
+            case R.id.btn_depth_activity:
+                startActivity(new Intent(getApplicationContext(), DepthActivity.class));
+                break;
+        }
+    }
+
+    //模拟K线数据
     private List<KData> getKDataList(double num) {
         long start = System.currentTimeMillis();
 
@@ -209,9 +200,15 @@ public class MainActivity extends AppCompatActivity {
         return random.nextInt(5) * 5  - random.nextDouble();
     }
 
+    private int dp2px(float dpValue) {
+        final float scale = getResources().getDisplayMetrics().density;
+        return (int) (dpValue * scale + 0.5f);
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        //退出页面时停止子线程并置空，便于回收，避免内存泄露
         mKLineView.cancelQuotaThread();
     }
 
