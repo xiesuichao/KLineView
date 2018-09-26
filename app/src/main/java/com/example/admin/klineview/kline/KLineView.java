@@ -465,7 +465,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        long drawStart = System.currentTimeMillis();
         if (totalDataList.isEmpty() || viewDataList.isEmpty()) {
             return;
         }
@@ -481,8 +480,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
 
         drawCrossHairLine(canvas);
         drawDetailData(canvas);
-        long drawEnd = System.currentTimeMillis();
-//        PrintUtil.log("drawTime", drawEnd - drawStart);
     }
 
     @Override
@@ -500,12 +497,12 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
             float dispatchMoveY = event.getY();
             float diffDispatchMoveX = Math.abs(dispatchMoveX - dispatchDownX);
             float diffDispatchMoveY = Math.abs(dispatchMoveY - dispatchDownY);
-            if (diffDispatchMoveX > 5 || diffDispatchMoveY > 5) {
+            if (diffDispatchMoveX > 10 || diffDispatchMoveY > 10) {
                 canShowLongPress = false;
             }
             if (canShowLongPress && !isDoubleFinger && !isLongPress
-                    && event.getEventTime() - dispatchDownTime > 400
-                    && diffDispatchMoveX < 1 && diffDispatchMoveY < 1) {
+                    && event.getEventTime() - dispatchDownTime > 300
+                    && diffDispatchMoveX < 10 && diffDispatchMoveY < 10) {
                 isLongPress = true;
                 isShowDetail = true;
                 singleClickDownX = event.getX();

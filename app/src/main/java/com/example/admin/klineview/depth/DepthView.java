@@ -228,12 +228,12 @@ public class DepthView extends View {
             float dispatchMoveY = event.getY();
             float diffDispatchMoveX = Math.abs(dispatchMoveX - dispatchDownX);
             float diffDispatchMoveY = Math.abs(dispatchMoveY - dispatchDownY);
-            if (diffDispatchMoveX > 5 || diffDispatchMoveY > 5) {
+            if (diffDispatchMoveX > 10 || diffDispatchMoveY > 10) {
                 canShowLongPress = false;
             }
             if (canShowLongPress && !isLongPress
-                    && event.getEventTime() - dispatchDownTime > 400
-                    && diffDispatchMoveX < 1 && diffDispatchMoveY < 1) {
+                    && event.getEventTime() - dispatchDownTime > 300
+                    && diffDispatchMoveX < 10 && diffDispatchMoveY < 10) {
                 isLongPress = true;
                 isShowDetail = true;
                 singleClickDownX = event.getX();
