@@ -1,7 +1,7 @@
 # KLineView
 股票走势图K线控件
 
-由于时间关系，只能在空余时间做，目前只做了MA,EMA,BOLL,MACD,KDJ 5个指标。并且没有扩展功能。
+由于时间关系，目前只做了MA,EMA,BOLL,MACD,KDJ 5个指标。       
 根目录下有个apk文件夹，内有最新的测试包，可以先安装看效果
 
 支持实时刷新的单条数据更新。          
@@ -15,8 +15,8 @@
 已对性能做优化，单次添加数据量1000条，总数据量几万条，滑动都很流畅，不会影响用户体验。
 
 //TODO         
-1、数据分时加载
-2、内存进一步优化
+1、数据分时加载    
+
 
 邮箱：xsc314@163.com       
 qq：181801034    
@@ -28,6 +28,7 @@ qq：181801034
 ![image](https://github.com/xiesuichao/KLineView/raw/master/image/a3.png)
 
 1.K线控件:
+      
     //初始化控件加载数据
     mKLineView.initKDataList(getKDataList(5));
                 
@@ -134,6 +135,7 @@ qq：181801034
     }
 
 2.深度图控件:
+
     //添加购买数据
     depthView.setBuyDataList(getBuyDepthList());
     //添加出售数据
