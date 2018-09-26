@@ -199,7 +199,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         if (quotaThread != null) {
             quotaThread.quotaListCalculate(totalDataList);
         }
-        PrintUtil.log("totalDataList.size", totalDataList.size());
     }
 
     /**
@@ -410,6 +409,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         super.setClickable(true);
         super.setLongClickable(true);
         super.setFocusable(true);
+        setLayerType(LAYER_TYPE_NONE, null);
         gestureDetector = new GestureDetector(getContext(), new CustomGestureListener());
         detailRectWidth = dp2px(103);
         detailRectHeight = dp2px(120);
@@ -465,6 +465,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        long drawStart = System.currentTimeMillis();
         if (totalDataList.isEmpty() || viewDataList.isEmpty()) {
             return;
         }
@@ -480,6 +481,8 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
 
         drawCrossHairLine(canvas);
         drawDetailData(canvas);
+        long drawEnd = System.currentTimeMillis();
+//        PrintUtil.log("drawTime", drawEnd - drawStart);
     }
 
     @Override
@@ -780,10 +783,12 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     private void resetViewData() {
         viewDataList.clear();
         int currentViewDataNum = Math.min(maxViewDataNum, totalDataList.size());
-        for (int i = 0; i < currentViewDataNum; i++) {
-            if (startDataNum >= 0 && i + startDataNum < totalDataList.size()) {
+        if (startDataNum >= 0){
+            for (int i = 0; i < currentViewDataNum; i++) {
                 viewDataList.add(totalDataList.get(i + startDataNum));
-            } else {
+            }
+        }else {
+            for (int i = 0; i < currentViewDataNum; i++) {
                 viewDataList.add(totalDataList.get(i));
             }
         }

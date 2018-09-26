@@ -69,14 +69,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void initData(){
         //初始化控件加载数据
-        mKLineView.initKDataList(getKDataList(20));
+        mKLineView.initKDataList(getKDataList(10));
 
         mHandler = new Handler();
         dataListAddRunnable = new Runnable() {
             @Override
             public void run() {
                 //分页加载时添加多条数据
-                mKLineView.addPreDataList(getKDataList(20), true);
+                mKLineView.addPreDataList(getKDataList(10), true);
             }
         };
 
@@ -194,7 +194,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         }
         long end = System.currentTimeMillis();
-        PrintUtil.log("mainActivity getKDataList time", end - start);
         return dataList;
     }
 
