@@ -3,6 +3,7 @@
 
 由于时间关系，目前只做了MA,EMA,BOLL,MACD,KDJ 5个指标。       
 根目录下有个apk文件夹，内有最新的测试包，可以先安装看效果
+新增深度图控件，如下图所示，详情见demo
 
 支持实时刷新的单条数据更新。          
 支持滑动时的分页加载更多数据。     
@@ -12,10 +13,14 @@
 支持横屏显示         
 支持布局文件自定义颜色，字体大小属性
 
-已对性能做优化，单次添加数据量1000条，总数据量几万条，滑动都很流畅，不会影响用户体验。
+已对性能做优化，总数据量十万条以上对用户体验没有影响。
+首次加载5000条数据，页面初始化到加载完成，总共耗时400+ms，不超过0.5秒。
+分页加载5000条数据时，如果正在滑动过程中，添加数据的那一瞬间会稍微有一下卡顿，影响不大。
+经测试，800块的华为荣耀6A 每次添加4000条以下数据不会有卡顿，很流畅。
+建议每次添加数据在2000条左右。
 
 //TODO         
-1、数据分时加载    
+1、性能与内存的继续优化。
 
 
 邮箱：xsc314@163.com       
@@ -41,6 +46,11 @@ qq：181801034
     @Override
     public void onClick(View v) {
         switch (v.getId()){
+            case R.id.btn_kline_reset:
+                //重置数据，可用于分时加载
+                mKLineView.resetDataList(getKDataList(0.1));
+                break;
+
             case R.id.btn_deputy:
                 //是否显示副图
                 mKLineView.setDeputyPicShow(!mKLineView.getVicePicShow());
@@ -70,6 +80,11 @@ qq：181801034
                 //副图展示KDJ
                 mKLineView.setDeputyImgType(KLineView.DEPUTY_IMG_KDJ);
                 break;
+
+            case R.id.btn_depth_activity:
+                //跳转到深度图页面
+                startActivity(new Intent(getApplicationContext(), DepthActivity.class));
+                break;
         }
     }
 
@@ -77,8 +92,6 @@ qq：181801034
      * 当控件显示数据属于总数据量的前三分之一时，会自动调用该接口，用于预加载数据，保证控件操作过程中的流畅性，
      * 虽然做了预加载，当总数据量较小时，也会出现用户滑到左边界了，但数据还未获取到，依然会有停顿。
      * 所以数据量越大，越不会出现停顿，也就越流畅
-     * （首次调用addDataList添加数据后，控件会记录该次list.size，后续每次分页加载的size都会与首次的size
-     * 比较，如果比首次的size小，判定为数据已拿完，不再自动请求数据）
      */
     mKLineView.setOnRequestDataListListener(new KLineView.OnRequestDataListListener() {
         @Override

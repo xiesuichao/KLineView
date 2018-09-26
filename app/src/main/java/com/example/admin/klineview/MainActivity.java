@@ -29,8 +29,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button bollBtn;
     private Button macdBtn;
     private Button kdjBtn;
-    private Runnable getDataRunnable;
-    private Runnable sendRunnable;
+    private Runnable dataListAddRunnable;
+    private Runnable singleDataAddRunnable;
     private Button depthJumpBtn;
     private Button kLineResetBtn;
 
@@ -69,26 +69,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void initData(){
         //初始化控件加载数据
-        mKLineView.initKDataList(getKDataList(5));
+        mKLineView.initKDataList(getKDataList(20));
 
         mHandler = new Handler();
-        getDataRunnable = new Runnable() {
+        dataListAddRunnable = new Runnable() {
             @Override
             public void run() {
                 //分页加载时添加多条数据
-                mKLineView.addPreDataList(getKDataList(5), false);
+                mKLineView.addPreDataList(getKDataList(20), true);
             }
         };
 
-        sendRunnable = new Runnable() {
+        singleDataAddRunnable = new Runnable() {
             @Override
             public void run() {
                 //实时刷新时添加单条数据
-                mKLineView.addData(getKDataList(0.1).get(0));
+                mKLineView.addSingleData(getKDataList(0.1).get(0));
                 mHandler.postDelayed(this, 5000);
             }
         };
-//        mHandler.postDelayed(sendRunnable, 2000);
+//        mHandler.postDelayed(singleDataRunnable, 2000);
 
     }
 
@@ -106,13 +106,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
          * 当控件显示数据属于总数据量的前三分之一时，会自动调用该接口，用于预加载数据，保证控件操作过程中的流畅性，
          * 虽然做了预加载，当总数据量较小时，也会出现用户滑到左边界了，但数据还未获取到，依然会有停顿。
          * 所以数据量越大，越不会出现停顿，也就越流畅
-         * （首次调用addDataList添加数据后，控件会记录该次list.size，后续每次分页加载的size都会与首次的size
-         * 比较，如果比首次的size小，判定为数据已拿完，不再自动请求数据）
          */
         mKLineView.setOnRequestDataListListener(new KLineView.OnRequestDataListListener() {
             @Override
             public void requestData() {
-                mHandler.postDelayed(getDataRunnable, 2000);
+                //延时3秒执行，模拟网络请求耗时
+                mHandler.postDelayed(dataListAddRunnable, 3000);
             }
         });
     }
@@ -120,6 +119,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         switch (v.getId()){
+            case R.id.btn_kline_reset:
+                //重置数据，可用于分时加载
+                mKLineView.resetDataList(getKDataList(0.1));
+                break;
+
             case R.id.btn_deputy:
                 //是否显示副图
                 mKLineView.setDeputyPicShow(!mKLineView.getVicePicShow());
@@ -150,11 +154,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 mKLineView.setDeputyImgType(KLineView.DEPUTY_IMG_KDJ);
                 break;
 
-            case R.id.btn_kline_reset:
-                mKLineView.resetDataList(getKDataList(0.1));
-                break;
-
             case R.id.btn_depth_activity:
+                //跳转到深度图页面
                 startActivity(new Intent(getApplicationContext(), DepthActivity.class));
                 break;
         }
@@ -173,7 +174,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         double volume;
 
         for (int x = 0; x < num * 10; x++) {
-            for (int i = 0; i < 8; i++) {
+            for (int i = 0; i < 12; i++) {
                 closePrice = openPrice + getAddRandomDouble();
                 maxPrice = closePrice + getAddRandomDouble();
                 minPrice = openPrice - getSubRandomDouble();
@@ -182,7 +183,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 openPrice = closePrice;
             }
 
-            for (int i = 0; i < 12; i++) {
+            for (int i = 0; i < 8; i++) {
                 closePrice = openPrice - getSubRandomDouble();
                 maxPrice = openPrice + getAddRandomDouble();
                 minPrice = closePrice - getSubRandomDouble();
@@ -193,7 +194,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         }
         long end = System.currentTimeMillis();
-//        PrintUtil.log("mainActivity getKDataList", end - start);
+        PrintUtil.log("mainActivity getKDataList time", end - start);
         return dataList;
     }
 

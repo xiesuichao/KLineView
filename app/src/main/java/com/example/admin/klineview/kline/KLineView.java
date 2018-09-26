@@ -32,14 +32,13 @@ import java.util.List;
 
 public class KLineView extends View implements View.OnTouchListener, Handler.Callback {
 
-
     //view显示的第一条数据在总数据list中的position
     private int startDataNum = 0;
-    //首次加载显示的数据个数
+    //首次加载显示的数据条数，可自行修改
     private final int VIEW_DATA_NUM_INIT = 34;
-    //放大时最少显示的数据个数
+    //放大时最少显示的数据条数，可自行修改
     private final int VIEW_DATA_NUM_MIN = 18;
-    //缩小时最多显示的数据个数
+    //缩小时最多显示的数据条数，可自行修改
     private final int VIEW_DATA_NUM_MAX = 140;
     //view显示的最大数据条数
     private int maxViewDataNum = VIEW_DATA_NUM_INIT;
@@ -165,9 +164,20 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     }
 
     /**
-     * 添加最新单条数据
+     * 控件初始化时添加的数据量，目前限制单次添加数据量不超过1100条
      */
-    public void addData(KData data) {
+    public void initKDataList(List<KData> dataList) {
+        this.totalDataList.clear();
+        this.totalDataList.addAll(dataList);
+        startDataNum = totalDataList.size() - maxViewDataNum;
+        QuotaUtil.initMa(totalDataList, false);
+        resetViewData();
+    }
+
+    /**
+     * 添加最新的单条数据
+     */
+    public void addSingleData(KData data) {
         endDataList.clear();
         endDataList.addAll(totalDataList.subList(totalDataList.size() - 30, totalDataList.size()));
         endDataList.add(data);
@@ -183,15 +193,13 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
      * @param isNeedReqPre 下次向前期滑动到边界时，是否需要自动调用接口请求数据
      */
     public void addPreDataList(List<KData> dataList, boolean isNeedReqPre) {
-        if (dataList.size() > 1100) {
-            return;
-        }
         isNeedRequestPreData = isNeedReqPre;
         totalDataList.addAll(0, dataList);
         startDataNum += dataList.size();
         if (quotaThread != null) {
             quotaThread.quotaListCalculate(totalDataList);
         }
+        PrintUtil.log("totalDataList.size", totalDataList.size());
     }
 
     /**
@@ -203,9 +211,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
      * 上面的方法，手动传入isNeedReqPre用来判断是否需要继续自动调用接口请求数据
      */
     public void addPreDataList(List<KData> dataList) {
-        if (dataList.size() > 1100) {
-            return;
-        }
         if (initTotalListSize == 0) {
             initTotalListSize = dataList.size();
         }
@@ -218,20 +223,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     }
 
     /**
-     * 控件初始化时添加的数据量，目前限制单次添加数据量不超过1100条
-     */
-    public void initKDataList(List<KData> dataList) {
-        if (dataList.size() > 1100) {
-            return;
-        }
-        this.totalDataList.clear();
-        this.totalDataList.addAll(dataList);
-        startDataNum = totalDataList.size() - 1 - maxViewDataNum;
-        QuotaUtil.initMa(totalDataList, false);
-        resetViewData();
-    }
-
-    /**
      * 重置所有数据，
      * 1、如果当前view显示的第一条数据的时间在新数据时间范围内，
      * 则将当前view显示的新数据仍然以该时间点显示。
@@ -239,9 +230,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
      * 则最大显示条数保持不变
      */
     public void resetDataList(List<KData> dataList) {
-        if (dataList.size() > 1100) {
-            return;
-        }
         long currentStartTime = viewDataList.get(0).getTime();
         isShowDetail = false;
 
@@ -300,23 +288,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     }
 
     /**
-     * 是否显示副图
-     */
-    public void setDeputyPicShow(boolean showState) {
-        switch (deputyImgType) {
-            case DEPUTY_IMG_MACD:
-                QuotaUtil.initMACD(totalDataList, false);
-                break;
-
-            case DEPUTY_IMG_KDJ:
-                QuotaUtil.initKDJ(totalDataList, false);
-                break;
-        }
-        this.isShowDeputy = showState;
-        invalidate();
-    }
-
-    /**
      * 设置主图显示类型，0：MA, 1:EMA, 2:BOLL
      */
     public void setMainImgType(int type) {
@@ -334,6 +305,23 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                 break;
         }
         this.mainImgType = type;
+        invalidate();
+    }
+
+    /**
+     * 是否显示副图
+     */
+    public void setDeputyPicShow(boolean showState) {
+        switch (deputyImgType) {
+            case DEPUTY_IMG_MACD:
+                QuotaUtil.initMACD(totalDataList, false);
+                break;
+
+            case DEPUTY_IMG_KDJ:
+                QuotaUtil.initKDJ(totalDataList, false);
+                break;
+        }
+        this.isShowDeputy = showState;
         invalidate();
     }
 
