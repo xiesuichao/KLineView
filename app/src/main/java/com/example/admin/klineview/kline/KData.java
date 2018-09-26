@@ -7,6 +7,7 @@ package com.example.admin.klineview.kline;
 
 public class KData {
 
+    //时间戳
     private long time;
     private double openPrice;
     private double closePrice;

@@ -32,6 +32,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Runnable getDataRunnable;
     private Runnable sendRunnable;
     private Button depthJumpBtn;
+    private Button kLineResetBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         bollBtn = findViewById(R.id.btn_boll);
         macdBtn = findViewById(R.id.btn_macd);
         kdjBtn = findViewById(R.id.btn_kdj);
+        kLineResetBtn = findViewById(R.id.btn_kline_reset);
         depthJumpBtn = findViewById(R.id.btn_depth_activity);
     }
 
@@ -74,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void run() {
                 //分页加载时添加多条数据
-                mKLineView.addDataList(getKDataList(5));
+                mKLineView.addPreDataList(getKDataList(5), false);
             }
         };
 
@@ -98,6 +100,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         macdBtn.setOnClickListener(this);
         kdjBtn.setOnClickListener(this);
         depthJumpBtn.setOnClickListener(this);
+        kLineResetBtn.setOnClickListener(this);
 
         /**
          * 当控件显示数据属于总数据量的前三分之一时，会自动调用该接口，用于预加载数据，保证控件操作过程中的流畅性，
@@ -145,6 +148,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.btn_kdj:
                 //副图展示KDJ
                 mKLineView.setDeputyImgType(KLineView.DEPUTY_IMG_KDJ);
+                break;
+
+            case R.id.btn_kline_reset:
+                mKLineView.resetDataList(getKDataList(0.1));
                 break;
 
             case R.id.btn_depth_activity:

@@ -81,11 +81,10 @@
         </LinearLayout>
 
         <Button
-            android:id="@+id/btn_reset"
+            android:id="@+id/btn_kline_reset"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="reset"
-            android:visibility="gone"
             />
 
         <Button
