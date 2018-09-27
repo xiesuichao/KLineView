@@ -408,7 +408,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     private void initData() {
         super.setOnTouchListener(this);
         super.setClickable(true);
-        super.setLongClickable(true);
         super.setFocusable(true);
         setLayerType(LAYER_TYPE_NONE, null);
         gestureDetector = new GestureDetector(getContext(), new CustomGestureListener());
@@ -526,7 +525,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
 
                 return isLongPress || super.dispatchTouchEvent(event);
 
-            } else if (!isHorizontalMove && diffDispatchMoveY > diffDispatchMoveX + dp2px(5)
+            } else if (!isHorizontalMove && !isDoubleFinger && diffDispatchMoveY > diffDispatchMoveX + dp2px(5)
                     && diffDispatchMoveY > moveLimitDistance) {
                 removeCallbacks(longPressRunnable);
                 getParent().requestDisallowInterceptTouchEvent(false);
@@ -559,6 +558,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
             case MotionEvent.ACTION_POINTER_DOWN:
                 isShowDetail = false;
                 isDoubleFinger = true;
+                removeCallbacks(longPressRunnable);
                 mulSecondDownX = event.getX(1);
                 float mulSecondDownY = event.getY(1);
                 lastDiffMoveX = Math.abs(mulSecondDownX - mulFirstDownX);
