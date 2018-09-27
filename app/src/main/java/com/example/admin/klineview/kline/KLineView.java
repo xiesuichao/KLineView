@@ -521,6 +521,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                 removeCallbacks(longPressRunnable);
 
                 if (isLongPress) {
+
                     getClickKData(event.getX());
                     if (lastKData != null) {
                         invalidate();
@@ -1308,9 +1309,9 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                 strokePaint);
 
         //底部标签
-        RectF grayRectF = new RectF(singleClickDownX - dp2px(25),
+        RectF grayRectF = new RectF((float) (lastKData.getLeftX() + avgPriceRectWidth / 2 - dp2px(25)),
                 bottomEnd - dp2px(20),
-                singleClickDownX + dp2px(25),
+                (float) (lastKData.getLeftX() + avgPriceRectWidth / 2 + dp2px(25)),
                 bottomEnd);
         fillPaint.setColor(crossHairBottomLabelCol);
         canvas.drawRoundRect(grayRectF, 4, 4, fillPaint);
@@ -1319,7 +1320,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         String moveTime = formatDate(lastKData.getTime());
         resetStrokePaint(crossHairBottomLabelTextCol, crossHairBottomLabelTextSize);
         canvas.drawText(moveTime,
-                singleClickDownX - strokePaint.measureText(moveTime) / 2,
+                (float) (lastKData.getLeftX() + avgPriceRectWidth / 2 - strokePaint.measureText(moveTime) / 2),
                 bottomEnd - dp2px(7),
                 strokePaint);
 
@@ -1462,7 +1463,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         resetStrokePaint(detailTextCol, detailTextSize);
         strokePaint.getTextBounds(detailLeftTitleArr[0], 0, detailLeftTitleArr[0].length(), detailTextRect);
 
-        if (singleClickDownX <= getMeasuredWidth() / 2) {
+        if (lastKData.getLeftX() + avgPriceRectWidth / 2 <= getMeasuredWidth() / 2) {
             //边框(右侧)
             fillPaint.setColor(detailBgCol);
             canvas.drawRect(verticalXList.get(verticalXList.size() - 1) - detailRectWidth,
