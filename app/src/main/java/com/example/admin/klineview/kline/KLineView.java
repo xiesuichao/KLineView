@@ -50,6 +50,8 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     private boolean isShowDetail = false;
     //是否长按
     private boolean isLongPress = false;
+    //长按触发时长
+    private final int LONG_PRESS_TIME_OUT = 300;
     //是否水平移动
     private boolean isHorizontalMove = false;
     //是否需要请求前期的数据
@@ -116,7 +118,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     private KData lastKData;
     private OnRequestDataListListener requestListener;
     private QuotaThread quotaThread;
-    private Handler mDelayHandler;
     private Runnable mDelayRunnable;
     private Runnable longPressRunnable;
     private GestureDetector gestureDetector;
@@ -356,6 +357,8 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         quotaThread.setUIHandler(null);
         quotaThread.quit();
         quotaThread = null;
+        removeCallbacks(mDelayRunnable);
+        removeCallbacks(longPressRunnable);
     }
 
     private void initAttrs(Context context, AttributeSet attrs) {
@@ -499,7 +502,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
             dispatchDownX = event.getX();
             dispatchDownY = event.getY();
             isLongPress = false;
-            postDelayed(longPressRunnable, 300);
+            postDelayed(longPressRunnable, LONG_PRESS_TIME_OUT);
 
         } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
             //长按控制
@@ -647,7 +650,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                 if (!isDoubleFinger) {
                     float diffTouchMoveX = Math.abs(event.getX() - singleClickDownX);
                     float diffTouchMoveY = Math.abs(event.getY() - touchDownY);
-                    if (diffTouchMoveY < 10 && diffTouchMoveX < 10) {
+                    if (diffTouchMoveY < moveLimitDistance && diffTouchMoveX < moveLimitDistance) {
                         isShowDetail = true;
                         getClickKData();
                         if (lastKData != null) {
@@ -712,11 +715,10 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     }
 
     private void stopDelay() {
-        mDelayHandler.postDelayed(mDelayRunnable, 0);
+        post(mDelayRunnable);
     }
 
     private void initStopDelay() {
-        mDelayHandler = new Handler();
         mDelayRunnable = new Runnable() {
             @Override
             public void run() {
@@ -758,7 +760,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                 requestNewData();
 
                 if (Math.abs(flingVelocityX) > 200) {
-                    mDelayHandler.postDelayed(this, 15);
+                    postDelayed(this, 15);
                 }
             }
         };

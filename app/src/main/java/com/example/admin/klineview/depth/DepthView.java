@@ -12,6 +12,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 
 import com.example.admin.klineview.PrintUtil;
 import com.example.admin.klineview.R;
@@ -49,6 +50,9 @@ public class DepthView extends View {
             abscissaTextCol, abscissaTextSize, detailBgCol, detailTextCol, detailTextSize, ordinateNum,
             buyLineStrokeWidth, sellLineStrokeWidth, detailLineCol, detailPointRadius, pricePrecision,
             volumePrecision;
+    private Runnable longPressRunnable;
+    private boolean isHorizontalMove;
+    private int moveLimitDistance;
 
     public DepthView(Context context) {
         this(context, null);
@@ -165,12 +169,24 @@ public class DepthView extends View {
 
         pricePrecision = 4;
         volumePrecision = 4;
+
         if (TextUtils.isEmpty(detailPriceTitle)) {
             detailPriceTitle = "价格(BTC)：";
         }
         if (TextUtils.isEmpty(detailVolumeTitle)) {
             detailVolumeTitle = "累积交易量：";
         }
+
+        moveLimitDistance = ViewConfiguration.get(getContext()).getScaledTouchSlop();
+        longPressRunnable = new Runnable() {
+            @Override
+            public void run() {
+                isLongPress = true;
+                isShowDetail = true;
+                getClickDepth(singleClickDownX);
+                invalidate();
+            }
+        };
 
     }
 
@@ -219,8 +235,7 @@ public class DepthView extends View {
             dispatchDownX = event.getX();
             dispatchDownY = event.getY();
             isLongPress = false;
-            canShowLongPress = true;
-            dispatchDownTime = event.getDownTime();
+            postDelayed(longPressRunnable, 300);
 
         } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
             //长按控制
@@ -228,28 +243,40 @@ public class DepthView extends View {
             float dispatchMoveY = event.getY();
             float diffDispatchMoveX = Math.abs(dispatchMoveX - dispatchDownX);
             float diffDispatchMoveY = Math.abs(dispatchMoveY - dispatchDownY);
-            if (diffDispatchMoveX > 10 || diffDispatchMoveY > 10) {
-                canShowLongPress = false;
-            }
-            if (canShowLongPress && !isLongPress
-                    && event.getEventTime() - dispatchDownTime > 300
-                    && diffDispatchMoveX < 10 && diffDispatchMoveY < 10) {
-                isLongPress = true;
-                isShowDetail = true;
-                singleClickDownX = event.getX();
-                getClickDepth(event.getX());
-                invalidate();
-            }
 
-            if (diffDispatchMoveX > 1) {
+            getParent().requestDisallowInterceptTouchEvent(true);
+
+            if (isHorizontalMove || (diffDispatchMoveX > diffDispatchMoveY + dp2px(5)
+                    && diffDispatchMoveX > moveLimitDistance)) {
+                isHorizontalMove = true;
+                removeCallbacks(longPressRunnable);
+
                 if (isLongPress) {
                     singleClickDownX = event.getX();
                     getClickDepth(event.getX());
-                    invalidate();
+                    if (clickDepth != null) {
+                        invalidate();
+                    }
                 }
+
+                return isLongPress || super.dispatchTouchEvent(event);
+
+            } else if (!isHorizontalMove && diffDispatchMoveY > diffDispatchMoveX + dp2px(5)
+                    && diffDispatchMoveY > moveLimitDistance) {
+                removeCallbacks(longPressRunnable);
+                getParent().requestDisallowInterceptTouchEvent(false);
+                return false;
+
+            } else if (diffDispatchMoveX < moveLimitDistance && diffDispatchMoveY < moveLimitDistance) {
+                singleClickDownX = event.getX();
             }
+
+        } else if (event.getAction() == MotionEvent.ACTION_UP) {
+            isHorizontalMove = false;
+            isLongPress = false;
+            getParent().requestDisallowInterceptTouchEvent(false);
         }
-        return isLongPress || super.dispatchTouchEvent(event);
+        return super.dispatchTouchEvent(event);
     }
 
     @Override
@@ -263,10 +290,12 @@ public class DepthView extends View {
             case MotionEvent.ACTION_UP:
                 float diffTouchMoveX = event.getX() - singleClickDownX;
                 float diffTouchMoveY = event.getY() - touchDownY;
-                if (diffTouchMoveY <= diffTouchMoveX && diffTouchMoveX < 5) {
-                    getClickDepth(event.getX());
+                if (diffTouchMoveY < moveLimitDistance && diffTouchMoveX < moveLimitDistance) {
                     isShowDetail = true;
-                    invalidate();
+                    getClickDepth(event.getX());
+                    if (clickDepth != null) {
+                        invalidate();
+                    }
                 }
                 break;
         }
