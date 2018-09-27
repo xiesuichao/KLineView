@@ -105,22 +105,31 @@ qq：181801034
 
     //添加购买数据
     depthView.setBuyDataList(getBuyDepthList());
+
     //添加出售数据
     depthView.setSellDataList(getSellDepthList());
+
     //重置深度数据
     depthView.resetAllData(getBuyDepthList(), getSellDepthList());
+
     //设置横坐标中间值
     depthView.setAbscissaCenterPrice(10.265);
+
     //设置数据详情的价钱说明
     depthView.setDetailPriceTitle("价格(BTC)：");
+
     //设置数据详情的数量说明
     depthView.setDetailVolumeTitle("累积交易量：");
+
     //设置横坐标价钱小数位精度
     depthView.setPricePrecision(4);
+
     //是否显示竖线
     depthView.setShowDetailLine(true);
+
     //手指单击松开后，数据是否继续显示
     depthView.setShowDetailSingleClick(true);
+
     //手指长按松开后，数据是否继续显示
     depthView.setShowDetailLongPress(true);
 
