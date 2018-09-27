@@ -33,9 +33,18 @@ public class DepthView extends View {
     private boolean isShowDetail = false;
     //是否长按
     private boolean isLongPress = false;
-    //能否显示长按
-    private boolean canShowLongPress = true;
-    private long dispatchDownTime;
+    //是否显示竖线
+    private boolean isShowDetailLine = true;
+    //手指单击松开后，数据是否继续显示
+    private boolean isShowDetailSingleClick = true;
+    //单击松开，数据延时消失，单位毫秒
+    private final int DISAPPEAR_TIME = 500;
+    //手指长按松开后，数据是否继续显示
+    private boolean isShowDetailLongPress = true;
+    //长按触发时长，单位毫秒
+    private final int LONG_PRESS_TIME_OUT = 300;
+    //横坐标中间值
+    private double abscissaCenterPrice = -1;
     private Depth clickDepth;
     private String detailPriceTitle;
     private String detailVolumeTitle;
@@ -43,16 +52,16 @@ public class DepthView extends View {
     private Rect textRect;
     private Path linePath;
     private List<Depth> buyDataList, sellDataList;
-    private float leftStart, topStart, rightEnd, bottomEnd, dispatchDownX, dispatchDownY,
-            singleClickDownX, touchDownY, detailLineWidth;
+    private float leftStart, topStart, rightEnd, bottomEnd, longPressDownX, longPressDownY,
+            singleClickDownX, singleClickDownY, detailLineWidth;
     private double maxVolume, avgVolumeSpace, avgOrdinateSpace, depthImgHeight;
     private int buyLineCol, buyBgCol, sellLineCol, sellBgCol, ordinateTextCol, ordinateTextSize,
             abscissaTextCol, abscissaTextSize, detailBgCol, detailTextCol, detailTextSize, ordinateNum,
-            buyLineStrokeWidth, sellLineStrokeWidth, detailLineCol, detailPointRadius, pricePrecision,
-            volumePrecision;
+            buyLineStrokeWidth, sellLineStrokeWidth, detailLineCol, detailPointRadius, pricePrecision;
     private Runnable longPressRunnable;
     private boolean isHorizontalMove;
     private int moveLimitDistance;
+    private Runnable singleClickDisappearRunnable;
 
     public DepthView(Context context) {
         this(context, null);
@@ -66,7 +75,6 @@ public class DepthView extends View {
         super(context, attrs, defStyleAttr);
         init(context, attrs);
     }
-
 
     /**
      * 设置购买数据
@@ -108,24 +116,64 @@ public class DepthView extends View {
         setSellDataList(sellDataList);
         isShowDetail = false;
         isLongPress = false;
-        canShowLongPress = true;
         requestLayout();
     }
 
+    /**
+     * 设置横坐标中间值
+     */
+    public void setAbscissaCenterPrice(double centerPrice) {
+        this.abscissaCenterPrice = centerPrice;
+    }
+
+    /**
+     * 是否显示竖线
+     */
+    public void setShowDetailLine(boolean isShowLine) {
+        this.isShowDetailLine = isShowLine;
+    }
+
+    /**
+     * 手指单击松开后，数据是否继续显示
+     */
+    public void setShowDetailSingleClick(boolean isShowDetailSingleClick) {
+        this.isShowDetailSingleClick = isShowDetailSingleClick;
+    }
+
+    /**
+     * 手指长按松开后，数据是否继续显示
+     */
+    public void setShowDetailLongPress(boolean isShowDetailLongPress) {
+        this.isShowDetailLongPress = isShowDetailLongPress;
+    }
+
+    /**
+     * 设置横坐标价钱小数位精度
+     */
     public void setPricePrecision(int pricePrecision) {
         this.pricePrecision = pricePrecision;
     }
 
-    public void setVolumePrecision(int volumePrecision) {
-        this.volumePrecision = volumePrecision;
-    }
-
+    /**
+     * 设置数据详情的价钱说明
+     */
     public void setDetailPriceTitle(String priceTitle) {
         this.detailPriceTitle = priceTitle;
     }
 
+    /**
+     * 设置数据详情的数量说明
+     */
     public void setDetailVolumeTitle(String volumeTitle) {
         this.detailVolumeTitle = volumeTitle;
+    }
+
+    /**
+     * 移除runnable
+     */
+    public void cancelCallback() {
+        removeCallbacks(longPressRunnable);
+        removeCallbacks(singleClickDisappearRunnable);
     }
 
     private void init(Context context, AttributeSet attrs) {
@@ -167,8 +215,7 @@ public class DepthView extends View {
         textRect = new Rect();
         linePath = new Path();
 
-        pricePrecision = 4;
-        volumePrecision = 4;
+        pricePrecision = 8;
 
         if (TextUtils.isEmpty(detailPriceTitle)) {
             detailPriceTitle = "价格(BTC)：";
@@ -183,7 +230,14 @@ public class DepthView extends View {
             public void run() {
                 isLongPress = true;
                 isShowDetail = true;
-                getClickDepth(singleClickDownX);
+                getClickDepth(longPressDownX);
+                invalidate();
+            }
+        };
+        singleClickDisappearRunnable = new Runnable() {
+            @Override
+            public void run() {
+                isShowDetail = false;
                 invalidate();
             }
         };
@@ -232,17 +286,17 @@ public class DepthView extends View {
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            dispatchDownX = event.getX();
-            dispatchDownY = event.getY();
+            longPressDownX = event.getX();
+            longPressDownY = event.getY();
             isLongPress = false;
-            postDelayed(longPressRunnable, 300);
+            postDelayed(longPressRunnable, LONG_PRESS_TIME_OUT);
 
         } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
             //长按控制
             float dispatchMoveX = event.getX();
             float dispatchMoveY = event.getY();
-            float diffDispatchMoveX = Math.abs(dispatchMoveX - dispatchDownX);
-            float diffDispatchMoveY = Math.abs(dispatchMoveY - dispatchDownY);
+            float diffDispatchMoveX = Math.abs(dispatchMoveX - longPressDownX);
+            float diffDispatchMoveY = Math.abs(dispatchMoveY - longPressDownY);
 
             getParent().requestDisallowInterceptTouchEvent(true);
 
@@ -252,7 +306,6 @@ public class DepthView extends View {
                 removeCallbacks(longPressRunnable);
 
                 if (isLongPress) {
-                    singleClickDownX = event.getX();
                     getClickDepth(event.getX());
                     if (clickDepth != null) {
                         invalidate();
@@ -267,16 +320,18 @@ public class DepthView extends View {
                 getParent().requestDisallowInterceptTouchEvent(false);
                 return false;
 
-            } else if (diffDispatchMoveX < moveLimitDistance && diffDispatchMoveY < moveLimitDistance) {
-                singleClickDownX = event.getX();
             }
 
         } else if (event.getAction() == MotionEvent.ACTION_UP) {
             isHorizontalMove = false;
-            isLongPress = false;
+            removeCallbacks(longPressRunnable);
+            if (!isShowDetailLongPress) {
+                isShowDetail = false;
+                invalidate();
+            }
             getParent().requestDisallowInterceptTouchEvent(false);
         }
-        return super.dispatchTouchEvent(event);
+        return isLongPress || super.dispatchTouchEvent(event);
     }
 
     @Override
@@ -284,25 +339,30 @@ public class DepthView extends View {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 singleClickDownX = event.getX();
-                touchDownY = event.getY();
+                singleClickDownY = event.getY();
                 break;
 
             case MotionEvent.ACTION_UP:
                 float diffTouchMoveX = event.getX() - singleClickDownX;
-                float diffTouchMoveY = event.getY() - touchDownY;
+                float diffTouchMoveY = event.getY() - singleClickDownY;
                 if (diffTouchMoveY < moveLimitDistance && diffTouchMoveX < moveLimitDistance) {
                     isShowDetail = true;
-                    getClickDepth(event.getX());
+                    getClickDepth(singleClickDownX);
                     if (clickDepth != null) {
                         invalidate();
                     }
+                }
+                if (!isShowDetailSingleClick) {
+                    postDelayed(singleClickDisappearRunnable, DISAPPEAR_TIME);
                 }
                 break;
         }
         return true;
     }
 
+    //获取单击位置数据
     private void getClickDepth(float clickX) {
+        clickDepth = null;
         if (clickX < sellDataList.get(0).getX()) {
             for (int i = 0; i < buyDataList.size(); i++) {
                 if (i + 1 < buyDataList.size() && clickX >= buyDataList.get(i).getX()
@@ -329,19 +389,29 @@ public class DepthView extends View {
         }
     }
 
+    //坐标轴
     private void drawCoordinateValue(Canvas canvas) {
         //横轴
         resetStrokePaint(abscissaTextCol, abscissaTextSize, 0);
-        String endPriceStr = formatNum(sellDataList.get(sellDataList.size() - 1).getPrice());
-        strokePaint.getTextBounds(endPriceStr, 0, endPriceStr.length(), textRect);
-        canvas.drawText(formatNum(buyDataList.get(0).getPrice()),
+        String rightPriceStr = setPrecision(sellDataList.get(sellDataList.size() - 1).getPrice(), pricePrecision);
+        strokePaint.getTextBounds(rightPriceStr, 0, rightPriceStr.length(), textRect);
+        //左边价格
+        canvas.drawText(setPrecision(buyDataList.get(0).getPrice(), pricePrecision),
                 leftStart,
                 bottomEnd - dp2px(2),
                 strokePaint);
-        canvas.drawText(endPriceStr,
+        //右边价格
+        canvas.drawText(rightPriceStr,
                 rightEnd - textRect.width(),
                 bottomEnd - dp2px(2),
                 strokePaint);
+        //中间价格
+        if (abscissaCenterPrice != -1) {
+            canvas.drawText(setPrecision(abscissaCenterPrice, pricePrecision),
+                    getWidth() / 2 - strokePaint.measureText(setPrecision(abscissaCenterPrice, pricePrecision)) / 2,
+                    bottomEnd - dp2px(2),
+                    strokePaint);
+        }
 
         //纵轴
         resetStrokePaint(ordinateTextCol, ordinateTextSize, 0);
@@ -420,9 +490,11 @@ public class DepthView extends View {
             return;
         }
         //游标线
-        resetStrokePaint(detailLineCol, 0, detailLineWidth);
-        canvas.drawLine(clickDepth.getX(), topStart, clickDepth.getX(), topStart + (float) depthImgHeight,
-                strokePaint);
+        if (isShowDetailLine) {
+            resetStrokePaint(detailLineCol, 0, detailLineWidth);
+            canvas.drawLine(clickDepth.getX(), topStart, clickDepth.getX(), topStart + (float) depthImgHeight,
+                    strokePaint);
+        }
 
         if (clickDepth.getX() < sellDataList.get(0).getX()) {
             fillPaint.setColor(buyLineCol);
@@ -481,6 +553,34 @@ public class DepthView extends View {
 
     }
 
+    /**
+     * 设置小数位精度
+     *
+     * @param num
+     * @param scale 保留几位小数
+     */
+    private String setPrecision(Double num, int scale) {
+        BigDecimal bigDecimal = new BigDecimal(num);
+        return bigDecimal.setScale(scale, BigDecimal.ROUND_DOWN).toPlainString();
+    }
+
+    /**
+     * 按量级格式化数量
+     */
+    private String formatNum(double num) {
+        if (num < 1) {
+            return setPrecision(num, 6);
+        } else if (num < 10) {
+            return setPrecision(num, 4);
+        } else if (num < 100) {
+            return setPrecision(num, 3);
+        } else if (num < 10000) {
+            return setPrecision(num / 1000, 1) + "K";
+        } else {
+            return setPrecision(num / 10000, 2) + "万";
+        }
+    }
+
     private void resetStrokePaint(int colorId, int textSize, float strokeWidth) {
         strokePaint.setColor(colorId);
         strokePaint.setTextSize(sp2px(textSize));
@@ -497,23 +597,5 @@ public class DepthView extends View {
         return (int) (spValue * fontScale + 0.5f);
     }
 
-    private String setPrecision(Double num, int scale) {
-        BigDecimal bigDecimal = new BigDecimal(num);
-        return bigDecimal.setScale(scale, BigDecimal.ROUND_DOWN).toPlainString();
-    }
-
-    private String formatNum(double num) {
-        if (num < 1) {
-            return setPrecision(num, 6);
-        } else if (num < 10) {
-            return setPrecision(num, 4);
-        } else if (num < 100) {
-            return setPrecision(num, 3);
-        } else if (num < 10000) {
-            return setPrecision(num, 2);
-        } else {
-            return setPrecision(num / 10000, 2) + "万";
-        }
-    }
 
 }
