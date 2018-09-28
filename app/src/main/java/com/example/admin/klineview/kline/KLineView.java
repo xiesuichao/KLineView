@@ -8,7 +8,6 @@ import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.support.annotation.Nullable;
@@ -143,6 +142,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
             mMinPriceY, mMaxMacd, mMinMacd, mMaxK;
     private float longPressDownX;
     private float longPressDownY;
+    private float dispatchDownX;
 
 
     public KLineView(Context context) {
@@ -414,7 +414,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         super.setOnTouchListener(this);
         super.setClickable(true);
         super.setFocusable(true);
-        setLayerType(LAYER_TYPE_NONE, null);
         gestureDetector = new GestureDetector(getContext(), new CustomGestureListener());
         moveLimitDistance = ViewConfiguration.get(getContext()).getScaledTouchSlop();
         detailRectWidth = dp2px(103);
@@ -487,13 +486,11 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         drawTickMark(canvas);
         drawMainDeputyRect(canvas);
         drawBezierCurve(canvas);
-
         drawTopPriceMAData(canvas);
         drawBotMAData(canvas);
         drawAbscissa(canvas);
         drawOrdinate(canvas);
         drawMaxMinPriceLabel(canvas);
-
         drawCrossHairLine(canvas);
         drawDetailData(canvas);
     }
@@ -503,16 +500,15 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             longPressDownX = event.getX();
             longPressDownY = event.getY();
+            dispatchDownX = event.getX();
             isLongPress = false;
             postDelayed(longPressRunnable, LONG_PRESS_TIME_OUT);
 
         } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
             //长按控制
-            float dispatchMoveX = event.getX();
-            float dispatchMoveY = event.getY();
-            float diffDispatchMoveX = Math.abs(dispatchMoveX - longPressDownX);
-            float diffDispatchMoveY = Math.abs(dispatchMoveY - longPressDownY);
-
+            float diffDispatchMoveX = Math.abs(event.getX() - longPressDownX);
+            float diffDispatchMoveY = Math.abs(event.getY() - longPressDownY);
+            float moveDistanceX = Math.abs(event.getX() - dispatchDownX);
             getParent().requestDisallowInterceptTouchEvent(true);
 
             if (isHorizontalMove || (diffDispatchMoveX > diffDispatchMoveY + dp2px(5)
@@ -520,14 +516,13 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                 isHorizontalMove = true;
                 removeCallbacks(longPressRunnable);
 
-                if (isLongPress) {
-
+                if (isLongPress && moveDistanceX > 2) {
                     getClickKData(event.getX());
                     if (lastKData != null) {
                         invalidate();
                     }
                 }
-
+                dispatchDownX = event.getX();
                 return isLongPress || super.dispatchTouchEvent(event);
 
             } else if (!isHorizontalMove && !isDoubleFinger && diffDispatchMoveY > diffDispatchMoveX + dp2px(5)
@@ -535,7 +530,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                 removeCallbacks(longPressRunnable);
                 getParent().requestDisallowInterceptTouchEvent(false);
                 return false;
-
             }
 
         } else if (event.getAction() == MotionEvent.ACTION_UP) {
@@ -579,8 +573,8 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                     float diffMoveY = Math.abs(mulSecondMoveY - mulFirstMoveY);
 
                     //双指分开，放大显示
-                    if ((diffMoveX >= diffMoveY && Math.abs(mulSecondMoveX - mulFirstMoveX) - lastDiffMoveX > 1.5)
-                            || (diffMoveY >= diffMoveX && Math.abs(mulSecondMoveY - mulFirstMoveY) - lastDiffMoveY > 1.5)) {
+                    if ((diffMoveX >= diffMoveY && diffMoveX - lastDiffMoveX > 1.5)
+                            || (diffMoveY >= diffMoveX && diffMoveY - lastDiffMoveY > 1.5)) {
 
                         if (maxViewDataNum <= VIEW_DATA_NUM_MIN) {
                             maxViewDataNum = VIEW_DATA_NUM_MIN;
@@ -605,10 +599,12 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                             maxViewDataNum -= 2;
                             startDataNum += 2;
                         }
+                        resetViewData();
+                        invalidate();
 
                         //双指靠拢，缩小显示
-                    } else if ((diffMoveX >= diffMoveY && Math.abs(mulSecondMoveX - mulFirstMoveX) - lastDiffMoveX < -1.5)
-                            || (diffMoveY >= diffMoveX && Math.abs(mulSecondMoveY - mulFirstMoveY) - lastDiffMoveY < -1.5)) {
+                    } else if ((diffMoveX >= diffMoveY && diffMoveX - lastDiffMoveX < -1.5)
+                            || (diffMoveY >= diffMoveX && diffMoveY - lastDiffMoveY < -1.5)) {
 
                         if (maxViewDataNum >= VIEW_DATA_NUM_MAX) {
                             maxViewDataNum = VIEW_DATA_NUM_MAX;
@@ -638,12 +634,12 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                             maxViewDataNum += 2;
                             startDataNum -= 2;
                         }
+                        resetViewData();
+                        invalidate();
 
                     }
                     lastDiffMoveX = Math.abs(mulSecondMoveX - mulFirstMoveX);
                     lastDiffMoveY = Math.abs(mulSecondMoveY - mulFirstMoveY);
-                    resetViewData();
-                    invalidate();
                 }
                 break;
 
@@ -693,8 +689,10 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                 return true;
             } else {
                 isShowDetail = false;
-                moveData(distanceX);
-                invalidate();
+                if (Math.abs(distanceX) > 1){
+                    moveData(distanceX);
+                    invalidate();
+                }
             }
             return true;
         }
@@ -776,8 +774,8 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         if (startDataNum < 0) {
             startDataNum = 0;
         }
-        if (startDataNum > totalDataList.size() - maxViewDataNum - 1) {
-            startDataNum = totalDataList.size() - maxViewDataNum - 1;
+        if (startDataNum > totalDataList.size() - maxViewDataNum) {
+            startDataNum = totalDataList.size() - maxViewDataNum;
         }
         requestNewData();
         resetViewData();

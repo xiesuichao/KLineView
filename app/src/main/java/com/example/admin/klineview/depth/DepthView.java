@@ -45,6 +45,7 @@ public class DepthView extends View {
     private final int LONG_PRESS_TIME_OUT = 300;
     //横坐标中间值
     private double abscissaCenterPrice = -1;
+    private boolean isHorizontalMove;
     private Depth clickDepth;
     private String detailPriceTitle;
     private String detailVolumeTitle;
@@ -52,15 +53,14 @@ public class DepthView extends View {
     private Rect textRect;
     private Path linePath;
     private List<Depth> buyDataList, sellDataList;
-    private float leftStart, topStart, rightEnd, bottomEnd, longPressDownX, longPressDownY,
-            singleClickDownX, singleClickDownY, detailLineWidth;
     private double maxVolume, avgVolumeSpace, avgOrdinateSpace, depthImgHeight;
+    private float leftStart, topStart, rightEnd, bottomEnd, longPressDownX, longPressDownY,
+            singleClickDownX, singleClickDownY, detailLineWidth, dispatchDownX;
     private int buyLineCol, buyBgCol, sellLineCol, sellBgCol, ordinateTextCol, ordinateTextSize,
             abscissaTextCol, abscissaTextSize, detailBgCol, detailTextCol, detailTextSize, ordinateNum,
-            buyLineStrokeWidth, sellLineStrokeWidth, detailLineCol, detailPointRadius, pricePrecision;
+            buyLineStrokeWidth, sellLineStrokeWidth, detailLineCol, detailPointRadius, pricePrecision,
+            moveLimitDistance;
     private Runnable longPressRunnable;
-    private boolean isHorizontalMove;
-    private int moveLimitDistance;
     private Runnable singleClickDisappearRunnable;
 
     public DepthView(Context context) {
@@ -288,6 +288,7 @@ public class DepthView extends View {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             longPressDownX = event.getX();
             longPressDownY = event.getY();
+            dispatchDownX = event.getX();
             isLongPress = false;
             postDelayed(longPressRunnable, LONG_PRESS_TIME_OUT);
 
@@ -297,6 +298,7 @@ public class DepthView extends View {
             float dispatchMoveY = event.getY();
             float diffDispatchMoveX = Math.abs(dispatchMoveX - longPressDownX);
             float diffDispatchMoveY = Math.abs(dispatchMoveY - longPressDownY);
+            float moveDistanceX = Math.abs(event.getX() - dispatchDownX);
 
             getParent().requestDisallowInterceptTouchEvent(true);
 
@@ -305,13 +307,13 @@ public class DepthView extends View {
                 isHorizontalMove = true;
                 removeCallbacks(longPressRunnable);
 
-                if (isLongPress) {
+                if (isLongPress && moveDistanceX > 2) {
                     getClickDepth(event.getX());
                     if (clickDepth != null) {
                         invalidate();
                     }
                 }
-
+                dispatchDownX = event.getX();
                 return isLongPress || super.dispatchTouchEvent(event);
 
             } else if (!isHorizontalMove && diffDispatchMoveY > diffDispatchMoveX + dp2px(5)
@@ -319,7 +321,6 @@ public class DepthView extends View {
                 removeCallbacks(longPressRunnable);
                 getParent().requestDisallowInterceptTouchEvent(false);
                 return false;
-
             }
 
         } else if (event.getAction() == MotionEvent.ACTION_UP) {
