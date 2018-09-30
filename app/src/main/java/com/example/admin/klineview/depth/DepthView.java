@@ -62,6 +62,8 @@ public class DepthView extends View {
             moveLimitDistance;
     private Runnable longPressRunnable;
     private Runnable singleClickDisappearRunnable;
+    private String leftPriceStr;
+    private String rightPriceStr;
 
     public DepthView(Context context) {
         this(context, null);
@@ -90,6 +92,8 @@ public class DepthView extends View {
                 buyDataList.get(i).setVolume(buyDataList.get(i).getVolume() + buyDataList.get(i + 1).getVolume());
             }
         }
+        requestLayout();
+        invalidate();
     }
 
     /**
@@ -106,6 +110,8 @@ public class DepthView extends View {
                 sellDataList.get(i).setVolume(sellDataList.get(i).getVolume() + sellDataList.get(i - 1).getVolume());
             }
         }
+        requestLayout();
+        invalidate();
     }
 
     /**
@@ -252,12 +258,47 @@ public class DepthView extends View {
         rightEnd = getMeasuredWidth() - getPaddingRight() - 1;
         bottomEnd = getMeasuredHeight() - getPaddingBottom() - 1;
 
-        maxVolume = Math.max(buyDataList.get(0).getVolume(), sellDataList.get(sellDataList.size() - 1).getVolume());
-        double minVolume = Math.min(buyDataList.get(buyDataList.size() - 1).getVolume(), sellDataList.get(0).getVolume());
+        double maxBuyVolume;
+        double minBuyVolume;
+        double maxSellVolume;
+        double minSellVolume;
+
+        if (!buyDataList.isEmpty()) {
+            maxBuyVolume = buyDataList.get(0).getVolume();
+            minBuyVolume = buyDataList.get(buyDataList.size() - 1).getVolume();
+        } else {
+            maxBuyVolume = minBuyVolume = 0;
+        }
+
+        if (!sellDataList.isEmpty()) {
+            maxSellVolume = sellDataList.get(sellDataList.size() - 1).getVolume();
+            minSellVolume = sellDataList.get(0).getVolume();
+        } else {
+            maxSellVolume = minSellVolume = 0;
+        }
+
+        maxVolume = Math.max(maxBuyVolume, maxSellVolume);
+        double minVolume = Math.min(minBuyVolume, minSellVolume);
 
         resetStrokePaint(abscissaTextCol, abscissaTextSize, 0);
-        String abscissaStr = buyDataList.get(0).getPrice() + "";
-        strokePaint.getTextBounds(abscissaStr, 0, abscissaStr.length(), textRect);
+
+        if (!buyDataList.isEmpty()) {
+            leftPriceStr = setPrecision(buyDataList.get(0).getPrice(), pricePrecision);
+        } else if (!sellDataList.isEmpty()) {
+            leftPriceStr = setPrecision(sellDataList.get(0).getPrice(), pricePrecision);
+        } else {
+            leftPriceStr = "0";
+        }
+
+        if (!sellDataList.isEmpty()) {
+            rightPriceStr = setPrecision(sellDataList.get(sellDataList.size() - 1).getPrice(), pricePrecision);
+        } else if (!buyDataList.isEmpty()) {
+            rightPriceStr = setPrecision(buyDataList.get(buyDataList.size() - 1).getPrice(), pricePrecision);
+        } else {
+            rightPriceStr = "0";
+        }
+
+        strokePaint.getTextBounds(leftPriceStr, 0, leftPriceStr.length(), textRect);
         depthImgHeight = bottomEnd - topStart - textRect.height() - dp2px(4);
         double avgHeightPerVolume = depthImgHeight / (maxVolume - minVolume);
         double avgWidthPerSize = (rightEnd - leftStart) / (buyDataList.size() + sellDataList.size());
@@ -278,6 +319,9 @@ public class DepthView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        if (buyDataList.isEmpty() && sellDataList.isEmpty()) {
+            return;
+        }
         drawLineAndBg(canvas);
         drawCoordinateValue(canvas);
         drawDetailData(canvas);
@@ -364,7 +408,18 @@ public class DepthView extends View {
     //获取单击位置数据
     private void getClickDepth(float clickX) {
         clickDepth = null;
-        if (clickX < sellDataList.get(0).getX()) {
+        if (sellDataList.isEmpty()) {
+            for (int i = 0; i < buyDataList.size(); i++) {
+                if (i + 1 < buyDataList.size() && clickX >= buyDataList.get(i).getX()
+                        && clickX < buyDataList.get(i + 1).getX()) {
+                    clickDepth = buyDataList.get(i);
+                    break;
+                } else if (i == buyDataList.size() - 1 && clickX >= buyDataList.get(i).getX()) {
+                    clickDepth = buyDataList.get(i);
+                    break;
+                }
+            }
+        } else if (clickX < sellDataList.get(0).getX()) {
             for (int i = 0; i < buyDataList.size(); i++) {
                 if (i + 1 < buyDataList.size() && clickX >= buyDataList.get(i).getX()
                         && clickX < buyDataList.get(i + 1).getX()) {
@@ -394,10 +449,10 @@ public class DepthView extends View {
     private void drawCoordinateValue(Canvas canvas) {
         //横轴
         resetStrokePaint(abscissaTextCol, abscissaTextSize, 0);
-        String rightPriceStr = setPrecision(sellDataList.get(sellDataList.size() - 1).getPrice(), pricePrecision);
+
         strokePaint.getTextBounds(rightPriceStr, 0, rightPriceStr.length(), textRect);
         //左边价格
-        canvas.drawText(setPrecision(buyDataList.get(0).getPrice(), pricePrecision),
+        canvas.drawText(leftPriceStr,
                 leftStart,
                 bottomEnd - dp2px(2),
                 strokePaint);
@@ -428,62 +483,67 @@ public class DepthView extends View {
 
     private void drawLineAndBg(Canvas canvas) {
         //买方背景
-        linePath.reset();
-        for (int i = 0; i < buyDataList.size(); i++) {
-            if (i == 0) {
-                linePath.moveTo(buyDataList.get(i).getX(), buyDataList.get(i).getY());
-            } else {
-                linePath.lineTo(buyDataList.get(i).getX(), buyDataList.get(i).getY());
+        if (!buyDataList.isEmpty()) {
+            linePath.reset();
+            for (int i = 0; i < buyDataList.size(); i++) {
+                if (i == 0) {
+                    linePath.moveTo(buyDataList.get(i).getX(), buyDataList.get(i).getY());
+                } else {
+                    linePath.lineTo(buyDataList.get(i).getX(), buyDataList.get(i).getY());
+                }
             }
-        }
-        if (buyDataList.get(buyDataList.size() - 1).getY() < topStart + depthImgHeight) {
-            linePath.lineTo(buyDataList.get(buyDataList.size() - 1).getX(), (float) (topStart + depthImgHeight));
-        }
-        linePath.lineTo(leftStart, (float) (topStart + depthImgHeight));
-        linePath.close();
-        fillPaint.setColor(buyBgCol);
-        canvas.drawPath(linePath, fillPaint);
+            if (!buyDataList.isEmpty() && buyDataList.get(buyDataList.size() - 1).getY() < topStart + depthImgHeight) {
+                linePath.lineTo(buyDataList.get(buyDataList.size() - 1).getX(), (float) (topStart + depthImgHeight));
+            }
+            linePath.lineTo(leftStart, (float) (topStart + depthImgHeight));
+            linePath.close();
+            fillPaint.setColor(buyBgCol);
+            canvas.drawPath(linePath, fillPaint);
 
-        //买方线条
-        linePath.reset();
-        for (int i = 0; i < buyDataList.size(); i++) {
-            if (i == 0) {
-                linePath.moveTo(buyDataList.get(i).getX(), buyDataList.get(i).getY());
-            } else {
-                linePath.lineTo(buyDataList.get(i).getX(), buyDataList.get(i).getY());
+            //买方线条
+            linePath.reset();
+            for (int i = 0; i < buyDataList.size(); i++) {
+                if (i == 0) {
+                    linePath.moveTo(buyDataList.get(i).getX(), buyDataList.get(i).getY());
+                } else {
+                    linePath.lineTo(buyDataList.get(i).getX(), buyDataList.get(i).getY());
+                }
             }
+            resetStrokePaint(buyLineCol, 0, buyLineStrokeWidth);
+            canvas.drawPath(linePath, strokePaint);
         }
-        resetStrokePaint(buyLineCol, 0, buyLineStrokeWidth);
-        canvas.drawPath(linePath, strokePaint);
 
         //卖方背景
-        linePath.reset();
-        for (int i = sellDataList.size() - 1; i >= 0; i--) {
-            if (i == sellDataList.size() - 1) {
-                linePath.moveTo(sellDataList.get(i).getX(), sellDataList.get(i).getY());
-            } else {
-                linePath.lineTo(sellDataList.get(i).getX(), sellDataList.get(i).getY());
+        if (!sellDataList.isEmpty()) {
+            linePath.reset();
+            for (int i = sellDataList.size() - 1; i >= 0; i--) {
+                if (i == sellDataList.size() - 1) {
+                    linePath.moveTo(sellDataList.get(i).getX(), sellDataList.get(i).getY());
+                } else {
+                    linePath.lineTo(sellDataList.get(i).getX(), sellDataList.get(i).getY());
+                }
             }
-        }
-        if (sellDataList.get(0).getY() < (float) (topStart + depthImgHeight)) {
-            linePath.lineTo(sellDataList.get(0).getX(), (float) (topStart + depthImgHeight));
-        }
-        linePath.lineTo(rightEnd, (float) (topStart + depthImgHeight));
-        linePath.close();
-        fillPaint.setColor(sellBgCol);
-        canvas.drawPath(linePath, fillPaint);
+            if (!sellDataList.isEmpty() && sellDataList.get(0).getY() < (float) (topStart + depthImgHeight)) {
+                linePath.lineTo(sellDataList.get(0).getX(), (float) (topStart + depthImgHeight));
+            }
+            linePath.lineTo(rightEnd, (float) (topStart + depthImgHeight));
+            linePath.close();
+            fillPaint.setColor(sellBgCol);
+            canvas.drawPath(linePath, fillPaint);
 
-        //卖方线条
-        linePath.reset();
-        for (int i = 0; i < sellDataList.size(); i++) {
-            if (i == 0) {
-                linePath.moveTo(sellDataList.get(i).getX(), sellDataList.get(i).getY());
-            } else {
-                linePath.lineTo(sellDataList.get(i).getX(), sellDataList.get(i).getY());
+            //卖方线条
+            linePath.reset();
+            for (int i = 0; i < sellDataList.size(); i++) {
+                if (i == 0) {
+                    linePath.moveTo(sellDataList.get(i).getX(), sellDataList.get(i).getY());
+                } else {
+                    linePath.lineTo(sellDataList.get(i).getX(), sellDataList.get(i).getY());
+                }
             }
+            resetStrokePaint(sellLineCol, 0, sellLineStrokeWidth);
+            canvas.drawPath(linePath, strokePaint);
         }
-        resetStrokePaint(sellLineCol, 0, sellLineStrokeWidth);
-        canvas.drawPath(linePath, strokePaint);
+
     }
 
     private void drawDetailData(Canvas canvas) {
@@ -497,9 +557,9 @@ public class DepthView extends View {
                     strokePaint);
         }
 
-        if (clickDepth.getX() < sellDataList.get(0).getX()) {
+        if (sellDataList.isEmpty() || clickDepth.getX() < sellDataList.get(0).getX()) {
             fillPaint.setColor(buyLineCol);
-        } else {
+        } else if (buyDataList.isEmpty() || clickDepth.getX() >= sellDataList.get(0).getX()) {
             fillPaint.setColor(sellLineCol);
         }
         canvas.drawCircle(clickDepth.getX(), clickDepth.getY(), dp2px(detailPointRadius), fillPaint);

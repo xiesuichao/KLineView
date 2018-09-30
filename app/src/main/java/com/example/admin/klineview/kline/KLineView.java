@@ -168,7 +168,12 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     }
 
     /**
-     * 控件初始化时添加的数据量，目前限制单次添加数据量不超过1100条
+     * 控件初始化时添加的数据量，建议每次添加数据在2000条左右
+     * 已对性能做优化，总数据量十万条以上对用户体验没有影响
+     * 首次加载5000条数据，页面初始化到加载完成，总共耗时400+ms，不超过0.5秒。
+     * 分页加载5000条数据时，如果正在滑动过程中，添加数据的那一瞬间会稍微有一下卡顿，影响不大。
+     * 经测试，800块的华为荣耀6A 每次添加4000条以下数据不会有卡顿，很流畅。
+     * @param dataList
      */
     public void initKDataList(List<KData> dataList) {
         this.totalDataList.clear();
@@ -191,9 +196,8 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     }
 
     /**
-     * 分页加载，向前期滑动时，进行分页加载添加数据，目前限制单次添加数据量不超过1100条
+     * 分页加载，向前期滑动时，进行分页加载添加数据，建议每次添加数据在2000条左右
      * 配合setOnRequestDataListListener接口使用实现自动分页加载
-     *
      * @param isNeedReqPre 下次向前期滑动到边界时，是否需要自动调用接口请求数据
      */
     public void addPreDataList(List<KData> dataList, boolean isNeedReqPre) {
@@ -206,7 +210,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     }
 
     /**
-     * 分页加载，向前期滑动时，进行分页加载添加数据，目前限制单次添加数据量不超过1100条
+     * 分页加载，向前期滑动时，进行分页加载添加数据，建议每次添加数据在2000条左右
      * 配合setOnRequestDataListListener接口使用实现自动分页加载
      * 首次调用该方法后会记录该次list.size，后续继续调用时会将传进来的list.size与首次
      * 的进行比较，如果比首次的size小，则判定为数据已拿完，不再自动调用接口请求数据。
@@ -287,7 +291,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         }
 
         resetViewData();
-        invalidate();
     }
 
     /**
@@ -462,7 +465,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
             if (startDataNum == totalDataList.size() - maxViewDataNum - 2) {
                 startDataNum++;
                 resetViewData();
-                invalidate();
             }
         }
         return false;
@@ -600,7 +602,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                             startDataNum += 2;
                         }
                         resetViewData();
-                        invalidate();
 
                         //双指靠拢，缩小显示
                     } else if ((diffMoveX >= diffMoveY && diffMoveX - lastDiffMoveX < -1.5)
@@ -635,7 +636,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                             startDataNum -= 2;
                         }
                         resetViewData();
-                        invalidate();
 
                     }
                     lastDiffMoveX = Math.abs(mulSecondMoveX - mulFirstMoveX);
@@ -689,7 +689,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                 return true;
             } else {
                 isShowDetail = false;
-                if (Math.abs(distanceX) > 1){
+                if (Math.abs(distanceX) > 1) {
                     moveData(distanceX);
                     invalidate();
                 }
@@ -755,7 +755,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                     }
                 }
                 resetViewData();
-                invalidate();
                 requestNewData();
 
                 if (Math.abs(flingVelocityX) > 200) {
@@ -817,6 +816,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         } else {
             lastKData = null;
         }
+        invalidate();
     }
 
     //刻度线
