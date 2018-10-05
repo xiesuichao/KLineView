@@ -178,7 +178,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 closePrice = openPrice + getAddRandomDouble();
                 maxPrice = closePrice + getAddRandomDouble();
                 minPrice = openPrice - getSubRandomDouble();
-                volume = random.nextInt(10) * 100 + random.nextInt(10) * 10 + random.nextInt(10) + random.nextDouble();
+                volume = random.nextInt(100) * 1000 + random.nextInt(10) * 10 + random.nextInt(10) + random.nextDouble();
                 dataList.add(new KData(start + i * 60 * 1000 * 5, openPrice, closePrice, maxPrice, minPrice, volume));
                 openPrice = closePrice;
             }
@@ -187,7 +187,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 closePrice = openPrice - getSubRandomDouble();
                 maxPrice = openPrice + getAddRandomDouble();
                 minPrice = closePrice - getSubRandomDouble();
-                volume = random.nextInt(10) * 100 + random.nextInt(10) * 10 + random.nextInt(10) + random.nextDouble();
+                volume = random.nextInt(100) * 1000 + random.nextInt(10) * 10 + random.nextInt(10) + random.nextDouble();
                 dataList.add(new KData(start + i * 60 * 1000 * 5, openPrice, closePrice, maxPrice, minPrice, volume));
                 openPrice = closePrice;
             }

@@ -134,15 +134,12 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     private float leftStart, topStart, rightEnd, bottomEnd, mulFirstDownX, mulFirstDownY, lastDiffMoveX,
             lastDiffMoveY, singleClickDownX, detailTextVerticalSpace,
             volumeImgBot, verticalSpace, flingVelocityX, priceImgBot, deputyTopY, deputyCenterY,
-            singleClickDownY, mulSecondDownX;
+            singleClickDownY, mulSecondDownX, longPressDownX, longPressDownY, dispatchDownX;
 
     private double maxPrice, topPrice, maxPriceX, minPrice, botPrice, minPriceX, maxVolume, avgHeightPerPrice,
             avgPriceRectWidth, avgHeightPerVolume, avgHeightMacd, avgHeightDea, avgHeightDif,
             avgHeightK, avgHeightD, avgHeightJ, mMaxPriceY,
             mMinPriceY, mMaxMacd, mMinMacd, mMaxK;
-    private float longPressDownX;
-    private float longPressDownY;
-    private float dispatchDownX;
 
 
     public KLineView(Context context) {
@@ -173,6 +170,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
      * 首次加载5000条数据，页面初始化到加载完成，总共耗时400+ms，不超过0.5秒。
      * 分页加载5000条数据时，如果正在滑动过程中，添加数据的那一瞬间会稍微有一下卡顿，影响不大。
      * 经测试，800块的华为荣耀6A 每次添加4000条以下数据不会有卡顿，很流畅。
+     *
      * @param dataList
      */
     public void initKDataList(List<KData> dataList) {
@@ -198,6 +196,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     /**
      * 分页加载，向前期滑动时，进行分页加载添加数据，建议每次添加数据在2000条左右
      * 配合setOnRequestDataListListener接口使用实现自动分页加载
+     *
      * @param isNeedReqPre 下次向前期滑动到边界时，是否需要自动调用接口请求数据
      */
     public void addPreDataList(List<KData> dataList, boolean isNeedReqPre) {
@@ -511,6 +510,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
             float diffDispatchMoveX = Math.abs(event.getX() - longPressDownX);
             float diffDispatchMoveY = Math.abs(event.getY() - longPressDownY);
             float moveDistanceX = Math.abs(event.getX() - dispatchDownX);
+//            PrintUtil.log("moveDistanceX", moveDistanceX);
             getParent().requestDisallowInterceptTouchEvent(true);
 
             if (isHorizontalMove || (diffDispatchMoveX > diffDispatchMoveY + dp2px(5)
@@ -518,7 +518,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                 isHorizontalMove = true;
                 removeCallbacks(longPressRunnable);
 
-                if (isLongPress && moveDistanceX > 2) {
+                if (isLongPress && moveDistanceX > 1) {
                     getClickKData(event.getX());
                     if (lastKData != null) {
                         invalidate();
@@ -574,9 +574,10 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                     float diffMoveX = Math.abs(mulSecondMoveX - mulFirstMoveX);
                     float diffMoveY = Math.abs(mulSecondMoveY - mulFirstMoveY);
 
+                    PrintUtil.log("diffMoveX - lastDiffMoveX", diffMoveX - lastDiffMoveX);
                     //双指分开，放大显示
-                    if ((diffMoveX >= diffMoveY && diffMoveX - lastDiffMoveX > 1.5)
-                            || (diffMoveY >= diffMoveX && diffMoveY - lastDiffMoveY > 1.5)) {
+                    if ((diffMoveX >= diffMoveY && diffMoveX - lastDiffMoveX > 1)
+                            || (diffMoveY >= diffMoveX && diffMoveY - lastDiffMoveY > 1)) {
 
                         if (maxViewDataNum <= VIEW_DATA_NUM_MIN) {
                             maxViewDataNum = VIEW_DATA_NUM_MIN;
@@ -604,8 +605,8 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                         resetViewData();
 
                         //双指靠拢，缩小显示
-                    } else if ((diffMoveX >= diffMoveY && diffMoveX - lastDiffMoveX < -1.5)
-                            || (diffMoveY >= diffMoveX && diffMoveY - lastDiffMoveY < -1.5)) {
+                    } else if ((diffMoveX >= diffMoveY && diffMoveX - lastDiffMoveX < -1)
+                            || (diffMoveY >= diffMoveX && diffMoveY - lastDiffMoveY < -1)) {
 
                         if (maxViewDataNum >= VIEW_DATA_NUM_MAX) {
                             maxViewDataNum = VIEW_DATA_NUM_MAX;
@@ -792,8 +793,8 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
 
     private void requestNewData() {
         if (startDataNum <= totalDataList.size() / 3 && isNeedRequestPreData) {
-            requestListener.requestData();
             isNeedRequestPreData = false;
+            requestListener.requestData();
         }
     }
 
@@ -1346,8 +1347,10 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                     / (horizontalYList.get(3) - horizontalYList.get(0));
         }
 
-        String movePrice = setPrecision(topPrice
-                - avgPricePerHeight * ((float) lastKData.getCloseY() - horizontalYList.get(0)), 2);
+        /*String movePrice = setPrecision(topPrice
+                - avgPricePerHeight * ((float) lastKData.getCloseY() - horizontalYList.get(0)), 2);*/
+        String movePrice = formatKDataNum(topPrice
+                - avgPricePerHeight * ((float) lastKData.getCloseY() - horizontalYList.get(0)));
         Rect textRect = new Rect();
         resetStrokePaint(crossHairRightLabelTextCol, crossHairRightLabelTextSize);
         strokePaint.getTextBounds(movePrice, 0, movePrice.length(), textRect);
@@ -1758,15 +1761,15 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         Rect rect = new Rect();
         resetStrokePaint(ordinateTextCol, ordinateTextSize);
         //最高价
-        strokePaint.getTextBounds(topPrice + "", 0, (topPrice + "").length(), rect);
-        canvas.drawText(setPrecision(topPrice, 2),
+        strokePaint.getTextBounds(formatKDataNum(topPrice), 0, formatKDataNum(topPrice).length(), rect);
+        canvas.drawText(formatKDataNum(topPrice),
                 verticalXList.get(verticalXList.size() - 1) + dp2px(4),
                 horizontalYList.get(0) + rect.height(),
                 strokePaint);
 
         //最低价
-        strokePaint.getTextBounds(botPrice + "", 0, (botPrice + "").length(), rect);
-        canvas.drawText(setPrecision(botPrice, 2),
+        strokePaint.getTextBounds(formatKDataNum(botPrice), 0, formatKDataNum(botPrice).length(), rect);
+        canvas.drawText(formatKDataNum(botPrice),
                 verticalXList.get(verticalXList.size() - 1) + dp2px(4),
                 priceImgBot - dp2px(3),
                 strokePaint);
@@ -1774,7 +1777,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         if (!isShowDeputy) {
             double avgPrice = (topPrice - botPrice) / 4;
             for (int i = 0; i < 3; i++) {
-                canvas.drawText(setPrecision(topPrice - avgPrice * (i + 1), 2),
+                canvas.drawText(formatKDataNum(topPrice - avgPrice * (i + 1)),
                         verticalXList.get(verticalXList.size() - 1) + dp2px(4),
                         horizontalYList.get(i + 1) + rect.height() / 2,
                         strokePaint);
@@ -1782,7 +1785,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         } else {
             double avgPrice = (topPrice - botPrice) / 3;
             for (int i = 0; i < 2; i++) {
-                canvas.drawText(setPrecision(topPrice - avgPrice * (i + 1), 2),
+                canvas.drawText(formatKDataNum(topPrice - avgPrice * (i + 1)),
                         verticalXList.get(verticalXList.size() - 1) + dp2px(4),
                         horizontalYList.get(i + 1) + rect.height() / 2,
                         strokePaint);
@@ -1806,8 +1809,8 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                     centerDeputy = setPrecision((mMaxMacd - mMinMacd) / 2, 2);
                 }
             } else if (deputyImgType == DEPUTY_IMG_KDJ) {
-                topDeputy = mMaxK + "";
-                centerDeputy = mMaxK / 2 + "";
+                topDeputy = setPrecision(mMaxK, 2);
+                centerDeputy = setPrecision(mMaxK / 2, 2);
                 botDeputy = "0";
             }
 
@@ -1828,14 +1831,14 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         }
 
         //最高量
-        strokePaint.getTextBounds(maxVolume + "", 0, (maxVolume + "").length(), rect);
-        canvas.drawText(setPrecision(maxVolume, 2),
+        strokePaint.getTextBounds(formatVolNum(maxVolume), 0, formatVolNum(maxVolume).length(), rect);
+        canvas.drawText(formatVolNum(maxVolume),
                 verticalXList.get(verticalXList.size() - 1) + dp2px(4),
                 priceImgBot + rect.height() + dp2px(3),
                 strokePaint);
 
         //最高量/2
-        canvas.drawText(setPrecision(maxVolume / 2, 2),
+        canvas.drawText(formatVolNum(maxVolume / 2),
                 verticalXList.get(verticalXList.size() - 1) + dp2px(4),
                 volumeImgBot - verticalSpace / 2,
                 strokePaint);
@@ -1866,9 +1869,42 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         return format.format(new Date(timeStamp));
     }
 
+    /**
+     * 设置小数位精度
+     *
+     * @param num
+     * @param scale 保留几位小数
+     */
     private String setPrecision(Double num, int scale) {
         BigDecimal bigDecimal = new BigDecimal(num);
         return bigDecimal.setScale(scale, BigDecimal.ROUND_DOWN).toPlainString();
+    }
+
+    /**
+     * 按量级格式化数量
+     */
+    private String formatKDataNum(double num) {
+        if (num < 1) {
+            return setPrecision(num, 6);
+        } else if (num < 10) {
+            return setPrecision(num, 4);
+        } else if (num < 100) {
+            return setPrecision(num, 3);
+        } else if (num < 10000) {
+            return setPrecision(num, 2);
+        } else {
+            return setPrecision(num / 10000, 2) + "万";
+        }
+    }
+
+    private String formatVolNum(double num) {
+        if (num > 10000) {
+            return setPrecision(num / 10000, 2) + "万";
+        } else if (num > 100000000) {
+            return setPrecision(num / 100000000, 2) + "亿";
+        } else {
+            return setPrecision(num, 2);
+        }
     }
 
     private void resetStrokePaint(int colorId, int textSize) {
