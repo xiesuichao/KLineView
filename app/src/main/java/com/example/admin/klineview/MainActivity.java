@@ -85,10 +85,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void run() {
                 //实时刷新时添加单条数据
                 mKLineView.addSingleData(getKDataList(0.1).get(0));
-                mHandler.postDelayed(this, 5000);
+                mHandler.postDelayed(this, 1000);
             }
         };
-//        mHandler.postDelayed(singleDataRunnable, 2000);
+        mHandler.postDelayed(singleDataAddRunnable, 2000);
 
     }
 
@@ -175,20 +175,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         for (int x = 0; x < num * 10; x++) {
             for (int i = 0; i < 12; i++) {
+                start += 60 * 1000 * 5;
                 closePrice = openPrice + getAddRandomDouble();
                 maxPrice = closePrice + getAddRandomDouble();
                 minPrice = openPrice - getSubRandomDouble();
                 volume = random.nextInt(100) * 1000 + random.nextInt(10) * 10 + random.nextInt(10) + random.nextDouble();
-                dataList.add(new KData(start + i * 60 * 1000 * 5, openPrice, closePrice, maxPrice, minPrice, volume));
+                dataList.add(new KData(start, openPrice, closePrice, maxPrice, minPrice, volume));
                 openPrice = closePrice;
             }
 
             for (int i = 0; i < 8; i++) {
+                start += 60 * 1000 * 5;
                 closePrice = openPrice - getSubRandomDouble();
                 maxPrice = openPrice + getAddRandomDouble();
                 minPrice = closePrice - getSubRandomDouble();
                 volume = random.nextInt(100) * 1000 + random.nextInt(10) * 10 + random.nextInt(10) + random.nextDouble();
-                dataList.add(new KData(start + i * 60 * 1000 * 5, openPrice, closePrice, maxPrice, minPrice, volume));
+                dataList.add(new KData(start, openPrice, closePrice, maxPrice, minPrice, volume));
                 openPrice = closePrice;
             }
 
