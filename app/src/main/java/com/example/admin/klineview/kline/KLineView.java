@@ -187,9 +187,9 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     public void addSingleData(KData data) {
         endDataList.clear();
         int startIndex;
-        if (totalDataList.size() >=30){
+        if (totalDataList.size() >= 30) {
             startIndex = totalDataList.size() - 30;
-        }else {
+        } else {
             startIndex = 0;
         }
         endDataList.addAll(totalDataList.subList(startIndex, totalDataList.size()));
@@ -471,7 +471,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                     && startDataNum == totalDataList.size() - maxViewDataNum - 1) {
                 startDataNum++;
                 resetViewData();
-            }else {
+            } else {
                 resetViewData();
             }
         }
@@ -821,7 +821,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         }
         if (viewDataList.size() > 0 && !isShowDetail) {
             lastKData = viewDataList.get(viewDataList.size() - 1);
-        } else if (viewDataList.isEmpty()){
+        } else if (viewDataList.isEmpty()) {
             lastKData = null;
         }
         invalidate();
