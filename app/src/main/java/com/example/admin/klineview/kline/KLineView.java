@@ -66,6 +66,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     private int deputyImgType = 0;
     public static final int DEPUTY_IMG_MACD = 0;
     public static final int DEPUTY_IMG_KDJ = 1;
+    public static final int DEPUTY_IMG_RSI = 2;
 
     private final String STR_MA5 = "Ma5:";
     private final String STR_MA10 = "Ma10:";
@@ -79,6 +80,10 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     private final String STR_K = "K:";
     private final String STR_D = "D:";
     private final String STR_J = "J:";
+    private final String STR_RSI_TITLE = "RSI(6,12,24)";
+    private final String STR_RS1 = "RS1:";
+    private final String STR_RS2 = "RS2:";
+    private final String STR_RS3 = "RS3:";
 
     private int initTotalListSize = 0;
 
@@ -140,6 +145,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
             avgPriceRectWidth, avgHeightPerVolume, avgHeightMacd, avgHeightDea, avgHeightDif,
             avgHeightK, avgHeightD, avgHeightJ, mMaxPriceY,
             mMinPriceY, mMaxMacd, mMinMacd, mMaxK;
+    private double avgHeightRSI;
 
 
     public KLineView(Context context) {
@@ -170,8 +176,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
      * 首次加载5000条数据，页面初始化到加载完成，总共耗时400+ms，不超过0.5秒。
      * 分页加载5000条数据时，如果正在滑动过程中，添加数据的那一瞬间会稍微有一下卡顿，影响不大。
      * 经测试，800块的华为荣耀6A 每次添加4000条以下数据不会有卡顿，很流畅。
-     *
-     * @param dataList
      */
     public void initKDataList(List<KData> dataList) {
         this.totalDataList.clear();
@@ -219,6 +223,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
      * 配合setOnRequestDataListListener接口使用实现自动分页加载
      * 首次调用该方法后会记录该次list.size，后续继续调用时会将传进来的list.size与首次
      * 的进行比较，如果比首次的size小，则判定为数据已拿完，不再自动调用接口请求数据。
+     *
      * ---该方法仅在能保证每次分页加载拿到的数据list.size相同的情况下调用，否则，请调用
      * 上面的方法，手动传入isNeedReqPre用来判断是否需要继续自动调用接口请求数据
      */
@@ -236,10 +241,8 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
 
     /**
      * 重置所有数据，
-     * 1、如果当前view显示的第一条数据的时间在新数据时间范围内，
-     * 则将当前view显示的新数据仍然以该时间点显示。
-     * 2、如果新数据的list.size大于等于当前view的最大显示数据条数，
-     * 则最大显示条数保持不变
+     * 如果reset前显示的第一条数据的时间点在新数据时间范围内，
+     * 则reset后显示的第一条仍然是该时间点。
      */
     public void resetDataList(List<KData> dataList) {
         long currentStartTime = viewDataList.get(0).getTime();
@@ -264,6 +267,10 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
 
             case DEPUTY_IMG_KDJ:
                 QuotaUtil.initKDJ(totalDataList, false);
+                break;
+
+            case DEPUTY_IMG_RSI:
+                QuotaUtil.initRSI(totalDataList, false);
                 break;
         }
 
@@ -323,6 +330,18 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
      * 是否显示副图
      */
     public void setDeputyPicShow(boolean showState) {
+        this.isShowDeputy = showState;
+        if (isShowDeputy) {
+            setDeputyImgType(deputyImgType);
+        }
+        invalidate();
+    }
+
+    /**
+     * 设置副图显示类型，0：MACD, 1:KDJ
+     */
+    public void setDeputyImgType(int type) {
+        this.deputyImgType = type;
         switch (deputyImgType) {
             case DEPUTY_IMG_MACD:
                 QuotaUtil.initMACD(totalDataList, false);
@@ -331,25 +350,11 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
             case DEPUTY_IMG_KDJ:
                 QuotaUtil.initKDJ(totalDataList, false);
                 break;
-        }
-        this.isShowDeputy = showState;
-        invalidate();
-    }
 
-    /**
-     * 设置副图显示类型，0：MACD, 1:KDJ
-     */
-    public void setDeputyImgType(int type) {
-        switch (type) {
-            case DEPUTY_IMG_MACD:
-                QuotaUtil.initMACD(totalDataList, false);
-                break;
-
-            case DEPUTY_IMG_KDJ:
-                QuotaUtil.initKDJ(totalDataList, false);
+            case DEPUTY_IMG_RSI:
+                QuotaUtil.initRSI(totalDataList, false);
                 break;
         }
-        this.deputyImgType = type;
         invalidate();
     }
 
@@ -923,9 +928,8 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                 if (viewDataList.get(i).getDif() <= minDif) {
                     minDif = viewDataList.get(i).getDif();
                 }
-            }
 
-            if (isShowDeputy && deputyImgType == DEPUTY_IMG_KDJ) {
+            } else if (isShowDeputy && deputyImgType == DEPUTY_IMG_KDJ) {
                 if (viewDataList.get(i).getK() >= mMaxK) {
                     mMaxK = viewDataList.get(i).getK();
                 }
@@ -984,15 +988,17 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
             } else if (minDif >= 0) {
                 avgHeightDif = (horizontalYList.get(horizontalYList.size() - 1) - deputyTopY - dp2px(24)) / Math.abs(maxDif);
             }
-        }
 
-        if (isShowDeputy && deputyImgType == DEPUTY_IMG_KDJ) {
+        } else if (isShowDeputy && deputyImgType == DEPUTY_IMG_KDJ) {
             //K
             avgHeightK = (horizontalYList.get(horizontalYList.size() - 1) - deputyTopY - dp2px(12)) / mMaxK;
             //D
             avgHeightD = (horizontalYList.get(horizontalYList.size() - 1) - deputyTopY - dp2px(12)) / maxD;
             //J
             avgHeightJ = (horizontalYList.get(horizontalYList.size() - 1) - deputyTopY - dp2px(12)) / maxJ;
+
+        } else if (isShowDeputy && deputyImgType == DEPUTY_IMG_RSI) {
+            avgHeightRSI = (horizontalYList.get(horizontalYList.size() - 1) - deputyTopY) / 100;
         }
 
         for (int i = 0; i < viewDataList.size(); i++) {
@@ -1006,12 +1012,14 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                 lowerPrice = closedPrice;
                 fillPaint.setColor(priceFallCol);
                 resetStrokePaint(priceFallCol, 0);
+
             } else {
                 higherPrice = closedPrice;
                 lowerPrice = openPrice;
                 fillPaint.setColor(priceIncreaseCol);
                 resetStrokePaint(priceIncreaseCol, 0);
             }
+
             viewDataList.get(i).setCloseY((float) (horizontalYList.get(0) + (topPrice - closedPrice) * avgHeightPerPrice));
             //priceRect
             canvas.drawRect((float) viewDataList.get(i).getLeftX() + dp2px(0.5f),
@@ -1082,6 +1090,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                         - viewDataList.get(i).getVolumeMa5() * avgHeightPerVolume));
                 volumeMa5PointList.add(volumeMa5Point);
             }
+
             Pointer volumeMa10Point = new Pointer();
             if (viewDataList.get(i).getVolumeMa10() > 0) {
                 volumeMa10Point.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
@@ -1100,6 +1109,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                                 + (maxPrice - viewDataList.get(i).getPriceMa5()) * avgHeightPerPrice));
                         mainMa5PointList.add(priceMa5Point);
                     }
+
                     Pointer priceMa10Point = new Pointer();
                     if (viewDataList.get(i).getPriceMa10() > 0) {
                         priceMa10Point.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
@@ -1107,6 +1117,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                                 + (maxPrice - viewDataList.get(i).getPriceMa10()) * avgHeightPerPrice));
                         mainMa10PointList.add(priceMa10Point);
                     }
+
                     Pointer priceMa30Point = new Pointer();
                     if (viewDataList.get(i).getPriceMa30() > 0) {
                         priceMa30Point.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
@@ -1125,6 +1136,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                                 + (maxPrice - viewDataList.get(i).getEma5()) * avgHeightPerPrice));
                         mainMa5PointList.add(ema5Point);
                     }
+
                     Pointer ema10Point = new Pointer();
                     if (viewDataList.get(i).getEma10() > 0) {
                         ema10Point.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
@@ -1132,6 +1144,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                                 + (maxPrice - viewDataList.get(i).getEma10()) * avgHeightPerPrice));
                         mainMa10PointList.add(ema10Point);
                     }
+
                     Pointer ema30Point = new Pointer();
                     if (viewDataList.get(i).getEma30() > 0) {
                         ema30Point.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
@@ -1150,6 +1163,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                                 + (maxPrice - viewDataList.get(i).getBollMb()) * avgHeightPerPrice));
                         mainMa5PointList.add(bollMbPoint);
                     }
+
                     Pointer bollUpPoint = new Pointer();
                     if (viewDataList.get(i).getBollUp() > 0) {
                         bollUpPoint.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
@@ -1157,6 +1171,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                                 + (maxPrice - viewDataList.get(i).getBollUp()) * avgHeightPerPrice));
                         mainMa10PointList.add(bollUpPoint);
                     }
+
                     Pointer bollDnPoint = new Pointer();
                     if (viewDataList.get(i).getBollDn() > 0) {
                         bollDnPoint.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
@@ -1208,6 +1223,28 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                     jPoint.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
                     jPoint.setY((float) (horizontalYList.get(5) - viewDataList.get(i).getJ() * avgHeightJ));
                     deputyMa30PointList.add(jPoint);
+                }
+
+            } else if (isShowDeputy && deputyImgType == DEPUTY_IMG_RSI) {
+                Pointer rs1Point = new Pointer();
+                if (viewDataList.get(i).getRs1() >= 0) {
+                    rs1Point.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
+                    rs1Point.setY((float) (horizontalYList.get(5) - viewDataList.get(i).getRs1() * avgHeightRSI));
+                    deputyMa5PointList.add(rs1Point);
+                }
+
+                Pointer rs2Point = new Pointer();
+                if (viewDataList.get(i).getRs2() >= 0) {
+                    rs2Point.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
+                    rs2Point.setY((float) (horizontalYList.get(5) - viewDataList.get(i).getRs2() * avgHeightRSI));
+                    deputyMa10PointList.add(rs2Point);
+                }
+
+                Pointer rs3Point = new Pointer();
+                if (viewDataList.get(i).getRs3() >= 0) {
+                    rs3Point.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
+                    rs3Point.setY((float) (horizontalYList.get(5) - viewDataList.get(i).getRs3() * avgHeightRSI));
+                    deputyMa30PointList.add(rs3Point);
                 }
             }
         }
@@ -1288,6 +1325,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                     lastKData = null;
                 }
             }
+
         } else {
             lastKData = viewDataList.get(viewDataList.size() - 1);
         }
@@ -1354,8 +1392,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                     / (horizontalYList.get(3) - horizontalYList.get(0));
         }
 
-        /*String movePrice = setPrecision(topPrice
-                - avgPricePerHeight * ((float) lastKData.getCloseY() - horizontalYList.get(0)), 2);*/
         String movePrice = formatKDataNum(topPrice
                 - avgPricePerHeight * ((float) lastKData.getCloseY() - horizontalYList.get(0)));
         Rect textRect = new Rect();
@@ -1661,70 +1697,56 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                 priceImgBot + volRect.height() + dp2px(2),
                 strokePaint);
 
+        String titleStr = "";
+        String firstStr = "";
+        String secondStr = "";
+        String thirdStr = "";
         if (isShowDeputy && deputyImgType == DEPUTY_IMG_MACD) {
-            //MACD
-            Rect titleRect = new Rect();
-            resetStrokePaint(volumeTextCol, volumeTextSize);
-            strokePaint.getTextBounds(STR_MACD_TITLE, 0, STR_MACD_TITLE.length(), titleRect);
-            canvas.drawText(STR_MACD_TITLE,
-                    verticalXList.get(0),
-                    horizontalYList.get(4) + titleRect.height(),
-                    strokePaint);
-
-            String macdStr = STR_MACD + setPrecision(lastKData.getMacd(), 2);
-            resetStrokePaint(priceMa5Col, volumeTextSize);
-            canvas.drawText(macdStr,
-                    verticalXList.get(0) + titleRect.width() + dp2px(10),
-                    horizontalYList.get(4) + titleRect.height(),
-                    strokePaint);
-            float macdWidth = strokePaint.measureText(macdStr);
-
-            String difStr = STR_DIF + setPrecision(lastKData.getDif(), 2);
-            resetStrokePaint(priceMa10Col, volumeTextSize);
-            canvas.drawText(difStr,
-                    verticalXList.get(0) + titleRect.width() + dp2px(20) + macdWidth,
-                    horizontalYList.get(4) + titleRect.height(),
-                    strokePaint);
-            float difWidth = strokePaint.measureText(difStr);
-
-            resetStrokePaint(priceMa30Col, volumeTextSize);
-            canvas.drawText(STR_DEA + setPrecision(lastKData.getDea(), 2),
-                    verticalXList.get(0) + titleRect.width() + dp2px(30) + macdWidth + difWidth,
-                    horizontalYList.get(4) + titleRect.height(),
-                    strokePaint);
+            titleStr = STR_MACD_TITLE;
+            firstStr = STR_MACD + setPrecision(lastKData.getMacd(), 2);
+            secondStr = STR_DIF + setPrecision(lastKData.getDif(), 2);
+            thirdStr = STR_DEA + setPrecision(lastKData.getDea(), 2);
 
         } else if (isShowDeputy && deputyImgType == DEPUTY_IMG_KDJ) {
-            //KDJ
-            Rect titleRect = new Rect();
-            resetStrokePaint(volumeTextCol, volumeTextSize);
-            strokePaint.getTextBounds(STR_KDJ_TITLE, 0, STR_KDJ_TITLE.length(), titleRect);
-            canvas.drawText(STR_KDJ_TITLE,
-                    verticalXList.get(0),
-                    horizontalYList.get(4) + titleRect.height(),
-                    strokePaint);
+            titleStr = STR_KDJ_TITLE;
+            firstStr = STR_K + setPrecision(lastKData.getK(), 2);
+            secondStr = STR_D + setPrecision(lastKData.getD(), 2);
+            thirdStr = STR_J + setPrecision(lastKData.getJ(), 2);
 
-            String kStr = STR_K + setPrecision(lastKData.getK(), 2);
-            resetStrokePaint(priceMa5Col, volumeTextSize);
-            canvas.drawText(kStr,
-                    verticalXList.get(0) + titleRect.width() + dp2px(10),
-                    horizontalYList.get(4) + titleRect.height(),
-                    strokePaint);
-            float kWidth = strokePaint.measureText(kStr);
-
-            String dStr = STR_D + setPrecision(lastKData.getD(), 2);
-            resetStrokePaint(priceMa10Col, volumeTextSize);
-            canvas.drawText(dStr,
-                    verticalXList.get(0) + titleRect.width() + dp2px(20) + kWidth,
-                    horizontalYList.get(4) + titleRect.height(),
-                    strokePaint);
-            float dWidth = strokePaint.measureText(dStr);
-
-            resetStrokePaint(priceMa30Col, volumeTextSize);
-            canvas.drawText(STR_J + setPrecision(lastKData.getJ(), 2),
-                    verticalXList.get(0) + titleRect.width() + dp2px(30) + kWidth + dWidth,
-                    horizontalYList.get(4) + titleRect.height(),
-                    strokePaint);
+        } else if (isShowDeputy && deputyImgType == DEPUTY_IMG_RSI) {
+            titleStr = STR_RSI_TITLE;
+            firstStr = STR_RS1 + setPrecision(lastKData.getRs1(), 2);
+            secondStr = STR_RS2 + setPrecision(lastKData.getRs2(), 2);
+            thirdStr = STR_RS3 + setPrecision(lastKData.getRs3(), 2);
         }
+
+        Rect titleRect = new Rect();
+        resetStrokePaint(volumeTextCol, volumeTextSize);
+        strokePaint.getTextBounds(titleStr, 0, titleStr.length(), titleRect);
+        canvas.drawText(titleStr,
+                verticalXList.get(0),
+                horizontalYList.get(4) + titleRect.height(),
+                strokePaint);
+
+        resetStrokePaint(priceMa5Col, volumeTextSize);
+        canvas.drawText(firstStr,
+                verticalXList.get(0) + titleRect.width() + dp2px(10),
+                horizontalYList.get(4) + titleRect.height(),
+                strokePaint);
+        float firstWidth = strokePaint.measureText(firstStr);
+
+        resetStrokePaint(priceMa10Col, volumeTextSize);
+        canvas.drawText(secondStr,
+                verticalXList.get(0) + titleRect.width() + dp2px(20) + firstWidth,
+                horizontalYList.get(4) + titleRect.height(),
+                strokePaint);
+        float secondWidth = strokePaint.measureText(secondStr);
+
+        resetStrokePaint(priceMa30Col, volumeTextSize);
+        canvas.drawText(thirdStr,
+                verticalXList.get(0) + titleRect.width() + dp2px(30) + firstWidth + secondWidth,
+                horizontalYList.get(4) + titleRect.height(),
+                strokePaint);
     }
 
     //横坐标
@@ -1789,6 +1811,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                         horizontalYList.get(i + 1) + rect.height() / 2,
                         strokePaint);
             }
+
         } else {
             double avgPrice = (topPrice - botPrice) / 3;
             for (int i = 0; i < 2; i++) {
@@ -1815,9 +1838,15 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                     botDeputy = "0";
                     centerDeputy = setPrecision((mMaxMacd - mMinMacd) / 2, 2);
                 }
+
             } else if (deputyImgType == DEPUTY_IMG_KDJ) {
                 topDeputy = setPrecision(mMaxK, 2);
                 centerDeputy = setPrecision(mMaxK / 2, 2);
+                botDeputy = "0";
+
+            } else if (deputyImgType == DEPUTY_IMG_RSI) {
+                topDeputy = "100";
+                centerDeputy = "50";
                 botDeputy = "0";
             }
 
@@ -1879,7 +1908,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     /**
      * 设置小数位精度
      *
-     * @param num
      * @param scale 保留几位小数
      */
     private String setPrecision(Double num, int scale) {

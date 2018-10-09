@@ -36,6 +36,9 @@ public class KData {
     private double k;
     private double d;
     private double j;
+    private double rs1;
+    private double rs2;
+    private double rs3;
     private double leftX;
     private double rightX;
     private double closeY;
@@ -269,6 +272,30 @@ public class KData {
         this.j = j;
     }
 
+    public double getRs1() {
+        return rs1;
+    }
+
+    public void setRs1(double rs1) {
+        this.rs1 = rs1;
+    }
+
+    public double getRs2() {
+        return rs2;
+    }
+
+    public void setRs2(double rs2) {
+        this.rs2 = rs2;
+    }
+
+    public double getRs3() {
+        return rs3;
+    }
+
+    public void setRs3(double rs3) {
+        this.rs3 = rs3;
+    }
+
     public double getUpDnAmount() {
         return closePrice - openPrice;
     }
@@ -304,35 +331,9 @@ public class KData {
     @Override
     public String toString() {
         return "KData{" +
-                "time=" + time +
-                ", openPrice=" + openPrice +
-                ", closePrice=" + closePrice +
-                ", maxPrice=" + maxPrice +
-                ", minPrice=" + minPrice +
-                ", volume=" + volume +
-                ", upDnAmount=" + upDnAmount +
-                ", upDnRate=" + upDnRate +
-                ", priceMa5=" + priceMa5 +
-                ", priceMa10=" + priceMa10 +
-                ", priceMa30=" + priceMa30 +
-                ", ema5=" + ema5 +
-                ", ema10=" + ema10 +
-                ", ema30=" + ema30 +
-                ", volumeMa5=" + volumeMa5 +
-                ", volumeMa10=" + volumeMa10 +
-                ", bollMb=" + bollMb +
-                ", bollUp=" + bollUp +
-                ", bollDn=" + bollDn +
-                ", macd=" + macd +
-                ", dea=" + dea +
-                ", dif=" + dif +
-                ", k=" + k +
-                ", d=" + d +
-                ", j=" + j +
-                ", leftX=" + leftX +
-                ", rightX=" + rightX +
-                ", closeY=" + closeY +
-                ", initFinish=" + initFinish +
+                "rs1=" + rs1 +
+                ", rs2=" + rs2 +
+                ", rs3=" + rs3 +
                 '}';
     }
 }

@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Runnable singleDataAddRunnable;
     private Button depthJumpBtn;
     private Button kLineResetBtn;
+    private Button rsiBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +64,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         bollBtn = findViewById(R.id.btn_boll);
         macdBtn = findViewById(R.id.btn_macd);
         kdjBtn = findViewById(R.id.btn_kdj);
+        rsiBtn = findViewById(R.id.btn_rsi);
         kLineResetBtn = findViewById(R.id.btn_kline_reset);
         depthJumpBtn = findViewById(R.id.btn_depth_activity);
     }
@@ -99,6 +101,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         bollBtn.setOnClickListener(this);
         macdBtn.setOnClickListener(this);
         kdjBtn.setOnClickListener(this);
+        rsiBtn.setOnClickListener(this);
         depthJumpBtn.setOnClickListener(this);
         kLineResetBtn.setOnClickListener(this);
 
@@ -154,6 +157,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 mKLineView.setDeputyImgType(KLineView.DEPUTY_IMG_KDJ);
                 break;
 
+            case R.id.btn_rsi:
+                //副图展示RSI
+                mKLineView.setDeputyImgType(KLineView.DEPUTY_IMG_RSI);
+                break;
+
             case R.id.btn_depth_activity:
                 //跳转到深度图页面
                 startActivity(new Intent(getApplicationContext(), DepthActivity.class));
@@ -167,7 +175,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         Random random = new Random();
         List<KData> dataList = new ArrayList<>();
-        double openPrice = 6000;
+        double openPrice = 100;
         double closePrice;
         double maxPrice;
         double minPrice;

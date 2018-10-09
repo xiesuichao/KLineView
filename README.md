@@ -1,8 +1,9 @@
 # KLineView
 股票走势图K线控件
 
-由于时间关系，目前只做了MA,EMA,BOLL,MACD,KDJ 5个指标。       
-根目录下有个apk文件夹，内有最新的测试包，可以先安装看效果      
+主图指标：MA,EMA,BOLL
+副图指标：MACD,KDJ,RSI
+根目录下有个apk文件夹，内有最新的测试包，可以先安装看效果
 新增深度图控件，如下图所示，详情见demo   
 
 支持实时刷新的单条数据更新。          
@@ -79,6 +80,11 @@ qq：181801034
             case R.id.btn_kdj:
                 //副图展示KDJ
                 mKLineView.setDeputyImgType(KLineView.DEPUTY_IMG_KDJ);
+                break;
+
+            case R.id.btn_rsi:
+                //副图展示RSI
+                mKLineView.setDeputyImgType(KLineView.DEPUTY_IMG_RSI);
                 break;
 
             case R.id.btn_depth_activity:

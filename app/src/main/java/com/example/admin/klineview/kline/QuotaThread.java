@@ -42,6 +42,7 @@ public class QuotaThread extends HandlerThread implements Handler.Callback {
         QuotaUtil.initBoll(dataList, isEndData);
         QuotaUtil.initMACD(dataList, isEndData);
         QuotaUtil.initKDJ(dataList, isEndData);
+        QuotaUtil.initRSI(dataList, isEndData);
         QuotaUtil.initMa(dataList, isEndData);
     }
 

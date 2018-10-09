@@ -22,8 +22,10 @@ public class QuotaUtil {
 
     /**
      * 初始化 MA5，MA10, MA30
+     *
+     * @param isEndData 是否是添加到list末尾的数据
      */
-    public static void initMa(List<KData> dataList, boolean isEndData){
+    public static void initMa(List<KData> dataList, boolean isEndData) {
         long startMa = System.currentTimeMillis();
         if (dataList == null || dataList.isEmpty()) {
             return;
@@ -31,23 +33,23 @@ public class QuotaUtil {
         cacheList.clear();
         cacheList.addAll(dataList);
         for (int i = 0; i < dataList.size(); i++) {
-            if (i + QUOTA_DAY5 <= dataList.size()){
+            if (i + QUOTA_DAY5 <= dataList.size()) {
                 //priceMa5
                 dataList.get(i + QUOTA_DAY5 - 1).setPriceMa5(getPriceMa(cacheList.subList(i, i + QUOTA_DAY5)));
                 //volumeMa5
                 dataList.get(i + QUOTA_DAY5 - 1).setVolumeMa5(getVolumeMa(cacheList.subList(i, i + QUOTA_DAY5)));
             }
-            if (i + QUOTA_DAY10 <= dataList.size()){
+            if (i + QUOTA_DAY10 <= dataList.size()) {
                 //priceMa10
                 dataList.get(i + QUOTA_DAY10 - 1).setPriceMa10(getPriceMa(cacheList.subList(i, i + QUOTA_DAY10)));
                 //volumeMa10
                 dataList.get(i + QUOTA_DAY10 - 1).setVolumeMa10(getVolumeMa(cacheList.subList(i, i + QUOTA_DAY10)));
             }
-            if (i + QUOTA_DAY30 <= dataList.size()){
+            if (i + QUOTA_DAY30 <= dataList.size()) {
                 //priceMa30
-                if (dataList.get(i + QUOTA_DAY30 - 1).getPriceMa30() != 0 && !isEndData){
+                if (dataList.get(i + QUOTA_DAY30 - 1).getPriceMa30() != 0 && !isEndData) {
                     break;
-                }else {
+                } else {
                     dataList.get(i + QUOTA_DAY30 - 1).setPriceMa30(getPriceMa(cacheList.subList(i, i + QUOTA_DAY30)));
                 }
             }
@@ -95,7 +97,7 @@ public class QuotaUtil {
         dataList.get(0).setEma30(lastEma30);
 
         for (int i = 1; i < dataList.size(); i++) {
-            if (dataList.get(i).getEma5() != 0 && !isEndData){
+            if (dataList.get(i).getEma30() != 0 && !isEndData) {
                 break;
             }
             double currentEma5 = 2 * (dataList.get(i).getClosePrice() - lastEma5) / (QUOTA_DAY5 + 1) + lastEma5;
@@ -124,8 +126,8 @@ public class QuotaUtil {
      * K为参数，可根据股票的特性来做相应的调整，一般默认为2
      *
      * @param dataList 数据集合
-     * @param period     周期，一般为26
-     * @param k          参数，可根据股票的特性来做相应的调整，一般默认为2
+     * @param period   周期，一般为26
+     * @param k        参数，可根据股票的特性来做相应的调整，一般默认为2
      */
     public static void initBOLL(List<KData> dataList, int period, int k, boolean isEndData) {
         long startBoll = System.currentTimeMillis();
@@ -147,7 +149,7 @@ public class QuotaUtil {
         double md;
 
         for (int i = 0; i < dataList.size(); i++) {
-            if (dataList.get(i).getBollMb() != 0 && !isEndData){
+            if (dataList.get(i).getBollMb() != 0 && !isEndData) {
                 break;
             }
             KData quotes = dataList.get(i);
@@ -197,7 +199,7 @@ public class QuotaUtil {
      */
     public static void initMACD(List<KData> dataList, int fastPeriod, int slowPeriod, int signalPeriod, boolean isEndData) {
         long startMacd = System.currentTimeMillis();
-        if (dataList == null || dataList.isEmpty()){
+        if (dataList == null || dataList.isEmpty()) {
             return;
         }
         double preEma_12 = 0;
@@ -211,7 +213,7 @@ public class QuotaUtil {
         double dif = 0;
         double macd = 0;
         for (int i = 0; i < dataList.size(); i++) {
-            if (dataList.get(i).getMacd() != 0 && !isEndData){
+            if (dataList.get(i).getMacd() != 0 && !isEndData) {
                 break;
             }
             ema_12 = preEma_12 * (fastPeriod - 1) / (fastPeriod + 1) + dataList.get(i).getClosePrice() * 2 / (fastPeriod + 1);
@@ -239,14 +241,13 @@ public class QuotaUtil {
     /**
      * KDJ
      *
-     * @param dataList
-     * @param n        标准值9
-     * @param m1       标准值3
-     * @param m2       标准值3
+     * @param n1 标准值9
+     * @param n2 标准值3
+     * @param n3 标准值3
      */
-    public static void initKDJ(List<KData> dataList, int n, int m1, int m2, boolean isEndData) {
+    public static void initKDJ(List<KData> dataList, int n1, int n2, int n3, boolean isEndData) {
         long startKdj = System.currentTimeMillis();
-        if (dataList == null || dataList.isEmpty()){
+        if (dataList == null || dataList.isEmpty()) {
             return;
         }
         //K值
@@ -263,7 +264,7 @@ public class QuotaUtil {
         int lowPosition = 0;
         double rSV = 0.0;
         for (int i = 0; i < dataList.size(); i++) {
-            if (dataList.get(i).getK() != 0 && !isEndData){
+            if (dataList.get(i).getK() != 0 && !isEndData) {
                 break;
             }
             if (i == 0) {
@@ -283,13 +284,13 @@ public class QuotaUtil {
                     lowValue = dataList.get(i).getMinPrice();
                     lowPosition = i;
                 }
-                if (i > (n - 1)) {
+                if (i > (n1 - 1)) {
                     //判断存储的最高价是否高于当前最高价
                     if (highValue > dataList.get(i).getMaxPrice()) {
                         //判断最高价是不是在最近n天内，若不在最近n天内，则从最近n天找出最高价并赋值
-                        if (highPosition < (i - (n - 1))) {
-                            highValue = dataList.get(i - (n - 1)).getMaxPrice();
-                            for (int j = (i - (n - 2)); j <= i; j++) {
+                        if (highPosition < (i - (n1 - 1))) {
+                            highValue = dataList.get(i - (n1 - 1)).getMaxPrice();
+                            for (int j = (i - (n1 - 2)); j <= i; j++) {
                                 if (highValue <= dataList.get(j).getMaxPrice()) {
                                     highValue = dataList.get(j).getMaxPrice();
                                     highPosition = j;
@@ -298,9 +299,9 @@ public class QuotaUtil {
                         }
                     }
                     if ((lowValue < dataList.get(i).getMinPrice())) {
-                        if (lowPosition < i - (n - 1)) {
+                        if (lowPosition < i - (n1 - 1)) {
                             lowValue = dataList.get(i).getMinPrice();
-                            for (int k = i - (n - 2); k <= i; k++) {
+                            for (int k = i - (n1 - 2); k <= i; k++) {
                                 if (lowValue >= dataList.get(k).getMinPrice()) {
                                     lowValue = dataList.get(k).getMinPrice();
                                     lowPosition = k;
@@ -312,8 +313,8 @@ public class QuotaUtil {
                 if (highValue != lowValue) {
                     rSV = (dataList.get(i).getClosePrice() - lowValue) / (highValue - lowValue) * 100;
                 }
-                mK[i] = (mK[i - 1] * (m1 - 1) + rSV) / m1;
-                mD[i] = (mD[i - 1] * (m2 - 1) + mK[i]) / m2;
+                mK[i] = (mK[i - 1] * (n2 - 1) + rSV) / n2;
+                mD[i] = (mD[i - 1] * (n3 - 1) + mK[i]) / n3;
                 jValue = 3 * mK[i] - 2 * mD[i];
             }
             dataList.get(i).setK(mK[i]);
@@ -329,7 +330,111 @@ public class QuotaUtil {
     }
 
     /**
+     * 初始化RSI
+     *
+     * @param period1 标准值6
+     * @param period2 标准值12
+     * @param period3 标准值24
+     */
+    public static void initRSI(List<KData> dataList, int period1, int period2, int period3, boolean isEndData) {
+        long startRSI = System.currentTimeMillis();
+        if (dataList == null || dataList.isEmpty()) {
+            return;
+        }
+        double upRateSum;
+        int upRateCount;
+        double dnRateSum;
+        int dnRateCount;
+        for (int i = 0; i < dataList.size(); i++) {
+            if (dataList.get(i).getRs3() != 0 && !isEndData) {
+                break;
+            }
+            upRateSum = 0;
+            upRateCount = 0;
+            dnRateSum = 0;
+            dnRateCount = 0;
+            if (i >= period1 - 1) {
+                for (int x = i; x >= i + 1 - period1; x--) {
+                    if (dataList.get(x).getUpDnRate() >= 0) {
+                        upRateSum += dataList.get(x).getUpDnRate();
+                        upRateCount++;
+                    } else {
+                        dnRateSum += dataList.get(x).getUpDnRate();
+                        dnRateCount++;
+                    }
+                }
+                double avgUpRate = 0;
+                double avgDnRate = 0;
+                if (upRateSum > 0) {
+                    avgUpRate = upRateSum / upRateCount;
+                }
+                if (dnRateSum < 0) {
+                    avgDnRate = dnRateSum / dnRateCount;
+                }
+                dataList.get(i).setRs1(avgUpRate / (avgUpRate + Math.abs(avgDnRate)) * 100);
+            }
+
+            upRateSum = 0;
+            upRateCount = 0;
+            dnRateSum = 0;
+            dnRateCount = 0;
+            if (i >= period2 - 1) {
+                for (int x = i; x >= i + 1 - period2; x--) {
+                    if (dataList.get(x).getUpDnRate() >= 0) {
+                        upRateSum += dataList.get(x).getUpDnRate();
+                        upRateCount++;
+                    } else {
+                        dnRateSum += dataList.get(x).getUpDnRate();
+                        dnRateCount++;
+                    }
+                }
+                double avgUpRate = 0;
+                double avgDnRate = 0;
+                if (upRateSum > 0) {
+                    avgUpRate = upRateSum / upRateCount;
+                }
+                if (dnRateSum < 0) {
+                    avgDnRate = dnRateSum / dnRateCount;
+                }
+                dataList.get(i).setRs2(avgUpRate / (avgUpRate + Math.abs(avgDnRate)) * 100);
+            }
+
+            upRateSum = 0;
+            upRateCount = 0;
+            dnRateSum = 0;
+            dnRateCount = 0;
+            if (i >= period3 - 1) {
+                for (int x = i; x >= i + 1 - period3; x--) {
+                    if (dataList.get(x).getUpDnRate() >= 0) {
+                        upRateSum += dataList.get(x).getUpDnRate();
+                        upRateCount++;
+                    } else {
+                        dnRateSum += dataList.get(x).getUpDnRate();
+                        dnRateCount++;
+                    }
+                }
+                double avgUpRate = 0;
+                double avgDnRate = 0;
+                if (upRateSum > 0) {
+                    avgUpRate = upRateSum / upRateCount;
+                }
+                if (dnRateSum < 0) {
+                    avgDnRate = dnRateSum / dnRateCount;
+                }
+                dataList.get(i).setRs3(avgUpRate / (avgUpRate + Math.abs(avgDnRate)) * 100);
+            }
+        }
+        long endRSI = System.currentTimeMillis();
+        PrintUtil.log("RSI", endRSI - startRSI);
+    }
+
+    public static void initRSI(List<KData> dataList, boolean isEndData) {
+        initRSI(dataList, 6, 12, 24, isEndData);
+    }
+
+    /**
      * 三阶贝塞尔曲线控制点
+     *
      * @param pointList
      * @param path
      */
@@ -382,11 +487,11 @@ public class QuotaUtil {
         }
     }
 
-    public static void setLinePath(List<Pointer> pointerList, Path path){
-        if (pointerList == null || pointerList.size() <= 1){
+    public static void setLinePath(List<Pointer> pointerList, Path path) {
+        path.reset();
+        if (pointerList == null || pointerList.size() <= 1) {
             return;
         }
-        path.reset();
         path.moveTo(pointerList.get(0).getX(), pointerList.get(0).getY());
         for (int i = 1; i < pointerList.size(); i++) {
             path.lineTo(pointerList.get(i).getX(), pointerList.get(i).getY());
