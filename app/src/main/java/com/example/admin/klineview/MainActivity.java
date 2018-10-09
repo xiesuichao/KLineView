@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 mHandler.postDelayed(this, 1000);
             }
         };
-        mHandler.postDelayed(singleDataAddRunnable, 2000);
+//        mHandler.postDelayed(singleDataAddRunnable, 2000);
 
     }
 
