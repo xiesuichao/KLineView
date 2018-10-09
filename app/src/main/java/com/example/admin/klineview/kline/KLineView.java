@@ -1916,7 +1916,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     }
 
     /**
-     * 按量级格式化数量
+     * 按量级格式化价格
      */
     private String formatKDataNum(double num) {
         if (num < 1) {
@@ -1932,6 +1932,9 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         }
     }
 
+    /**
+     * 按量级格式化数量
+     */
     private String formatVolNum(double num) {
         if (num > 10000) {
             return setPrecision(num / 10000, 2) + "万";
