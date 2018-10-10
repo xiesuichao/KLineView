@@ -36,7 +36,7 @@ qq：181801034
 
 1.K线控件:
       
-    //初始化控件加载数据
+    //初始化控件加载数据（仅作初始化用，数据重置请调用resetDataList）
     mKLineView.initKDataList(getKDataList(5));
                 
     //分页加载时添加多条数据
@@ -49,7 +49,8 @@ qq：181801034
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.btn_kline_reset:
-                //重置数据，可用于分时加载
+                //重置数据，可用于分时加载，在做分时功能重新加载数据的时候，
+                //请务必调用该方法
                 mKLineView.resetDataList(getKDataList(0.1));
                 break;
 
