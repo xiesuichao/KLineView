@@ -245,7 +245,10 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
      * 则reset后显示的第一条仍然是该时间点。
      */
     public void resetDataList(List<KData> dataList) {
-        long currentStartTime = viewDataList.get(0).getTime();
+        long currentStartTime = 0;
+        if(viewDataList.size > 0){
+            currentStartTime = viewDataList.get(0).getTime();
+        }
         isShowDetail = false;
 
         this.totalDataList.clear();
