@@ -95,7 +95,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     private Rect topMa30Rect = new Rect();
     private Rect detailTextRect = new Rect();
 
-    private String[] dateArr;
     private String[] detailLeftTitleArr;
     private List<KData> totalDataList = new ArrayList<>();
     private List<KData> viewDataList = new ArrayList<>();
@@ -223,7 +222,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
      * 配合setOnRequestDataListListener接口使用实现自动分页加载
      * 首次调用该方法后会记录该次list.size，后续继续调用时会将传进来的list.size与首次
      * 的进行比较，如果比首次的size小，则判定为数据已拿完，不再自动调用接口请求数据。
-     *
+     * <p>
      * ---该方法仅在能保证每次分页加载拿到的数据list.size相同的情况下调用，否则，请调用
      * 上面的方法，手动传入isNeedReqPre用来判断是否需要继续自动调用接口请求数据
      */
@@ -246,7 +245,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
      */
     public void resetDataList(List<KData> dataList) {
         long currentStartTime = 0;
-        if(viewDataList.size > 0){
+        if (viewDataList.size() > 0) {
             currentStartTime = viewDataList.get(0).getTime();
         }
         isShowDetail = false;
@@ -435,7 +434,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         detailRectWidth = dp2px(103);
         detailRectHeight = dp2px(120);
         detailTextVerticalSpace = (detailRectHeight - dp2px(4)) / 8;
-        dateArr = new String[3];
         detailLeftTitleArr = new String[]{"时间", "开", "高", "低", "收", "涨跌额", "涨跌幅", "成交量"};
         initQuotaThread();
         initStopDelay();
@@ -1754,18 +1752,10 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
 
     //横坐标
     private void drawAbscissa(Canvas canvas) {
-        for (int i = 0; i < 3; i++) {
-            for (KData data : viewDataList) {
-                if (data.getLeftX() <= verticalXList.get(i + 1) && data.getRightX() >= verticalXList.get(i + 1)) {
-                    dateArr[i] = formatDate(data.getTime());
-                    break;
-                }
-            }
-        }
-
         resetStrokePaint(abscissaTextCol, abscissaTextSize);
         for (int i = 0; i < verticalXList.size(); i++) {
-            if (i == 0) {
+            if (i == 0 && viewDataList.get(0).getLeftX() <= verticalXList.get(0)
+                    && viewDataList.get(0).getRightX() > verticalXList.get(0)) {
                 canvas.drawText(formatDate(viewDataList.get(0).getTime()),
                         leftStart + dp2px(6),
                         bottomEnd - dp2px(7),
@@ -1777,13 +1767,17 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                         rightEnd - dp2px(41) - strokePaint.measureText(dateStr),
                         bottomEnd - dp2px(7),
                         strokePaint);
-
             } else {
-                canvas.drawText(dateArr[i - 1],
-                        leftStart + dp2px(6) + (rightEnd - leftStart - dp2px(47)) / 4 * i
-                                - strokePaint.measureText(dateArr[i - 1]) / 2,
-                        bottomEnd - dp2px(7),
-                        strokePaint);
+                for (KData data : viewDataList) {
+                    if (data.getLeftX() <= verticalXList.get(i) && data.getRightX() >= verticalXList.get(i)) {
+                        String dateStr = formatDate(data.getTime());
+                        canvas.drawText(dateStr,
+                                verticalXList.get(i) - strokePaint.measureText(dateStr) / 2,
+                                bottomEnd - dp2px(7),
+                                strokePaint);
+                        break;
+                    }
+                }
             }
         }
     }
@@ -1930,8 +1924,10 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
             return setPrecision(num, 3);
         } else if (num < 10000) {
             return setPrecision(num, 2);
-        } else {
+        } else if (num < 100000000) {
             return setPrecision(num / 10000, 2) + "万";
+        } else {
+            return setPrecision(num / 100000000, 2) + "亿";
         }
     }
 
@@ -1939,12 +1935,12 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
      * 按量级格式化数量
      */
     private String formatVolNum(double num) {
-        if (num > 10000) {
-            return setPrecision(num / 10000, 2) + "万";
-        } else if (num > 100000000) {
-            return setPrecision(num / 100000000, 2) + "亿";
-        } else {
+        if (num < 10000) {
             return setPrecision(num, 2);
+        } else if (num < 100000000) {
+            return setPrecision(num / 10000, 2) + "万";
+        } else {
+            return setPrecision(num / 100000000, 2) + "亿";
         }
     }
 
