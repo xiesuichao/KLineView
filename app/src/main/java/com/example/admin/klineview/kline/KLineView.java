@@ -58,15 +58,20 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     //是否双指触控
     private boolean isDoubleFinger = false;
     //主图数据类型 0:MA, 1:EMA 2:BOLL
-    private int mainImgType = 0;
     public static final int MAIN_IMG_MA = 0;
     public static final int MAIN_IMG_EMA = 1;
     public static final int MAIN_IMG_BOLL = 2;
+    private int mainImgType = MAIN_IMG_MA;
     //副图数据类型 0:MACD, 1:KDJ
-    private int deputyImgType = 0;
     public static final int DEPUTY_IMG_MACD = 0;
     public static final int DEPUTY_IMG_KDJ = 1;
     public static final int DEPUTY_IMG_RSI = 2;
+    private int deputyImgType = DEPUTY_IMG_MACD;
+    //十字线横线上下移动模式 0:固定指向收盘价，1：固定指向开盘价，2：上下自由滑动
+    public static final int CROSS_HAIR_MOVE_CLOSE = 0;
+    public static final int CROSS_HAIR_MOVE_OPEN = 1;
+    public static final int CROSS_HAIR_MOVE_FREE = 2;
+    private int crossHairMoveMode = CROSS_HAIR_MOVE_CLOSE;
 
     private final String STR_MA5 = "Ma5:";
     private final String STR_MA10 = "Ma10:";
@@ -145,6 +150,8 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
             avgHeightK, avgHeightD, avgHeightJ, mMaxPriceY,
             mMinPriceY, mMaxMacd, mMinMacd, mMaxK;
     private double avgHeightRSI;
+    private float longPressMoveY;
+    private float dispatchDownY;
 
 
     public KLineView(Context context) {
@@ -361,6 +368,15 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     }
 
     /**
+     * 设置十字线的横线上下移动模式
+     *
+     * @param moveMode 0：固定指向收盘价，1：固定指向开盘价，2：上下自由滑动
+     */
+    public void setCrossHairMoveMode(int moveMode) {
+        this.crossHairMoveMode = moveMode;
+    }
+
+    /**
      * 获取副图是否显示
      */
     public boolean getVicePicShow() {
@@ -517,6 +533,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
             longPressDownX = event.getX();
             longPressDownY = event.getY();
             dispatchDownX = event.getX();
+            dispatchDownY = event.getY();
             isLongPress = false;
             postDelayed(longPressRunnable, LONG_PRESS_TIME_OUT);
 
@@ -525,23 +542,29 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
             float diffDispatchMoveX = Math.abs(event.getX() - longPressDownX);
             float diffDispatchMoveY = Math.abs(event.getY() - longPressDownY);
             float moveDistanceX = Math.abs(event.getX() - dispatchDownX);
+            float moveDistanceY = Math.abs(event.getY() - dispatchDownY);
+            longPressMoveY = event.getY();
             getParent().requestDisallowInterceptTouchEvent(true);
 
             if (isHorizontalMove || (diffDispatchMoveX > diffDispatchMoveY + dp2px(5)
-                    && diffDispatchMoveX > moveLimitDistance)) {
+                    && diffDispatchMoveX > moveLimitDistance)
+                    || (isLongPress && diffDispatchMoveY > moveLimitDistance)) {
                 isHorizontalMove = true;
                 removeCallbacks(longPressRunnable);
 
-                if (isLongPress && moveDistanceX > 1) {
+                if (isLongPress && (moveDistanceX > 1 || moveDistanceY > 1)) {
                     getClickKData(event.getX());
                     if (lastKData != null) {
                         invalidate();
                     }
                 }
+
                 dispatchDownX = event.getX();
+                dispatchDownY = event.getY();
                 return isLongPress || super.dispatchTouchEvent(event);
 
-            } else if (!isHorizontalMove && !isDoubleFinger && diffDispatchMoveY > diffDispatchMoveX + dp2px(5)
+            } else if (!isLongPress && !isHorizontalMove && !isDoubleFinger
+                    && diffDispatchMoveY > diffDispatchMoveX + dp2px(5)
                     && diffDispatchMoveY > moveLimitDistance) {
                 removeCallbacks(longPressRunnable);
                 getParent().requestDisallowInterceptTouchEvent(false);
@@ -663,6 +686,9 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                     float diffTouchMoveY = Math.abs(event.getY() - singleClickDownY);
                     if (diffTouchMoveY < moveLimitDistance && diffTouchMoveX < moveLimitDistance) {
                         isShowDetail = true;
+                        if (crossHairMoveMode == CROSS_HAIR_MOVE_FREE) {
+                            longPressMoveY = event.getY();
+                        }
                         getClickKData(singleClickDownX);
                         if (lastKData != null) {
                             invalidate();
@@ -1022,6 +1048,8 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
             }
 
             viewDataList.get(i).setCloseY((float) (horizontalYList.get(0) + (topPrice - closedPrice) * avgHeightPerPrice));
+            viewDataList.get(i).setOpenY((float) (horizontalYList.get(0) + (topPrice - openPrice) * avgHeightPerPrice));
+
             //priceRect
             canvas.drawRect((float) viewDataList.get(i).getLeftX() + dp2px(0.5f),
                     (float) (mMaxPriceY + (maxPrice - higherPrice) * avgHeightPerPrice),
@@ -1346,11 +1374,35 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                 strokePaint);
 
         //水平
+        double moveY;
+        switch (crossHairMoveMode) {
+            case CROSS_HAIR_MOVE_CLOSE:
+                moveY = lastKData.getCloseY();
+                break;
+
+            case CROSS_HAIR_MOVE_OPEN:
+                moveY = lastKData.getOpenY();
+                break;
+
+            case CROSS_HAIR_MOVE_FREE:
+                moveY = longPressMoveY;
+                break;
+
+            default:
+                moveY = lastKData.getCloseY();
+                break;
+        }
+        if (moveY < horizontalYList.get(0)) {
+            moveY = horizontalYList.get(0);
+        } else if (moveY > priceImgBot) {
+            moveY = priceImgBot;
+        }
+
         resetStrokePaint(crossHairCol, 0);
         canvas.drawLine(verticalXList.get(0),
-                (float) lastKData.getCloseY(),
+                (float) moveY,
                 verticalXList.get(verticalXList.size() - 1),
-                (float) lastKData.getCloseY(),
+                (float) moveY,
                 strokePaint);
 
         //底部标签
@@ -1371,16 +1423,16 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
 
         //右侧标签
         RectF blueRectF = new RectF(rightEnd - dp2px(38),
-                (float) lastKData.getCloseY() - dp2px(7),
+                (float) moveY - dp2px(7),
                 rightEnd - dp2px(1),
-                (float) lastKData.getCloseY() + dp2px(7));
+                (float) moveY + dp2px(7));
         fillPaint.setColor(crossHairRightLabelCol);
         canvas.drawRoundRect(blueRectF, 4, 4, fillPaint);
 
         curvePath.reset();
-        curvePath.moveTo(verticalXList.get(verticalXList.size() - 1), (float) lastKData.getCloseY());
-        curvePath.lineTo(rightEnd - dp2px(37), (float) lastKData.getCloseY() - dp2px(3));
-        curvePath.lineTo(rightEnd - dp2px(37), (float) lastKData.getCloseY() + dp2px(3));
+        curvePath.moveTo(verticalXList.get(verticalXList.size() - 1), (float) moveY);
+        curvePath.lineTo(rightEnd - dp2px(37), (float) moveY - dp2px(3));
+        curvePath.lineTo(rightEnd - dp2px(37), (float) moveY + dp2px(3));
         curvePath.close();
         canvas.drawPath(curvePath, fillPaint);
 
@@ -1394,13 +1446,13 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         }
 
         String movePrice = formatKDataNum(topPrice
-                - avgPricePerHeight * ((float) lastKData.getCloseY() - horizontalYList.get(0)));
+                - avgPricePerHeight * ((float) moveY - horizontalYList.get(0)));
         Rect textRect = new Rect();
         resetStrokePaint(crossHairRightLabelTextCol, crossHairRightLabelTextSize);
         strokePaint.getTextBounds(movePrice, 0, movePrice.length(), textRect);
         canvas.drawText(movePrice,
                 rightEnd - dp2px(38) + (blueRectF.width() - textRect.width()) / 2,
-                (float) lastKData.getCloseY() + dp2px(7) - (blueRectF.height() - textRect.height()) / 2,
+                (float) moveY + dp2px(7) - (blueRectF.height() - textRect.height()) / 2,
                 strokePaint);
     }
 
@@ -1754,7 +1806,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     private void drawAbscissa(Canvas canvas) {
         resetStrokePaint(abscissaTextCol, abscissaTextSize);
         for (int i = 0; i < verticalXList.size(); i++) {
-            if (i == 0 && viewDataList.get(0).getLeftX() <= verticalXList.get(0)
+            if (i == 0 && viewDataList.get(0).getLeftX() <= verticalXList.get(0) + avgPriceRectWidth / 2
                     && viewDataList.get(0).getRightX() > verticalXList.get(0)) {
                 canvas.drawText(formatDate(viewDataList.get(0).getTime()),
                         leftStart + dp2px(6),

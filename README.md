@@ -38,6 +38,9 @@ qq：181801034
       
     //初始化控件加载数据（仅作初始化用，数据重置请调用resetDataList）
     mKLineView.initKDataList(getKDataList(5));
+
+    //设置十字线移动模式，默认为0：固定指向收盘价
+    mKLineView.setCrossHairMoveMode(KLineView.CROSS_HAIR_MOVE_FREE);
                 
     //分页加载时添加多条数据
     mKLineView.addDataList(getKDataList(5));

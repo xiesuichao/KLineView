@@ -49,13 +49,6 @@
                 android:text="BOLL"
                 />
 
-            <Button
-                android:id="@+id/btn_deputy"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="显示副图"
-                />
-
         </LinearLayout>
 
         <LinearLayout
@@ -63,6 +56,12 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
+            <Button
+                android:id="@+id/btn_deputy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="显示副图"
+                />
 
             <Button
                 android:id="@+id/btn_macd"
