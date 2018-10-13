@@ -315,7 +315,10 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     }
 
     /**
-     * 设置主图显示类型，0：MA, 1:EMA, 2:BOLL
+     * 设置主图显示类型
+     * MA: MAIN_IMG_MA
+     * EMA: MAIN_IMG_EMA
+     * BOLL: MAIN_IMG_BOLL
      */
     public void setMainImgType(int type) {
         switch (type) {
@@ -347,7 +350,10 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     }
 
     /**
-     * 设置副图显示类型，0：MACD, 1:KDJ
+     * 设置副图显示类型
+     * MACD: DEPUTY_IMG_MACD
+     * KDJ: DEPUTY_IMG_KDJ
+     * RSI: DEPUTY_IMG_RSI
      */
     public void setDeputyImgType(int type) {
         this.deputyImgType = type;
@@ -369,8 +375,9 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
 
     /**
      * 设置十字线的横线上下移动模式
-     *
-     * @param moveMode 0：固定指向收盘价，1：固定指向开盘价，2：上下自由滑动
+     * 固定指向收盘价: CROSS_HAIR_MOVE_CLOSE
+     * 固定指向开盘价: CROSS_HAIR_MOVE_OPEN
+     * 上下自由滑动: CROSS_HAIR_MOVE_FREE
      */
     public void setCrossHairMoveMode(int moveMode) {
         this.crossHairMoveMode = moveMode;
