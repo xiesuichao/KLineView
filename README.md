@@ -1,8 +1,8 @@
 # KLineView
 股票走势图K线控件
 
-主图指标：MA,EMA,BOLL  
-副图指标：MACD,KDJ,RSI       
+主图指标：MA, EMA, BOLL
+副图指标：MACD, KDJ, RSI
 如需增加其他指标，请联系      
 根目录下有个apk文件夹，内有最新的测试包，可以先安装看效果      
 新增深度图控件，如下图所示，详情见demo   
