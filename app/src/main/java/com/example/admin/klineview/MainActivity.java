@@ -125,7 +125,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.btn_kline_reset:
-                //重置数据，可用于分时加载
+                //重置数据，可用于分时加载，是否需要定位到重置前的时间点请看方法注释
+                //在做分时功能重新加载数据的时候，请务必调用该方法
                 mKLineView.resetDataList(getKDataList(0.1));
                 break;
 

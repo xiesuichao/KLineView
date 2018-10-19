@@ -246,11 +246,19 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     }
 
     /**
-     * 重置所有数据，
-     * 如果reset前显示的第一条数据的时间点在新数据时间范围内，
-     * 则reset后显示的第一条仍然是该时间点。
+     * 重置所有数据，默认不作定位
      */
     public void resetDataList(List<KData> dataList) {
+        resetDataList(dataList, false);
+    }
+
+    /**
+     * 重置所有数据
+     * @param isNeedLocateCurrent 重置后的数据是否需要定位到重置前移动到的时间点，例如：
+     *                            重置前已经滑动到9月20号，true则在重置后会将新数据定位到9月20号。
+     *                            false则不作定位，view右边直接显示为最新的数据
+     */
+    public void resetDataList(List<KData> dataList, boolean isNeedLocateCurrent) {
         long currentStartTime = 0;
         if (viewDataList.size() > 0) {
             currentStartTime = viewDataList.get(0).getTime();
@@ -283,32 +291,41 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                 break;
         }
 
-        int halfSizeNum = totalDataList.size() / 2;
-        startDataNum = -1;
-        if (totalDataList.get(0).getTime() <= currentStartTime
-                && totalDataList.get(halfSizeNum).getTime() > currentStartTime) {
-            for (int i = 0; i < halfSizeNum; i++) {
-                if (i + 1 < totalDataList.size() && totalDataList.get(i).getTime() <= currentStartTime
-                        && totalDataList.get(i + 1).getTime() > currentStartTime) {
-                    startDataNum = i;
-                    break;
+        if (isNeedLocateCurrent) {
+            int halfSizeNum = totalDataList.size() / 2;
+            startDataNum = -1;
+            if (totalDataList.get(0).getTime() <= currentStartTime
+                    && totalDataList.get(halfSizeNum).getTime() > currentStartTime) {
+                for (int i = 0; i < halfSizeNum; i++) {
+                    if (i + 1 < totalDataList.size() && totalDataList.get(i).getTime() <= currentStartTime
+                            && totalDataList.get(i + 1).getTime() > currentStartTime) {
+                        startDataNum = i;
+                        break;
+                    }
+                }
+            } else if (totalDataList.get(halfSizeNum).getTime() <= currentStartTime
+                    && totalDataList.get(totalDataList.size() - 1).getTime() >= currentStartTime) {
+                for (int i = halfSizeNum; i < totalDataList.size(); i++) {
+                    if (i + 1 < totalDataList.size() && totalDataList.get(i).getTime() <= currentStartTime
+                            && totalDataList.get(i + 1).getTime() > currentStartTime) {
+                        startDataNum = i;
+                        break;
+                    }
                 }
             }
-        } else if (totalDataList.get(halfSizeNum).getTime() <= currentStartTime
-                && totalDataList.get(totalDataList.size() - 1).getTime() >= currentStartTime) {
-            for (int i = halfSizeNum; i < totalDataList.size(); i++) {
-                if (i + 1 < totalDataList.size() && totalDataList.get(i).getTime() <= currentStartTime
-                        && totalDataList.get(i + 1).getTime() > currentStartTime) {
-                    startDataNum = i;
-                    break;
-                }
-            }
-        }
 
-        if (totalDataList.size() < maxViewDataNum) {
-            startDataNum = 0;
-        } else if (totalDataList.size() - startDataNum < maxViewDataNum || startDataNum == -1) {
-            startDataNum = totalDataList.size() - maxViewDataNum;
+            if (totalDataList.size() < maxViewDataNum) {
+                startDataNum = 0;
+            } else if (totalDataList.size() - startDataNum < maxViewDataNum || startDataNum == -1) {
+                startDataNum = totalDataList.size() - maxViewDataNum;
+            }
+
+        } else {
+            if (totalDataList.size() < maxViewDataNum) {
+                startDataNum = 0;
+            } else {
+                startDataNum = totalDataList.size() - maxViewDataNum;
+            }
         }
 
         resetViewData();
