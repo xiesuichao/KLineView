@@ -3,9 +3,8 @@
 
 主图指标：MA, EMA, BOLL      
 副图指标：MACD, KDJ, RSI     
-如需增加其他指标，请联系
-根目录下有个apk文件夹，内有最新的测试包，可以先安装看效果
-新增深度图控件，如下图所示，详情见demo
+根目录下有个apk文件夹，内有最新的测试包，可以先安装看效果      
+新增深度图控件，如下图所示，详情见demo         
 
 支持实时刷新的单条数据更新。          
 支持滑动时的分页加载更多数据。     
@@ -13,7 +12,7 @@
 支持多指触控缩放。       
 支持长按拖动。         
 支持横屏显示         
-支持xml布局自定义颜色，字体大小属性
+支持xml布局自定义颜色，字体大小属性     
 
 已对性能做优化，总数据量十万条以上对用户体验没有影响。   
 首次加载5000条数据，页面初始化到加载完成，总共耗时400+ms，不超过0.5秒。         
@@ -22,9 +21,9 @@
 建议每次添加数据在2000条左右。       
 已对滑动事件冲突做处理，可上下滑动的父类（ScrollView、NestedScrollView等）无需再考虑滑动冲突       
 
-邮箱：xsc314@163.com
-qq：181801034
-如有需要其他修改，请联系
+邮箱：xsc314@163.com       
+qq：181801034            
+如有需要其他修改，请联系            
 
 ![image](https://github.com/xiesuichao/KLineView/raw/master/image/KLineUI.png)
 ![image](https://github.com/xiesuichao/KLineView/raw/master/image/a5.png)
