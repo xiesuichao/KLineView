@@ -141,17 +141,14 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
             topMaTextSize, detailRectHeight, moveLimitDistance;
 
     private float leftStart, topStart, rightEnd, bottomEnd, mulFirstDownX, mulFirstDownY, lastDiffMoveX,
-            lastDiffMoveY, singleClickDownX, detailTextVerticalSpace,
+            lastDiffMoveY, singleClickDownX, detailTextVerticalSpace, longPressMoveY, dispatchDownY,
             volumeImgBot, verticalSpace, flingVelocityX, priceImgBot, deputyTopY, deputyCenterY,
             singleClickDownY, mulSecondDownX, longPressDownX, longPressDownY, dispatchDownX;
 
     private double maxPrice, topPrice, maxPriceX, minPrice, botPrice, minPriceX, maxVolume, avgHeightPerPrice,
             avgPriceRectWidth, avgHeightPerVolume, avgHeightMacd, avgHeightDea, avgHeightDif,
-            avgHeightK, avgHeightD, avgHeightJ, mMaxPriceY,
+            avgHeightK, avgHeightD, avgHeightJ, mMaxPriceY, avgHeightRSI,
             mMinPriceY, mMaxMacd, mMinMacd, mMaxK;
-    private double avgHeightRSI;
-    private float longPressMoveY;
-    private float dispatchDownY;
 
 
     public KLineView(Context context) {
@@ -254,6 +251,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
 
     /**
      * 重置所有数据
+     *
      * @param isNeedLocateCurrent 重置后的数据是否需要定位到重置前移动到的时间点，例如：
      *                            重置前已经滑动到9月20号，true则在重置后会将新数据定位到9月20号。
      *                            false则不作定位，view右边直接显示为最新的数据
@@ -900,10 +898,16 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         //水平刻度线
         verticalSpace = (bottomEnd - topStart - dp2px(38)) / 5;
         horizontalYList.clear();
+        float horizontalRightEnd;
         for (int i = 0; i < 6; i++) {
+            if (i == 0 || i == 5 || i == 4 || (isShowDeputy && i == 3)) {
+                horizontalRightEnd = rightEnd;
+            } else {
+                horizontalRightEnd = verticalXList.get(verticalXList.size() - 1);
+            }
             canvas.drawLine(leftStart + dp2px(6),
                     topStart + verticalSpace * i + dp2px(18),
-                    rightEnd,
+                    horizontalRightEnd,
                     topStart + verticalSpace * i + dp2px(18),
                     strokePaint);
             horizontalYList.add(topStart + verticalSpace * i + dp2px(18));
@@ -912,14 +916,14 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         deputyTopY = horizontalYList.get(4) + dp2px(12);
         canvas.drawLine(leftStart + dp2px(6),
                 horizontalYList.get(4) + verticalSpace / 2,
-                rightEnd,
+                verticalXList.get(verticalXList.size() - 1),
                 horizontalYList.get(4) + verticalSpace / 2,
                 strokePaint);
         //数量中线
         if (isShowDeputy) {
             canvas.drawLine(leftStart + dp2px(6),
                     horizontalYList.get(3) + verticalSpace / 2,
-                    rightEnd,
+                    verticalXList.get(verticalXList.size() - 1),
                     horizontalYList.get(3) + verticalSpace / 2,
                     strokePaint);
         }
@@ -1866,14 +1870,14 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         strokePaint.getTextBounds(formatKDataNum(topPrice), 0, formatKDataNum(topPrice).length(), rect);
         canvas.drawText(formatKDataNum(topPrice),
                 verticalXList.get(verticalXList.size() - 1) + dp2px(4),
-                horizontalYList.get(0) + rect.height(),
+                horizontalYList.get(0) + rect.height() + dp2px(2),
                 strokePaint);
 
         //最低价
         strokePaint.getTextBounds(formatKDataNum(botPrice), 0, formatKDataNum(botPrice).length(), rect);
         canvas.drawText(formatKDataNum(botPrice),
                 verticalXList.get(verticalXList.size() - 1) + dp2px(4),
-                priceImgBot - dp2px(3),
+                priceImgBot - dp2px(2),
                 strokePaint);
 
         if (!isShowDeputy) {
@@ -1925,17 +1929,17 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
 
             canvas.drawText(topDeputy,
                     verticalXList.get(verticalXList.size() - 1) + dp2px(4),
-                    horizontalYList.get(horizontalYList.size() - 2) + rect.height(),
+                    horizontalYList.get(horizontalYList.size() - 2) + rect.height() + dp2px(2),
                     strokePaint);
 
             canvas.drawText(centerDeputy,
                     verticalXList.get(verticalXList.size() - 1) + dp2px(4),
-                    horizontalYList.get(horizontalYList.size() - 1) - verticalSpace / 2,
+                    horizontalYList.get(horizontalYList.size() - 1) - verticalSpace / 2 + rect.height()/2,
                     strokePaint);
 
             canvas.drawText(botDeputy,
                     verticalXList.get(verticalXList.size() - 1) + dp2px(4),
-                    horizontalYList.get(horizontalYList.size() - 1),
+                    horizontalYList.get(horizontalYList.size() - 1) - dp2px(2),
                     strokePaint);
         }
 
@@ -1943,13 +1947,13 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         strokePaint.getTextBounds(formatVolNum(maxVolume), 0, formatVolNum(maxVolume).length(), rect);
         canvas.drawText(formatVolNum(maxVolume),
                 verticalXList.get(verticalXList.size() - 1) + dp2px(4),
-                priceImgBot + rect.height() + dp2px(3),
+                priceImgBot + rect.height() + dp2px(2),
                 strokePaint);
 
         //最高量/2
         canvas.drawText(formatVolNum(maxVolume / 2),
                 verticalXList.get(verticalXList.size() - 1) + dp2px(4),
-                volumeImgBot - verticalSpace / 2,
+                volumeImgBot - verticalSpace / 2 + rect.height()/2,
                 strokePaint);
 
         //数量 0
