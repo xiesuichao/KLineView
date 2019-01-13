@@ -20,10 +20,7 @@
 经测试，800块的华为荣耀6A 每次添加4000条以下数据不会有卡顿，很流畅。         
 建议每次添加数据在2000条左右。       
 已对滑动事件冲突做处理，可上下滑动的父类（ScrollView、NestedScrollView等）无需再考虑滑动冲突       
-
-邮箱：xsc314@163.com       
-qq：181801034            
-如有需要其他修改，请联系            
+             
 
 ![image](https://github.com/xiesuichao/KLineView/raw/master/image/KLineUI.png)
 ![image](https://github.com/xiesuichao/KLineView/raw/master/image/a5.png)
