@@ -14,7 +14,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 
-import com.example.admin.klineview.PrintUtil;
 import com.example.admin.klineview.R;
 
 import java.math.BigDecimal;

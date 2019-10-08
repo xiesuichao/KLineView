@@ -19,21 +19,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener{
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private Handler mHandler;
     private KLineView mKLineView;
-    private Button deputyBtn;
-    private Button maBtn;
-    private Button emaBtn;
-    private Button bollBtn;
-    private Button macdBtn;
-    private Button kdjBtn;
-    private Runnable dataListAddRunnable;
-    private Runnable singleDataAddRunnable;
-    private Button depthJumpBtn;
-    private Button kLineResetBtn;
-    private Button rsiBtn;
+    private Button deputyBtn, maBtn, emaBtn, bollBtn, macdBtn, kdjBtn, depthJumpBtn, kLineResetBtn,
+            rsiBtn;
+    private Runnable dataListAddRunnable, singleDataAddRunnable;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,18 +38,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setListener();
 
         //切换横屏适配测试
-        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE){
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                     dp2px(280));
             mKLineView.setLayoutParams(params);
-        }else {
+        } else {
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                     dp2px(380));
             mKLineView.setLayoutParams(params);
         }
     }
 
-    private void initView(){
+    private void initView() {
         mKLineView = findViewById(R.id.klv_main);
         deputyBtn = findViewById(R.id.btn_deputy);
         maBtn = findViewById(R.id.btn_ma);
@@ -69,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         depthJumpBtn = findViewById(R.id.btn_depth_activity);
     }
 
-    private void initData(){
+    private void initData() {
         //初始化控件加载数据
         mKLineView.initKDataList(getKDataList(10));
         //设置十字线移动模式，默认为0：固定指向收盘价
@@ -96,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    private void setListener(){
+    private void setListener() {
         deputyBtn.setOnClickListener(this);
         maBtn.setOnClickListener(this);
         emaBtn.setOnClickListener(this);
@@ -123,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()){
+        switch (v.getId()) {
             case R.id.btn_kline_reset:
                 //重置数据，可用于分时加载，是否需要定位到重置前的时间点请看方法注释
                 //在做分时功能重新加载数据的时候，请务必调用该方法
@@ -169,6 +162,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 //跳转到深度图页面
                 startActivity(new Intent(getApplicationContext(), DepthActivity.class));
                 break;
+
+            default:
+                break;
         }
     }
 
@@ -183,6 +179,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         double maxPrice;
         double minPrice;
         double volume;
+
+        /*for (int i = 0; i < 2000; i++) {
+            start += 60 * 1000 * 5;
+            closePrice = 150;
+            maxPrice = 200;
+            minPrice = 80;
+            volume = 300;
+            dataList.add(new KData(start, openPrice, closePrice, maxPrice, minPrice, volume));
+        }*/
 
         for (int x = 0; x < num * 10; x++) {
             for (int i = 0; i < 12; i++) {
@@ -210,14 +215,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return dataList;
     }
 
-    private double getAddRandomDouble(){
+    private double getAddRandomDouble() {
         Random random = new Random();
         return random.nextInt(5) * 5 + random.nextDouble();
     }
 
-    private double getSubRandomDouble(){
+    private double getSubRandomDouble() {
         Random random = new Random();
-        return random.nextInt(5) * 5  - random.nextDouble();
+        return random.nextInt(5) * 5 - random.nextDouble();
     }
 
     private int dp2px(float dpValue) {

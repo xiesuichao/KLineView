@@ -10,6 +10,7 @@ import android.graphics.RectF;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Process;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
@@ -17,7 +18,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 
-import com.example.admin.klineview.PrintUtil;
 import com.example.admin.klineview.R;
 
 import java.math.BigDecimal;
@@ -181,6 +181,9 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
      * 经测试，800块的华为荣耀6A 每次添加4000条以下数据不会有卡顿，很流畅。
      */
     public void initKDataList(List<KData> dataList) {
+        if (dataList == null || dataList.isEmpty()){
+            return;
+        }
         this.totalDataList.clear();
         this.totalDataList.addAll(dataList);
         startDataNum = totalDataList.size() - maxViewDataNum;
@@ -192,6 +195,9 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
      * 添加最新的单条数据
      */
     public void addSingleData(KData data) {
+        if (data == null){
+            return;
+        }
         endDataList.clear();
         int startIndex;
         if (totalDataList.size() >= 30) {
@@ -213,6 +219,9 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
      * @param isNeedReqPre 下次向前期滑动到边界时，是否需要自动调用接口请求数据
      */
     public void addPreDataList(List<KData> dataList, boolean isNeedReqPre) {
+        if (dataList == null || dataList.isEmpty()){
+            return;
+        }
         isNeedRequestPreData = isNeedReqPre;
         totalDataList.addAll(0, dataList);
         startDataNum += dataList.size();
@@ -231,6 +240,9 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
      * 上面的方法，手动传入isNeedReqPre用来判断是否需要继续自动调用接口请求数据
      */
     public void addPreDataList(List<KData> dataList) {
+        if (dataList == null || dataList.isEmpty()){
+            return;
+        }
         if (initTotalListSize == 0) {
             initTotalListSize = dataList.size();
         }
@@ -246,6 +258,9 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
      * 重置所有数据，默认不作定位
      */
     public void resetDataList(List<KData> dataList) {
+        if (dataList == null || dataList.isEmpty()){
+            return;
+        }
         resetDataList(dataList, false);
     }
 
@@ -257,6 +272,9 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
      *                            false则不作定位，view右边直接显示为最新的数据
      */
     public void resetDataList(List<KData> dataList, boolean isNeedLocateCurrent) {
+        if (dataList == null || dataList.isEmpty()){
+            return;
+        }
         long currentStartTime = 0;
         if (viewDataList.size() > 0) {
             currentStartTime = viewDataList.get(0).getTime();
@@ -274,6 +292,9 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
             case MAIN_IMG_BOLL:
                 QuotaUtil.initBoll(totalDataList, false);
                 break;
+
+            default:
+                break;
         }
         switch (deputyImgType) {
             case DEPUTY_IMG_MACD:
@@ -286,6 +307,9 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
 
             case DEPUTY_IMG_RSI:
                 QuotaUtil.initRSI(totalDataList, false);
+                break;
+
+            default:
                 break;
         }
 
@@ -348,6 +372,9 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
             case MAIN_IMG_BOLL:
                 QuotaUtil.initBoll(totalDataList, false);
                 break;
+
+            default:
+                break;
         }
         this.mainImgType = type;
         invalidate();
@@ -383,6 +410,9 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
 
             case DEPUTY_IMG_RSI:
                 QuotaUtil.initRSI(totalDataList, false);
+                break;
+
+            default:
                 break;
         }
         invalidate();
@@ -855,7 +885,9 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     private void requestNewData() {
         if (startDataNum <= totalDataList.size() / 3 && isNeedRequestPreData) {
             isNeedRequestPreData = false;
-            requestListener.requestData();
+            if (requestListener != null){
+                requestListener.requestData();
+            }
         }
     }
 
@@ -1934,7 +1966,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
 
             canvas.drawText(centerDeputy,
                     verticalXList.get(verticalXList.size() - 1) + dp2px(4),
-                    horizontalYList.get(horizontalYList.size() - 1) - verticalSpace / 2 + rect.height()/2,
+                    horizontalYList.get(horizontalYList.size() - 1) - verticalSpace / 2 + rect.height() / 2,
                     strokePaint);
 
             canvas.drawText(botDeputy,
@@ -1953,7 +1985,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         //最高量/2
         canvas.drawText(formatVolNum(maxVolume / 2),
                 verticalXList.get(verticalXList.size() - 1) + dp2px(4),
-                volumeImgBot - verticalSpace / 2 + rect.height()/2,
+                volumeImgBot - verticalSpace / 2 + rect.height() / 2,
                 strokePaint);
 
         //数量 0

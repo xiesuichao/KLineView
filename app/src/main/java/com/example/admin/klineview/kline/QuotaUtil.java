@@ -2,7 +2,7 @@ package com.example.admin.klineview.kline;
 
 import android.graphics.Path;
 
-import com.example.admin.klineview.PrintUtil;
+import com.example.admin.klineview.Print;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +56,7 @@ public class QuotaUtil {
             dataList.get(i).setInitFinish(true);
         }
         long endMa = System.currentTimeMillis();
-        PrintUtil.log("MA", endMa - startMa);
+        Print.log("MA", endMa - startMa);
     }
 
     private static double getVolumeMa(List<KData> dataList) {
@@ -113,7 +113,7 @@ public class QuotaUtil {
             lastEma30 = currentEma30;
         }
         long endEma = System.currentTimeMillis();
-        PrintUtil.log("EMA", endEma - startEma);
+        Print.log("EMA", endEma - startEma);
     }
 
     /**
@@ -182,7 +182,7 @@ public class QuotaUtil {
             quotes.setBollDn(dn);
         }
         long endBoll = System.currentTimeMillis();
-        PrintUtil.log("BOLL", endBoll - startBoll);
+        Print.log("BOLL", endBoll - startBoll);
     }
 
     public static void initBoll(List<KData> dataList, boolean isEndData) {
@@ -231,7 +231,7 @@ public class QuotaUtil {
             dataList.get(i).setDif(dif);
         }
         long endMacd = System.currentTimeMillis();
-        PrintUtil.log("MACD", endMacd - startMacd);
+        Print.log("MACD", endMacd - startMacd);
     }
 
     public static void initMACD(List<KData> dataList, boolean isEndData) {
@@ -322,7 +322,7 @@ public class QuotaUtil {
             dataList.get(i).setJ(jValue);
         }
         long endKdj = System.currentTimeMillis();
-        PrintUtil.log("KDJ", endKdj - startKdj);
+        Print.log("KDJ", endKdj - startKdj);
     }
 
     public static void initKDJ(List<KData> dataList, boolean isEndData) {
@@ -425,7 +425,7 @@ public class QuotaUtil {
             }
         }
         long endRSI = System.currentTimeMillis();
-        PrintUtil.log("RSI", endRSI - startRSI);
+        Print.log("RSI", endRSI - startRSI);
     }
 
     public static void initRSI(List<KData> dataList, boolean isEndData) {
