@@ -73,7 +73,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void run() {
                 //分页加载时添加多条数据
-                mKLineView.addPreDataList(getKDataList(10), true);
+//                mKLineView.addPreDataList(getKDataList(10), true);
+                mKLineView.addPreDataList(null, true);
             }
         };
 
@@ -82,10 +83,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void run() {
                 //实时刷新时添加单条数据
                 mKLineView.addSingleData(getKDataList(0.1).get(0));
-                mHandler.postDelayed(this, 1000);
+//                mHandler.postDelayed(this, 1000);
             }
         };
-//        mHandler.postDelayed(singleDataAddRunnable, 2000);
+        mHandler.postDelayed(singleDataAddRunnable, 2000);
 
     }
 
@@ -100,11 +101,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         depthJumpBtn.setOnClickListener(this);
         kLineResetBtn.setOnClickListener(this);
 
-        /**
-         * 当控件显示数据属于总数据量的前三分之一时，会自动调用该接口，用于预加载数据，保证控件操作过程中的流畅性，
-         * 虽然做了预加载，当总数据量较小时，也会出现用户滑到左边界了，但数据还未获取到，依然会有停顿。
-         * 所以数据量越大，越不会出现停顿，也就越流畅
-         */
+        //当控件显示数据属于总数据量的前三分之一时，会自动调用该接口，用于预加载数据，保证控件操作过程中的流畅性，
+        //虽然做了预加载，当总数据量较小时，也会出现用户滑到左边界了，但数据还未获取到，依然会有停顿。
+        //所以数据量越大，越不会出现停顿，也就越流畅
         mKLineView.setOnRequestDataListListener(new KLineView.OnRequestDataListListener() {
             @Override
             public void requestData() {

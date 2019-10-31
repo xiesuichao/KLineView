@@ -340,9 +340,40 @@ public class KData {
     @Override
     public String toString() {
         return "KData{" +
-                "rs1=" + rs1 +
+                "time=" + time +
+                ", openPrice=" + openPrice +
+                ", closePrice=" + closePrice +
+                ", maxPrice=" + maxPrice +
+                ", minPrice=" + minPrice +
+                ", volume=" + volume +
+                ", upDnAmount=" + upDnAmount +
+                ", upDnRate=" + upDnRate +
+                ", priceMa5=" + priceMa5 +
+                ", priceMa10=" + priceMa10 +
+                ", priceMa30=" + priceMa30 +
+                ", ema5=" + ema5 +
+                ", ema10=" + ema10 +
+                ", ema30=" + ema30 +
+                ", ema=" + ema +
+                ", volumeMa5=" + volumeMa5 +
+                ", volumeMa10=" + volumeMa10 +
+                ", bollMb=" + bollMb +
+                ", bollUp=" + bollUp +
+                ", bollDn=" + bollDn +
+                ", macd=" + macd +
+                ", dea=" + dea +
+                ", dif=" + dif +
+                ", k=" + k +
+                ", d=" + d +
+                ", j=" + j +
+                ", rs1=" + rs1 +
                 ", rs2=" + rs2 +
                 ", rs3=" + rs3 +
+                ", leftX=" + leftX +
+                ", rightX=" + rightX +
+                ", closeY=" + closeY +
+                ", openY=" + openY +
+                ", initFinish=" + initFinish +
                 '}';
     }
 }

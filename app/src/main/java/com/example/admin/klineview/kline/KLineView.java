@@ -18,6 +18,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 
+import com.example.admin.klineview.Print;
 import com.example.admin.klineview.R;
 
 import java.math.BigDecimal;
@@ -57,12 +58,14 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     private boolean isNeedRequestPreData = true;
     //是否双指触控
     private boolean isDoubleFinger = false;
+    //是否已经滑动到最右边
+    private boolean isRightmost = false;
     //主图数据类型 0:MA, 1:EMA 2:BOLL
     public static final int MAIN_IMG_MA = 0;
     public static final int MAIN_IMG_EMA = 1;
     public static final int MAIN_IMG_BOLL = 2;
     private int mainImgType = MAIN_IMG_MA;
-    //副图数据类型 0:MACD, 1:KDJ
+    //副图数据类型 0:MACD, 1:KDJ, 2:RSI
     public static final int DEPUTY_IMG_MACD = 0;
     public static final int DEPUTY_IMG_KDJ = 1;
     public static final int DEPUTY_IMG_RSI = 2;
@@ -634,7 +637,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     }
 
     @Override
-    public boolean onTouchEvent(MotionEvent event) {
+    public boolean onTouchEvent(@NonNull MotionEvent event) {
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 singleClickDownX = event.getX();
@@ -767,8 +770,11 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
 
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+            if (distanceX < 0){
+                isRightmost = false;
+            }
             if ((startDataNum == 0 && distanceX < 0)
-                    || (startDataNum == totalDataList.size() - 1 - maxViewDataNum && distanceX > 0)
+                    || (startDataNum == totalDataList.size() - maxViewDataNum  && distanceX > 0)
                     || startDataNum < 0
                     || viewDataList.size() < maxViewDataNum) {
                 if (isShowDetail) {
@@ -857,6 +863,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     }
 
     private void moveData(float distanceX) {
+        Print.log("totalDataList.size", totalDataList.size());
         if (maxViewDataNum < 60) {
             setSpeed(distanceX, 10);
         } else {
@@ -1346,7 +1353,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     }
 
     //主图 MA曲线
-    private void drawMainBezierCurve(Canvas canvas) {
+    private void drawMainBezierCurve(@NonNull Canvas canvas) {
         QuotaUtil.setBezierPath(mainMa5PointList, curvePath);
         resetStrokePaint(priceMa5Col, 0);
         canvas.drawPath(curvePath, strokePaint);
@@ -1361,7 +1368,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     }
 
     //volume MA曲线
-    private void drawVolumeBezierCurve(Canvas canvas) {
+    private void drawVolumeBezierCurve(@NonNull Canvas canvas) {
         QuotaUtil.setBezierPath(volumeMa5PointList, curvePath);
         resetStrokePaint(priceMa5Col, 0);
         canvas.drawPath(curvePath, strokePaint);
@@ -1372,7 +1379,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     }
 
     //副图 曲线
-    private void drawDeputyCurve(Canvas canvas) {
+    private void drawDeputyCurve(@NonNull Canvas canvas) {
         QuotaUtil.setLinePath(deputyMa5PointList, curvePath);
         resetStrokePaint(priceMa5Col, 0);
         canvas.drawPath(curvePath, strokePaint);
@@ -1436,10 +1443,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         //水平
         double moveY;
         switch (crossHairMoveMode) {
-            case CROSS_HAIR_MOVE_CLOSE:
-                moveY = lastKData.getCloseY();
-                break;
-
             case CROSS_HAIR_MOVE_OPEN:
                 moveY = lastKData.getOpenY();
                 break;
@@ -1448,6 +1451,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                 moveY = longPressMoveY;
                 break;
 
+            case CROSS_HAIR_MOVE_CLOSE:
             default:
                 moveY = lastKData.getCloseY();
                 break;
@@ -1562,7 +1566,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         resetStrokePaint(priceMaxLabelTextCol, priceMaxLabelTextSize);
         canvas.drawText(maxPriceStr,
                 maxPriceTextX,
-                (float) mMaxPriceY + maxPriceRect.height() / 2,
+                (float) mMaxPriceY + maxPriceRect.height() / 2f,
                 strokePaint);
 
         //minPrice
@@ -1609,7 +1613,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         resetStrokePaint(priceMinLabelTextCol, priceMinLabelTextSize);
         canvas.drawText(minPriceStr,
                 minPriceTextX,
-                (float) mMinPriceY + minPriceRect.height() / 2,
+                (float) mMinPriceY + minPriceRect.height() / 2f,
                 strokePaint);
     }
 
@@ -1620,7 +1624,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         resetStrokePaint(detailTextCol, detailTextSize);
         strokePaint.getTextBounds(detailLeftTitleArr[0], 0, detailLeftTitleArr[0].length(), detailTextRect);
 
-        if (lastKData.getLeftX() + avgPriceRectWidth / 2 <= getMeasuredWidth() / 2) {
+        if (lastKData.getLeftX() + avgPriceRectWidth / 2 <= getMeasuredWidth() / 2f) {
             //边框(右侧)
             fillPaint.setColor(detailBgCol);
             canvas.drawRect(verticalXList.get(verticalXList.size() - 1) - detailRectWidth,
@@ -1895,7 +1899,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     }
 
     //纵坐标
-    private void drawOrdinate(Canvas canvas) {
+    private void drawOrdinate(@NonNull Canvas canvas) {
         Rect rect = new Rect();
         resetStrokePaint(ordinateTextCol, ordinateTextSize);
         //最高价
@@ -1966,7 +1970,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
 
             canvas.drawText(centerDeputy,
                     verticalXList.get(verticalXList.size() - 1) + dp2px(4),
-                    horizontalYList.get(horizontalYList.size() - 1) - verticalSpace / 2 + rect.height() / 2,
+                    horizontalYList.get(horizontalYList.size() - 1) - verticalSpace / 2 + rect.height() / 2f,
                     strokePaint);
 
             canvas.drawText(botDeputy,
@@ -1985,7 +1989,7 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         //最高量/2
         canvas.drawText(formatVolNum(maxVolume / 2),
                 verticalXList.get(verticalXList.size() - 1) + dp2px(4),
-                volumeImgBot - verticalSpace / 2 + rect.height() / 2,
+                volumeImgBot - verticalSpace / 2 + rect.height() / 2f,
                 strokePaint);
 
         //数量 0
