@@ -832,8 +832,8 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                         startDataNum++;
                     }
                     flingVelocityX += 200;
-                    if (startDataNum > totalDataList.size() - maxViewDataNum - 1) {
-                        startDataNum = totalDataList.size() - maxViewDataNum - 1;
+                    if (startDataNum > totalDataList.size() - maxViewDataNum) {
+                        startDataNum = totalDataList.size() - maxViewDataNum;
                     }
                 } else if (flingVelocityX > 200) {
                     if (flingVelocityX > 6000) {
@@ -863,7 +863,6 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     }
 
     private void moveData(float distanceX) {
-        Print.log("totalDataList.size", totalDataList.size());
         if (maxViewDataNum < 60) {
             setSpeed(distanceX, 10);
         } else {
