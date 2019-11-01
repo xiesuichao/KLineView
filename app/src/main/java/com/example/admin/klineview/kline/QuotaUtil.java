@@ -1,6 +1,7 @@
 package com.example.admin.klineview.kline;
 
 import android.graphics.Path;
+import android.support.annotation.NonNull;
 
 import com.example.admin.klineview.Print;
 
@@ -439,6 +440,9 @@ public class QuotaUtil {
      * @param path
      */
     public static void setBezierPath(List<Pointer> pointList, Path path) {
+        if (path == null){
+            return;
+        }
         path.reset();
         if (pointList == null || pointList.isEmpty()) {
             return;
@@ -488,7 +492,9 @@ public class QuotaUtil {
     }
 
     public static void setLinePath(List<Pointer> pointerList, Path path) {
-        path.reset();
+        if (path == null){
+            return;
+        }
         if (pointerList == null || pointerList.size() <= 1) {
             return;
         }

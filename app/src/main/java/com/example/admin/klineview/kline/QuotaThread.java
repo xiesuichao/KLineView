@@ -3,6 +3,8 @@ package com.example.admin.klineview.kline;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
+import android.support.annotation.NonNull;
+
 import java.util.List;
 
 /**
@@ -53,7 +55,7 @@ public class QuotaThread extends HandlerThread implements Handler.Callback {
     }
 
     @Override
-    public boolean handleMessage(Message msg) {
+    public boolean handleMessage(@NonNull Message msg) {
         if (msg.what == HANDLER_QUOTA_LIST) {
             handleData(msg, HANDLER_QUOTA_LIST, false);
         }else if (msg.what == HANDLER_QUOTA_SINGLE){
@@ -63,6 +65,9 @@ public class QuotaThread extends HandlerThread implements Handler.Callback {
     }
 
     private void handleData(Message msg, int whatId, boolean isEndData){
+        if (msg == null){
+            return;
+        }
         List<KData> dataList = (List<KData>) msg.obj;
         calculateKDataQuota(dataList, isEndData);
         Message message = Message.obtain(null, whatId);
