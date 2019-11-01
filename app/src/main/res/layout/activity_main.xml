@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     tools:context="com.example.admin.klineview.MainActivity"
-    android:background="#ffffff">
+    android:background="#ffffff"
+    android:overScrollMode="never">
 
     <LinearLayout
         android:layout_width="match_parent"

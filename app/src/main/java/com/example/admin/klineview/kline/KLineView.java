@@ -195,6 +195,20 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     }
 
     /**
+     * 获取总数据list
+     */
+    public List<KData> getTotalDataList(){
+        return totalDataList;
+    }
+
+    /**
+     * 获取显示的数据list
+     */
+    public List<KData> getViewDataList(){
+        return viewDataList;
+    }
+
+    /**
      * 添加最新的单条数据
      */
     public void addSingleData(KData data) {
@@ -1116,11 +1130,18 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
             viewDataList.get(i).setCloseY((float) (horizontalYList.get(0) + (topPrice - closedPrice) * avgHeightPerPrice));
             viewDataList.get(i).setOpenY((float) (horizontalYList.get(0) + (topPrice - openPrice) * avgHeightPerPrice));
 
+            //如果开盘价==收盘价，则给1px的高度
+            float upPriceCoordinate = (float) (mMaxPriceY + (maxPrice - higherPrice) * avgHeightPerPrice);
+            float downPriceCoordinate = (float) (mMaxPriceY + (maxPrice - lowerPrice) * avgHeightPerPrice);
+            if (upPriceCoordinate == downPriceCoordinate){
+                downPriceCoordinate = upPriceCoordinate + 1;
+            }
+
             //priceRect
             canvas.drawRect((float) viewDataList.get(i).getLeftX() + dp2px(0.5f),
-                    (float) (mMaxPriceY + (maxPrice - higherPrice) * avgHeightPerPrice),
+                    upPriceCoordinate,
                     (float) viewDataList.get(i).getRightX() - dp2px(0.5f),
-                    (float) (mMaxPriceY + (maxPrice - lowerPrice) * avgHeightPerPrice),
+                    downPriceCoordinate,
                     fillPaint);
 
             //priceLine

@@ -22,7 +22,7 @@ import java.util.Random;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private Handler mHandler;
-    private KLineView mKLineView;
+    private KLineView kLineView;
     private Button deputyBtn, maBtn, emaBtn, bollBtn, macdBtn, kdjBtn, depthJumpBtn, kLineResetBtn,
             rsiBtn;
     private Runnable dataListAddRunnable, singleDataAddRunnable;
@@ -41,16 +41,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                     dp2px(280));
-            mKLineView.setLayoutParams(params);
+            kLineView.setLayoutParams(params);
         } else {
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                     dp2px(380));
-            mKLineView.setLayoutParams(params);
+            kLineView.setLayoutParams(params);
         }
     }
 
     private void initView() {
-        mKLineView = findViewById(R.id.klv_main);
+        kLineView = findViewById(R.id.klv_main);
         deputyBtn = findViewById(R.id.btn_deputy);
         maBtn = findViewById(R.id.btn_ma);
         emaBtn = findViewById(R.id.btn_ema);
@@ -64,17 +64,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void initData() {
         //初始化控件加载数据
-        mKLineView.initKDataList(getKDataList(10));
+        kLineView.initKDataList(getKDataList(10));
         //设置十字线移动模式，默认为0：固定指向收盘价
-        mKLineView.setCrossHairMoveMode(KLineView.CROSS_HAIR_MOVE_OPEN);
+        kLineView.setCrossHairMoveMode(KLineView.CROSS_HAIR_MOVE_OPEN);
 
         mHandler = new Handler();
         dataListAddRunnable = new Runnable() {
             @Override
             public void run() {
                 //分页加载时添加多条数据
-//                mKLineView.addPreDataList(getKDataList(10), true);
-                mKLineView.addPreDataList(null, true);
+                kLineView.addPreDataList(getKDataList(10), true);
+//                kLineView.addPreDataList(null, true);
             }
         };
 
@@ -82,7 +82,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void run() {
                 //实时刷新时添加单条数据
-                mKLineView.addSingleData(getKDataList(0.1).get(0));
+                /*KData kData = kLineView.getTotalDataList().get(kLineView.getTotalDataList().size() - 1);
+                KData kData1 = new KData(kData.getTime(), kData.getOpenPrice(), kData.getOpenPrice(),
+                        kData.getMaxPrice(), kData.getMinPrice(), kData.getVolume());
+                kLineView.addSingleData(kData1);*/
+                kLineView.addSingleData(getKDataList(0.1).get(0));
 //                mHandler.postDelayed(this, 1000);
             }
         };
@@ -104,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //当控件显示数据属于总数据量的前三分之一时，会自动调用该接口，用于预加载数据，保证控件操作过程中的流畅性，
         //虽然做了预加载，当总数据量较小时，也会出现用户滑到左边界了，但数据还未获取到，依然会有停顿。
         //所以数据量越大，越不会出现停顿，也就越流畅
-        mKLineView.setOnRequestDataListListener(new KLineView.OnRequestDataListListener() {
+        kLineView.setOnRequestDataListListener(new KLineView.OnRequestDataListListener() {
             @Override
             public void requestData() {
                 //延时3秒执行，模拟网络请求耗时
@@ -119,42 +123,42 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.btn_kline_reset:
                 //重置数据，可用于分时加载，是否需要定位到重置前的时间点请看方法注释
                 //在做分时功能重新加载数据的时候，请务必调用该方法
-                mKLineView.resetDataList(getKDataList(0.1));
+                kLineView.resetDataList(getKDataList(0.1));
                 break;
 
             case R.id.btn_deputy:
                 //是否显示副图
-                mKLineView.setDeputyPicShow(!mKLineView.getVicePicShow());
+                kLineView.setDeputyPicShow(!kLineView.getVicePicShow());
                 break;
 
             case R.id.btn_ma:
                 //主图展示MA
-                mKLineView.setMainImgType(KLineView.MAIN_IMG_MA);
+                kLineView.setMainImgType(KLineView.MAIN_IMG_MA);
                 break;
 
             case R.id.btn_ema:
                 //主图展示EMA
-                mKLineView.setMainImgType(KLineView.MAIN_IMG_EMA);
+                kLineView.setMainImgType(KLineView.MAIN_IMG_EMA);
                 break;
 
             case R.id.btn_boll:
                 //主图展示BOLL
-                mKLineView.setMainImgType(KLineView.MAIN_IMG_BOLL);
+                kLineView.setMainImgType(KLineView.MAIN_IMG_BOLL);
                 break;
 
             case R.id.btn_macd:
                 //副图展示MACD
-                mKLineView.setDeputyImgType(KLineView.DEPUTY_IMG_MACD);
+                kLineView.setDeputyImgType(KLineView.DEPUTY_IMG_MACD);
                 break;
 
             case R.id.btn_kdj:
                 //副图展示KDJ
-                mKLineView.setDeputyImgType(KLineView.DEPUTY_IMG_KDJ);
+                kLineView.setDeputyImgType(KLineView.DEPUTY_IMG_KDJ);
                 break;
 
             case R.id.btn_rsi:
                 //副图展示RSI
-                mKLineView.setDeputyImgType(KLineView.DEPUTY_IMG_RSI);
+                kLineView.setDeputyImgType(KLineView.DEPUTY_IMG_RSI);
                 break;
 
             case R.id.btn_depth_activity:
@@ -233,7 +237,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onDestroy() {
         super.onDestroy();
         //退出页面时停止子线程并置空，便于回收，避免内存泄露
-        mKLineView.cancelQuotaThread();
+        kLineView.cancelQuotaThread();
     }
 
 }
