@@ -1,5 +1,6 @@
 # KLineView
-股票走势图K线控件
+股票走势图K线控件  
+[![](https://jitpack.io/v/xiesuichao/KLineView.svg)](https://jitpack.io/#xiesuichao/KLineView)  
 
 主图指标：MA, EMA, BOLL      
 副图指标：MACD, KDJ, RSI     
