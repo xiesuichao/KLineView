@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void initData() {
-        //初始化控件加载数据
+        //初始化控件加载数据，仅限于首次初始化赋值，不可用于更新数据
         kLineView.initKDataList(getKDataList(10));
         //设置十字线移动模式，默认为0：固定指向收盘价
         kLineView.setCrossHairMoveMode(KLineView.CROSS_HAIR_MOVE_OPEN);
