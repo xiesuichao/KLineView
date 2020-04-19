@@ -8,7 +8,7 @@ import android.util.Log;
  */
 public class Print {
 
-    private static boolean printAvailable = false;
+    private static boolean printAvailable = true;
     private static final String TAG_LOG = "KLine";
 
     public static void log(Object obj) {

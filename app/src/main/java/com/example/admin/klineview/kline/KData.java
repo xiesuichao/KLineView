@@ -38,6 +38,7 @@ public class KData {
     private double rs3;
     private double leftX;
     private double rightX;
+    private double centerX;
     private double closeY;
     private double openY;
     private boolean initFinish;
@@ -60,6 +61,14 @@ public class KData {
         this.maxPrice = maxPrice;
         this.minPrice = minPrice;
         this.volume = volume;
+    }
+
+    public double getCenterX() {
+        return centerX;
+    }
+
+    public void setCenterX(double centerX) {
+        this.centerX = centerX;
     }
 
     public double getEma() {
