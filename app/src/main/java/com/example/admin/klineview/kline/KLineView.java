@@ -3,10 +3,13 @@ package com.example.admin.klineview.kline;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.Shader;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Process;
@@ -95,8 +98,8 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
 
     private int initTotalListSize = 0;
 
-    private Paint strokePaint, fillPaint;
-    private Path curvePath;
+    private Paint strokePaint, fillPaint, instantFillPaint;
+    private Path curvePath, instantPath;
 
     private Rect topMa5Rect = new Rect();
     private Rect topMa10Rect = new Rect();
@@ -550,7 +553,12 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         fillPaint.setAntiAlias(true);
         fillPaint.setStyle(Paint.Style.FILL);
 
+        instantFillPaint = new Paint();
+        instantFillPaint.setAntiAlias(true);
+        instantFillPaint.setStyle(Paint.Style.FILL);
+
         curvePath = new Path();
+        instantPath = new Path();
 
         longPressRunnable = new Runnable() {
             @Override
@@ -2130,14 +2138,30 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
             return;
         }
         curvePath.reset();
+        instantPath.reset();
+        float startX = (float) viewDataList.get(0).getCenterX();
+        float startY = (float) viewDataList.get(0).getCloseY();
+        curvePath.moveTo(startX, startY);
+        instantPath.moveTo(startX, startY);
         int viewDataSize = viewDataList.size();
-        curvePath.moveTo((float) viewDataList.get(0).getCenterX(), (float) viewDataList.get(0).getCloseY());
         for (int i = 1; i < viewDataSize; i++) {
             KData viewData = viewDataList.get(i);
             curvePath.lineTo((float) viewData.getCenterX(), (float) viewData.getCloseY());
+            instantPath.lineTo((float) viewData.getCenterX(), (float) viewData.getCloseY());
+            if (i == viewDataSize - 1){
+                instantPath.lineTo(verticalXList.get(verticalXList.size() - 1), (float) viewData.getCloseY());
+            }
         }
         resetStrokePaint(0xff1aa3f0, 0);
         canvas.drawPath(curvePath, strokePaint);
+
+        instantPath.lineTo(verticalXList.get(verticalXList.size() - 1), horizontalYList.get(horizontalYList.size() - 2));
+        instantPath.lineTo(startX, horizontalYList.get(horizontalYList.size() - 2));
+        instantPath.close();
+        LinearGradient gradient = new LinearGradient(0, (int)mMaxPriceY, 0,
+                horizontalYList.get(horizontalYList.size() - 2), 0x801aa3f0, 0x0d1aa3f0, Shader.TileMode.CLAMP);
+        instantFillPaint.setShader(gradient);
+        canvas.drawPath(instantPath, instantFillPaint);
     }
 
     private int dp2px(float dpValue) {

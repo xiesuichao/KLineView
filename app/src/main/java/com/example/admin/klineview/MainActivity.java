@@ -88,10 +88,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         kData.getMaxPrice(), kData.getMinPrice(), kData.getVolume());
                 kLineView.addSingleData(kData1);*/
                 kLineView.addSingleData(getKDataList(0.1).get(0));
-                mHandler.postDelayed(this, 1000);
+//                mHandler.postDelayed(this, 1000);
             }
         };
-        mHandler.postDelayed(singleDataAddRunnable, 2000);
+//        mHandler.postDelayed(singleDataAddRunnable, 2000);
 
     }
 
