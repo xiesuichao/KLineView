@@ -7,17 +7,14 @@ package com.example.admin.klineview.kline;
 
 public class KData {
 
-    //时间戳
-    private long time;
+    private long time;//时间戳
     private double openPrice;
     private double closePrice;
     private double maxPrice;
     private double minPrice;
     private double volume;
-    //涨跌额
-    private double upDnAmount;
-    //涨跌幅
-    private double upDnRate;
+    private double upDnAmount;//涨跌额
+    private double upDnRate;//涨跌幅
     private double priceMa5;
     private double priceMa10;
     private double priceMa30;
@@ -41,6 +38,7 @@ public class KData {
     private double rs3;
     private double leftX;
     private double rightX;
+    private double centerX;
     private double closeY;
     private double openY;
     private boolean initFinish;
@@ -63,6 +61,14 @@ public class KData {
         this.maxPrice = maxPrice;
         this.minPrice = minPrice;
         this.volume = volume;
+    }
+
+    public double getCenterX() {
+        return centerX;
+    }
+
+    public void setCenterX(double centerX) {
+        this.centerX = centerX;
     }
 
     public double getEma() {

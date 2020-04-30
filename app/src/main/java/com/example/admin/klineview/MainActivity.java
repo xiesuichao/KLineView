@@ -24,7 +24,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Handler mHandler;
     private KLineView kLineView;
     private Button deputyBtn, maBtn, emaBtn, bollBtn, macdBtn, kdjBtn, depthJumpBtn, kLineResetBtn,
-            rsiBtn;
+            rsiBtn, instantBtn;
     private Runnable dataListAddRunnable, singleDataAddRunnable;
 
 
@@ -60,10 +60,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         rsiBtn = findViewById(R.id.btn_rsi);
         kLineResetBtn = findViewById(R.id.btn_kline_reset);
         depthJumpBtn = findViewById(R.id.btn_depth_activity);
+        instantBtn = findViewById(R.id.btn_instant);
     }
 
     private void initData() {
-        //初始化控件加载数据
+        //初始化控件加载数据，仅限于首次初始化赋值，不可用于更新数据
         kLineView.initKDataList(getKDataList(10));
         //设置十字线移动模式，默认为0：固定指向收盘价
         kLineView.setCrossHairMoveMode(KLineView.CROSS_HAIR_MOVE_OPEN);
@@ -90,7 +91,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //                mHandler.postDelayed(this, 1000);
             }
         };
-        mHandler.postDelayed(singleDataAddRunnable, 2000);
+//        mHandler.postDelayed(singleDataAddRunnable, 2000);
 
     }
 
@@ -104,6 +105,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         rsiBtn.setOnClickListener(this);
         depthJumpBtn.setOnClickListener(this);
         kLineResetBtn.setOnClickListener(this);
+        instantBtn.setOnClickListener(this);
 
         //当控件显示数据属于总数据量的前三分之一时，会自动调用该接口，用于预加载数据，保证控件操作过程中的流畅性，
         //虽然做了预加载，当总数据量较小时，也会出现用户滑到左边界了，但数据还未获取到，依然会有停顿。
@@ -159,6 +161,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.btn_rsi:
                 //副图展示RSI
                 kLineView.setDeputyImgType(KLineView.DEPUTY_IMG_RSI);
+                break;
+
+            case R.id.btn_instant:
+                kLineView.setShowInstant(!kLineView.isShowInstant());
                 break;
 
             case R.id.btn_depth_activity:

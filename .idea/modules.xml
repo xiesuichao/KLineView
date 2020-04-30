@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/AndroidSpace-KLineView.iml" filepath="$PROJECT_DIR$/AndroidSpace-KLineView.iml" group="KLineView" />
       <module fileurl="file://$PROJECT_DIR$/KLineView.iml" filepath="$PROJECT_DIR$/KLineView.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/KLineView-app.iml" filepath="$PROJECT_DIR$/app/KLineView-app.iml" group="KLineView/app" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

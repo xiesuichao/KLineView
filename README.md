@@ -1,12 +1,14 @@
 # KLineView
-股票走势图K线控件
+股票走势图K线控件  
+[![](https://jitpack.io/v/xiesuichao/KLineView.svg)](https://jitpack.io/#xiesuichao/KLineView)  
 
 主图指标：MA, EMA, BOLL      
 副图指标：MACD, KDJ, RSI     
 根目录下有个apk文件夹，内有最新的测试包，可以先安装看效果      
 新增深度图控件，如下图所示，详情见demo         
 
-支持实时刷新的单条数据更新。          
+支持实时刷新最后一条数据。  
+支持添加最新的单条数据。  
 支持滑动时的分页加载更多数据。     
 支持惯性滑动。         
 支持多指触控缩放。       
