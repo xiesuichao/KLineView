@@ -635,8 +635,8 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
             drawBezierCurve(canvas);
             drawTopPriceMAData(canvas);
             drawBotMAData(canvas);
-            drawDetailData(canvas);
             drawMaxMinPriceLabel(canvas);
+            drawDetailData(canvas);
         }
     }
 
