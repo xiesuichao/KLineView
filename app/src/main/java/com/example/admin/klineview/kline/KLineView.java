@@ -1207,9 +1207,8 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
     //主副图蜡烛图
     private void drawMainDeputyRect(Canvas canvas) {
         int viewDataSize = viewDataList.size();
-        for (int i = 0; i < viewDataSize; i++) {
-            //drawPriceRectAndLine
-            KData viewKData = viewDataList.get(i);
+        //drawPriceRectAndLine
+        for (KData viewKData : viewDataList) {
             double openPrice = viewKData.getOpenPrice();
             double closedPrice = viewKData.getClosePrice();
             double higherPrice;
@@ -1306,24 +1305,24 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
         deputyMa10PointList.clear();
         deputyMa30PointList.clear();
 
-        for (int i = 0; i < viewDataList.size(); i++) {
-            if (!viewDataList.get(i).isInitFinish()) {
+        for (KData kData : viewDataList) {
+            if (!kData.isInitFinish()) {
                 break;
             }
             //volumeMA
             Pointer volumeMa5Point = new Pointer();
-            if (viewDataList.get(i).getVolumeMa5() > 0) {
-                volumeMa5Point.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
+            if (kData.getVolumeMa5() > 0) {
+                volumeMa5Point.setX((float) (kData.getLeftX() + avgPriceRectWidth / 2));
                 volumeMa5Point.setY((float) (volumeImgBot
-                        - viewDataList.get(i).getVolumeMa5() * avgHeightPerVolume));
+                        - kData.getVolumeMa5() * avgHeightPerVolume));
                 volumeMa5PointList.add(volumeMa5Point);
             }
 
             Pointer volumeMa10Point = new Pointer();
-            if (viewDataList.get(i).getVolumeMa10() > 0) {
-                volumeMa10Point.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
+            if (kData.getVolumeMa10() > 0) {
+                volumeMa10Point.setX((float) (kData.getLeftX() + avgPriceRectWidth / 2));
                 volumeMa10Point.setY((float) (volumeImgBot
-                        - viewDataList.get(i).getVolumeMa10() * avgHeightPerVolume));
+                        - kData.getVolumeMa10() * avgHeightPerVolume));
                 volumeMa10PointList.add(volumeMa10Point);
             }
 
@@ -1331,26 +1330,26 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                 //priceMA
                 case MAIN_IMG_MA:
                     Pointer priceMa5Point = new Pointer();
-                    if (viewDataList.get(i).getPriceMa5() > 0) {
-                        priceMa5Point.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
+                    if (kData.getPriceMa5() > 0) {
+                        priceMa5Point.setX((float) (kData.getLeftX() + avgPriceRectWidth / 2));
                         priceMa5Point.setY((float) (mMaxPriceY
-                                + (maxPrice - viewDataList.get(i).getPriceMa5()) * avgHeightPerPrice));
+                                + (maxPrice - kData.getPriceMa5()) * avgHeightPerPrice));
                         mainMa5PointList.add(priceMa5Point);
                     }
 
                     Pointer priceMa10Point = new Pointer();
-                    if (viewDataList.get(i).getPriceMa10() > 0) {
-                        priceMa10Point.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
+                    if (kData.getPriceMa10() > 0) {
+                        priceMa10Point.setX((float) (kData.getLeftX() + avgPriceRectWidth / 2));
                         priceMa10Point.setY((float) (mMaxPriceY
-                                + (maxPrice - viewDataList.get(i).getPriceMa10()) * avgHeightPerPrice));
+                                + (maxPrice - kData.getPriceMa10()) * avgHeightPerPrice));
                         mainMa10PointList.add(priceMa10Point);
                     }
 
                     Pointer priceMa30Point = new Pointer();
-                    if (viewDataList.get(i).getPriceMa30() > 0) {
-                        priceMa30Point.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
+                    if (kData.getPriceMa30() > 0) {
+                        priceMa30Point.setX((float) (kData.getLeftX() + avgPriceRectWidth / 2));
                         priceMa30Point.setY((float) (mMaxPriceY
-                                + (maxPrice - viewDataList.get(i).getPriceMa30()) * avgHeightPerPrice));
+                                + (maxPrice - kData.getPriceMa30()) * avgHeightPerPrice));
                         mainMa30PointList.add(priceMa30Point);
                     }
                     break;
@@ -1358,26 +1357,26 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                 //priceEMA
                 case MAIN_IMG_EMA:
                     Pointer ema5Point = new Pointer();
-                    if (viewDataList.get(i).getEma5() > 0) {
-                        ema5Point.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
+                    if (kData.getEma5() > 0) {
+                        ema5Point.setX((float) (kData.getLeftX() + avgPriceRectWidth / 2));
                         ema5Point.setY((float) (mMaxPriceY
-                                + (maxPrice - viewDataList.get(i).getEma5()) * avgHeightPerPrice));
+                                + (maxPrice - kData.getEma5()) * avgHeightPerPrice));
                         mainMa5PointList.add(ema5Point);
                     }
 
                     Pointer ema10Point = new Pointer();
-                    if (viewDataList.get(i).getEma10() > 0) {
-                        ema10Point.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
+                    if (kData.getEma10() > 0) {
+                        ema10Point.setX((float) (kData.getLeftX() + avgPriceRectWidth / 2));
                         ema10Point.setY((float) (mMaxPriceY
-                                + (maxPrice - viewDataList.get(i).getEma10()) * avgHeightPerPrice));
+                                + (maxPrice - kData.getEma10()) * avgHeightPerPrice));
                         mainMa10PointList.add(ema10Point);
                     }
 
                     Pointer ema30Point = new Pointer();
-                    if (viewDataList.get(i).getEma30() > 0) {
-                        ema30Point.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
+                    if (kData.getEma30() > 0) {
+                        ema30Point.setX((float) (kData.getLeftX() + avgPriceRectWidth / 2));
                         ema30Point.setY((float) (mMaxPriceY
-                                + (maxPrice - viewDataList.get(i).getEma30()) * avgHeightPerPrice));
+                                + (maxPrice - kData.getEma30()) * avgHeightPerPrice));
                         mainMa30PointList.add(ema30Point);
                     }
                     break;
@@ -1385,26 +1384,26 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
                 //priceBOLL
                 case MAIN_IMG_BOLL:
                     Pointer bollMbPoint = new Pointer();
-                    if (viewDataList.get(i).getBollMb() > 0) {
-                        bollMbPoint.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
+                    if (kData.getBollMb() > 0) {
+                        bollMbPoint.setX((float) (kData.getLeftX() + avgPriceRectWidth / 2));
                         bollMbPoint.setY((float) (mMaxPriceY
-                                + (maxPrice - viewDataList.get(i).getBollMb()) * avgHeightPerPrice));
+                                + (maxPrice - kData.getBollMb()) * avgHeightPerPrice));
                         mainMa5PointList.add(bollMbPoint);
                     }
 
                     Pointer bollUpPoint = new Pointer();
-                    if (viewDataList.get(i).getBollUp() > 0) {
-                        bollUpPoint.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
+                    if (kData.getBollUp() > 0) {
+                        bollUpPoint.setX((float) (kData.getLeftX() + avgPriceRectWidth / 2));
                         bollUpPoint.setY((float) (mMaxPriceY
-                                + (maxPrice - viewDataList.get(i).getBollUp()) * avgHeightPerPrice));
+                                + (maxPrice - kData.getBollUp()) * avgHeightPerPrice));
                         mainMa10PointList.add(bollUpPoint);
                     }
 
                     Pointer bollDnPoint = new Pointer();
-                    if (viewDataList.get(i).getBollDn() > 0) {
-                        bollDnPoint.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
+                    if (kData.getBollDn() > 0) {
+                        bollDnPoint.setX((float) (kData.getLeftX() + avgPriceRectWidth / 2));
                         bollDnPoint.setY((float) (mMaxPriceY
-                                + (maxPrice - viewDataList.get(i).getBollDn()) * avgHeightPerPrice));
+                                + (maxPrice - kData.getBollDn()) * avgHeightPerPrice));
                         mainMa30PointList.add(bollDnPoint);
                     }
                     break;
@@ -1412,66 +1411,66 @@ public class KLineView extends View implements View.OnTouchListener, Handler.Cal
 
             if (isShowDeputy && deputyImgType == DEPUTY_IMG_MACD) {
                 Pointer difPoint = new Pointer();
-                if (viewDataList.get(i).getDif() > 0) {
-                    difPoint.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
-                    difPoint.setY((float) (deputyCenterY - viewDataList.get(i).getDif() * avgHeightDif));
+                if (kData.getDif() > 0) {
+                    difPoint.setX((float) (kData.getLeftX() + avgPriceRectWidth / 2));
+                    difPoint.setY((float) (deputyCenterY - kData.getDif() * avgHeightDif));
                 } else {
-                    difPoint.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
-                    difPoint.setY((float) (deputyCenterY + Math.abs(viewDataList.get(i).getDif() * avgHeightDif)));
+                    difPoint.setX((float) (kData.getLeftX() + avgPriceRectWidth / 2));
+                    difPoint.setY((float) (deputyCenterY + Math.abs(kData.getDif() * avgHeightDif)));
                 }
                 deputyMa10PointList.add(difPoint);
 
                 Pointer deaPoint = new Pointer();
-                if (viewDataList.get(i).getDea() > 0) {
-                    deaPoint.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
-                    deaPoint.setY((float) (deputyCenterY - viewDataList.get(i).getDea() * avgHeightDea));
+                if (kData.getDea() > 0) {
+                    deaPoint.setX((float) (kData.getLeftX() + avgPriceRectWidth / 2));
+                    deaPoint.setY((float) (deputyCenterY - kData.getDea() * avgHeightDea));
                 } else {
-                    deaPoint.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
-                    deaPoint.setY((float) (deputyCenterY + Math.abs(viewDataList.get(i).getDea() * avgHeightDea)));
+                    deaPoint.setX((float) (kData.getLeftX() + avgPriceRectWidth / 2));
+                    deaPoint.setY((float) (deputyCenterY + Math.abs(kData.getDea() * avgHeightDea)));
                 }
                 deputyMa30PointList.add(deaPoint);
 
             } else if (isShowDeputy && deputyImgType == DEPUTY_IMG_KDJ) {
                 Pointer kPoint = new Pointer();
-                if (viewDataList.get(i).getK() > 0) {
-                    kPoint.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
-                    kPoint.setY((float) (horizontalYList.get(5) - viewDataList.get(i).getK() * avgHeightK));
+                if (kData.getK() > 0) {
+                    kPoint.setX((float) (kData.getLeftX() + avgPriceRectWidth / 2));
+                    kPoint.setY((float) (horizontalYList.get(5) - kData.getK() * avgHeightK));
                     deputyMa5PointList.add(kPoint);
                 }
 
                 Pointer dPoint = new Pointer();
-                if (viewDataList.get(i).getD() > 0) {
-                    dPoint.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
-                    dPoint.setY((float) (horizontalYList.get(5) - viewDataList.get(i).getD() * avgHeightD));
+                if (kData.getD() > 0) {
+                    dPoint.setX((float) (kData.getLeftX() + avgPriceRectWidth / 2));
+                    dPoint.setY((float) (horizontalYList.get(5) - kData.getD() * avgHeightD));
                     deputyMa10PointList.add(dPoint);
                 }
 
                 Pointer jPoint = new Pointer();
-                if (viewDataList.get(i).getJ() > 0) {
-                    jPoint.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
-                    jPoint.setY((float) (horizontalYList.get(5) - viewDataList.get(i).getJ() * avgHeightJ));
+                if (kData.getJ() > 0) {
+                    jPoint.setX((float) (kData.getLeftX() + avgPriceRectWidth / 2));
+                    jPoint.setY((float) (horizontalYList.get(5) - kData.getJ() * avgHeightJ));
                     deputyMa30PointList.add(jPoint);
                 }
 
             } else if (isShowDeputy && deputyImgType == DEPUTY_IMG_RSI) {
                 Pointer rs1Point = new Pointer();
-                if (viewDataList.get(i).getRs1() >= 0) {
-                    rs1Point.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
-                    rs1Point.setY((float) (horizontalYList.get(5) - viewDataList.get(i).getRs1() * avgHeightRSI));
+                if (kData.getRs1() >= 0) {
+                    rs1Point.setX((float) (kData.getLeftX() + avgPriceRectWidth / 2));
+                    rs1Point.setY((float) (horizontalYList.get(5) - kData.getRs1() * avgHeightRSI));
                     deputyMa5PointList.add(rs1Point);
                 }
 
                 Pointer rs2Point = new Pointer();
-                if (viewDataList.get(i).getRs2() >= 0) {
-                    rs2Point.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
-                    rs2Point.setY((float) (horizontalYList.get(5) - viewDataList.get(i).getRs2() * avgHeightRSI));
+                if (kData.getRs2() >= 0) {
+                    rs2Point.setX((float) (kData.getLeftX() + avgPriceRectWidth / 2));
+                    rs2Point.setY((float) (horizontalYList.get(5) - kData.getRs2() * avgHeightRSI));
                     deputyMa10PointList.add(rs2Point);
                 }
 
                 Pointer rs3Point = new Pointer();
-                if (viewDataList.get(i).getRs3() >= 0) {
-                    rs3Point.setX((float) (viewDataList.get(i).getLeftX() + avgPriceRectWidth / 2));
-                    rs3Point.setY((float) (horizontalYList.get(5) - viewDataList.get(i).getRs3() * avgHeightRSI));
+                if (kData.getRs3() >= 0) {
+                    rs3Point.setX((float) (kData.getLeftX() + avgPriceRectWidth / 2));
+                    rs3Point.setY((float) (horizontalYList.get(5) - kData.getRs3() * avgHeightRSI));
                     deputyMa30PointList.add(rs3Point);
                 }
             }
